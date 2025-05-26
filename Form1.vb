@@ -9,12 +9,13 @@
         DataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells
 
         ' Optionally, you can set the column width if you want
-        DataGridView1.Columns("Column2").Width = 125
+        DataGridView1.Columns("Column2").Width = 175
 
         'Rohit : 26-05-2025 Testing foor GIT HUB
 
         'ROJITHIHTI
         'Anil 5:05
+        'Anil Edit 5:32
 
     End Sub
 
