@@ -1,0 +1,552 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A4B22F0D-81AA-458A-BBA6-089ABB86B720}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>XpertReporting_wow.Module1</StartupObject>
+    <RootNamespace>XpertReporting_wow</RootNamespace>
+    <AssemblyName>XpertReporting_wow</AssemblyName>
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <ApplicationIcon>wi0054-64.ico</ApplicationIcon>
+    <OptionCompare>Binary</OptionCompare>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+    <TargetZone>LocalIntranet</TargetZone>
+    <GenerateManifests>false</GenerateManifests>
+    <ManifestCertificateThumbprint>86C0B1B9D683744364A3C522FF09273AD837B449</ManifestCertificateThumbprint>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
+    <SignManifests>false</SignManifests>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <PublishUrl>http://localhost/xtremereporting/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BootstrapperComponentsLocation>Relative</BootstrapperComponentsLocation>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>false</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <PlatformTarget>x86</PlatformTarget>
+    <Optimize>false</Optimize>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>Full</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <DebugSymbols>true</DebugSymbols>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AppMethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\REFERENCES\AppMethods.dll</HintPath>
+    </Reference>
+    <Reference Include="CustomPanelControl, Version=1.0.3521.20833, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Packs.POS\CLASS\wizPanel\CustomPanelControl.dll</HintPath>
+    </Reference>
+    <Reference Include="Datamethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\REFERENCES\Datamethods.dll</HintPath>
+    </Reference>
+    <Reference Include="DateControl, Version=1.0.6221.28342, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Packs.New\REFERENCES\DateControl.dll</HintPath>
+    </Reference>
+    <Reference Include="FormClass, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Packs.New\REFERENCES\FormClass.dll</HintPath>
+    </Reference>
+    <Reference Include="GenFixReportEmail, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Packs.New\REFERENCES\GenFixReportEmail.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel1">
+      <HintPath>..\..\REFERENCES\Microsoft.Office.Interop.Excel.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Microsoft.ReportViewer.WinForms, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="office, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WizCommon">
+      <HintPath>..\..\REFERENCES\WizCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="wizGridView, Version=1.0.6914.24384, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Packs.New\REFERENCES\wizGridView.dll</HintPath>
+    </Reference>
+    <Reference Include="WizTextBox, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Packs.New\REFERENCES\WizTextBox.dll</HintPath>
+    </Reference>
+    <Reference Include="XtremeMethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\REFERENCES\XtremeMethods.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Form1.Designer.vb">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAge.Designer.vb">
+      <DependentUpon>FrmAge.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmAge.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmGemWizard.designer.vb">
+      <DependentUpon>FrmGemWizard.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmGemWizard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmImgDet.Designer.vb">
+      <DependentUpon>FrmImgDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmImgDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAddReport.Designer.vb">
+      <DependentUpon>FrmAddReport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmAddReport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmErr.designer.vb">
+      <DependentUpon>FrmErr.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmErr.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FRMGRID.Designer.vb">
+      <DependentUpon>FRMGRID.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FRMGRID.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmIMG.Designer.vb">
+      <DependentUpon>FrmIMG.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmIMG.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmcustomRepusers.Designer.vb">
+      <DependentUpon>FrmcustomRepusers.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmcustomRepusers.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLayout.Designer.vb">
+      <DependentUpon>FrmLayout.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLayout.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLAyoutSetup.designer.vb">
+      <DependentUpon>FrmLAyoutSetup.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLAyoutSetup.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptPeriod.Designer.vb">
+      <DependentUpon>FrmRptPeriod.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptPeriod.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptPeriod_DF.Designer.vb">
+      <DependentUpon>FrmRptPeriod_DF.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptPeriod_DF.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmNamedFilter.Designer.vb">
+      <DependentUpon>FrmNamedFilter.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmNamedFilter.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmConfig.designer.vb">
+      <DependentUpon>FrmConfig.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmConfig.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmFilter.Designer.vb">
+      <DependentUpon>FrmFilter.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmFilter.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReportType.Designer.vb">
+      <DependentUpon>FrmReportType.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReportType.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptPeriod_g.Designer.vb">
+      <DependentUpon>FrmRptPeriod_g.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptPeriod_g.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmStkAge.Designer.vb">
+      <DependentUpon>FrmStkAge.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmStkAge.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmThumb.Designer.vb">
+      <DependentUpon>FrmThumb.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmThumb.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmWizcustom.Designer.vb">
+      <DependentUpon>FrmWizcustom.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmWizcustom.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmsetSch.Designer.vb">
+      <DependentUpon>FrmsetSch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmsetSch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCopy.Designer.vb">
+      <DependentUpon>FrmCopy.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCopy.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCustomCol.Designer.vb">
+      <DependentUpon>frmCustomCol.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmCustomCol.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Frmdefault.Designer.vb">
+      <DependentUpon>Frmdefault.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Frmdefault.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmreport.Designer.vb">
+      <DependentUpon>frmreport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmreport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmWizard.designer.vb">
+      <DependentUpon>frmWizard.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmWizard.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Login.designer.vb">
+      <DependentUpon>Login.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Login.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MDIParent1.Designer.vb">
+      <DependentUpon>MDIParent1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="MDIParent1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Module1.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmAddReport.resx">
+      <DependentUpon>FrmAddReport.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmAge.resx">
+      <DependentUpon>FrmAge.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmErr.resx">
+      <DependentUpon>FrmErr.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmGemWizard.resx">
+      <DependentUpon>FrmGemWizard.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FRMGRID.resx">
+      <DependentUpon>FRMGRID.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmIMG.resx">
+      <DependentUpon>FrmIMG.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmcustomRepusers.resx">
+      <DependentUpon>FrmcustomRepusers.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmImgDet.resx">
+      <DependentUpon>FrmImgDet.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLayout.resx">
+      <DependentUpon>FrmLayout.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLAyoutSetup.resx">
+      <DependentUpon>FrmLAyoutSetup.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptPeriod.resx">
+      <DependentUpon>FrmRptPeriod.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptPeriod_DF.resx">
+      <DependentUpon>FrmRptPeriod_DF.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmNamedFilter.resx">
+      <DependentUpon>FrmNamedFilter.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmConfig.resx">
+      <DependentUpon>FrmConfig.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmFilter.resx">
+      <DependentUpon>FrmFilter.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReportType.resx">
+      <DependentUpon>FrmReportType.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptPeriod_g.resx">
+      <DependentUpon>FrmRptPeriod_g.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmStkAge.resx">
+      <DependentUpon>FrmStkAge.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmThumb.resx">
+      <DependentUpon>FrmThumb.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmWizcustom.resx">
+      <DependentUpon>FrmWizcustom.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmsetSch.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FrmsetSch.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCopy.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FrmCopy.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCustomCol.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmCustomCol.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frmdefault.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Frmdefault.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmreport.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmreport.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmWizard.resx">
+      <DependentUpon>frmWizard.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Login.resx">
+      <DependentUpon>Login.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MDIParent1.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MDIParent1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MIS.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\m003.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="My Project\app.manifest" />
+    <None Include="Resources\rohit5.PNG" />
+    <None Include="Resources\rohit7.PNG" />
+    <None Include="Resources\rohit9.PNG" />
+    <None Include="Resources\rohit8.PNG" />
+    <None Include="bin\Debug\xtremereporting\MIS.bmp" />
+    <None Include="bin\Debug\MIS.bmp" />
+    <None Include="Resources\saveHS.png" />
+    <None Include="Resources\close.bmp" />
+    <None Include="Resources\NextPageHS.png" />
+    <None Include="Resources\SychronizeListHS.png" />
+    <None Include="Resources\AlignObjectsBottomHS.png" />
+    <None Include="Resources\FormulaEvaluatorHS.png" />
+    <None Include="Resources\PageUpHS.png" />
+    <None Include="Resources\PrintSetupHS.png" />
+    <None Include="Resources\RefreshDocViewHS.png" />
+    <None Include="Resources\64_thumbnails_2.png" />
+    <None Include="Resources\115303-200.png" />
+    <None Include="Resources\16_thumbnail.png" />
+    <Content Include="wi0054-64.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{C0C07587-41A7-46C8-8FBD-3F9C8EBE2DDC}" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>4</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
