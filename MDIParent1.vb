@@ -2330,9 +2330,26 @@ Public Class MDIParent1
 
 
 
-
         Me.cload = True
     End Sub
+
+    Private Sub ShowHideGridCol(xrepCode As String)
+        Try
+
+            'Hide Bulk Export and grid view  if olap is enable
+            If bR1Olap = True And xrepCode.Trim().ToUpper() = "R1" Then
+                BulkExport.Visible = False
+                GRIDVIEW.Visible = False
+            Else
+                BulkExport.Visible = True
+                GRIDVIEW.Visible = True
+            End If
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+
 
     Private Sub PriceCatInsert()
         Try
@@ -3167,6 +3184,8 @@ Public Class MDIParent1
                     DgvRepList.Rows(iRow).DefaultCellStyle.BackColor = Color.LightGoldenrodYellow
                 End If
 
+                ShowHideGridCol(Convert.ToString(Dr("XPERT_REP_CODE")).Trim())
+
                 iRow = iRow + 1
             Next
         Catch ex As Exception
@@ -3423,6 +3442,9 @@ Public Class MDIParent1
             ElseIf cCol = "GRIDVIEW" Then
 
                 Try
+
+
+
                     bRUNFROMMAIN = False
                     bGridView = True
                     bError = False
@@ -3434,6 +3456,13 @@ Public Class MDIParent1
 
                     TviewSelect(cRepid, 1)
                     cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
+
+                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                        Return
+                    End If
+
+
+
                     tsView_Click(5)
                     If bShowPAge Then
                         If appRep.dset.Tables.Contains(cReportT) Then
@@ -3498,6 +3527,11 @@ Public Class MDIParent1
 
                     TviewSelect(cRepid, 1)
                     cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
+                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                        Return
+                    End If
+
+
                     tsView_Click(3)
 
 
@@ -10631,6 +10665,7 @@ again:
 
                 TSSHORTCLOSE.Visible = False
                 TSSEPSHORTCLOSE.Visible = False
+
             End If
         Catch ex As Exception
             iMainGridRow = 0
