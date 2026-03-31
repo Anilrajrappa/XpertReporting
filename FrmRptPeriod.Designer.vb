@@ -23,6 +23,7 @@ Partial Class FrmRptPeriod
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.txtolap = New System.Windows.Forms.TextBox()
         Me.DTPTC = New DateControl.DateControl()
         Me.DTPFC = New DateControl.DateControl()
         Me.dtpto2 = New DateControl.DateControl()
@@ -46,17 +47,20 @@ Partial Class FrmRptPeriod
         Me.Label6 = New System.Windows.Forms.Label()
         Me.cmdcancel = New System.Windows.Forms.Button()
         Me.cmdok = New System.Windows.Forms.Button()
-        Me.txtolap = New System.Windows.Forms.TextBox()
+        Me.chkSalePeriod = New System.Windows.Forms.CheckBox()
+        Me.Label3 = New System.Windows.Forms.Label()
+        Me.dtFromS = New DateControl.DateControl()
+        Me.dtptoS = New DateControl.DateControl()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.chkSalePeriod)
+        Me.GroupBox1.Controls.Add(Me.Label3)
+        Me.GroupBox1.Controls.Add(Me.dtFromS)
+        Me.GroupBox1.Controls.Add(Me.dtptoS)
         Me.GroupBox1.Controls.Add(Me.txtolap)
-        Me.GroupBox1.Controls.Add(Me.DTPTC)
-        Me.GroupBox1.Controls.Add(Me.DTPFC)
-        Me.GroupBox1.Controls.Add(Me.dtpto2)
-        Me.GroupBox1.Controls.Add(Me.dtpfrom1)
         Me.GroupBox1.Controls.Add(Me.chkComP)
         Me.GroupBox1.Controls.Add(Me.Label1)
         Me.GroupBox1.Controls.Add(Me.dtFromC)
@@ -81,9 +85,20 @@ Partial Class FrmRptPeriod
         Me.GroupBox1.Font = New System.Drawing.Font("Arial Narrow", 11.25!, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox1.Location = New System.Drawing.Point(0, 0)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(334, 449)
+        Me.GroupBox1.Size = New System.Drawing.Size(370, 463)
         Me.GroupBox1.TabIndex = 0
         Me.GroupBox1.TabStop = False
+        '
+        'txtolap
+        '
+        Me.txtolap.Enabled = False
+        Me.txtolap.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.txtolap.Location = New System.Drawing.Point(18, 421)
+        Me.txtolap.Name = "txtolap"
+        Me.txtolap.ReadOnly = True
+        Me.txtolap.Size = New System.Drawing.Size(26, 25)
+        Me.txtolap.TabIndex = 46
+        Me.txtolap.Visible = False
         '
         'DTPTC
         '
@@ -100,7 +115,7 @@ Partial Class FrmRptPeriod
         Me.DTPTC._value = New Date(2013, 5, 18, 0, 0, 0, 0)
         Me.DTPTC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.DTPTC.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DTPTC.Location = New System.Drawing.Point(110, 382)
+        Me.DTPTC.Location = New System.Drawing.Point(112, 476)
         Me.DTPTC.Name = "DTPTC"
         Me.DTPTC.Size = New System.Drawing.Size(27, 20)
         Me.DTPTC.TabIndex = 45
@@ -121,7 +136,7 @@ Partial Class FrmRptPeriod
         Me.DTPFC._value = New Date(2099, 1, 1, 0, 0, 0, 0)
         Me.DTPFC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.DTPFC.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.DTPFC.Location = New System.Drawing.Point(66, 382)
+        Me.DTPFC.Location = New System.Drawing.Point(61, 476)
         Me.DTPFC.Name = "DTPFC"
         Me.DTPFC.Size = New System.Drawing.Size(27, 20)
         Me.DTPFC.TabIndex = 44
@@ -142,7 +157,7 @@ Partial Class FrmRptPeriod
         Me.dtpto2._value = New Date(2099, 1, 1, 0, 0, 0, 0)
         Me.dtpto2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.dtpto2.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.dtpto2.Location = New System.Drawing.Point(15, 381)
+        Me.dtpto2.Location = New System.Drawing.Point(15, 476)
         Me.dtpto2.Name = "dtpto2"
         Me.dtpto2.Size = New System.Drawing.Size(27, 20)
         Me.dtpto2.TabIndex = 43
@@ -163,7 +178,7 @@ Partial Class FrmRptPeriod
         Me.dtpfrom1._value = New Date(2013, 5, 18, 0, 0, 0, 0)
         Me.dtpfrom1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.dtpfrom1.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.dtpfrom1.Location = New System.Drawing.Point(16, 401)
+        Me.dtpfrom1.Location = New System.Drawing.Point(145, 476)
         Me.dtpfrom1.Name = "dtpfrom1"
         Me.dtpfrom1.Size = New System.Drawing.Size(27, 20)
         Me.dtpfrom1.TabIndex = 42
@@ -172,10 +187,10 @@ Partial Class FrmRptPeriod
         'chkComP
         '
         Me.chkComP.AutoSize = True
-        Me.chkComP.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkComP.Font = New System.Drawing.Font("Arial Narrow", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.chkComP.Location = New System.Drawing.Point(16, 67)
         Me.chkComP.Name = "chkComP"
-        Me.chkComP.Size = New System.Drawing.Size(164, 20)
+        Me.chkComP.Size = New System.Drawing.Size(149, 24)
         Me.chkComP.TabIndex = 41
         Me.chkComP.Text = "Comparison Period"
         Me.chkComP.UseVisualStyleBackColor = True
@@ -185,7 +200,7 @@ Partial Class FrmRptPeriod
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label1.ForeColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
-        Me.Label1.Location = New System.Drawing.Point(184, 92)
+        Me.Label1.Location = New System.Drawing.Point(194, 92)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(26, 18)
         Me.Label1.TabIndex = 39
@@ -208,7 +223,7 @@ Partial Class FrmRptPeriod
         Me.dtFromC.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.dtFromC.Location = New System.Drawing.Point(73, 92)
         Me.dtFromC.Name = "dtFromC"
-        Me.dtFromC.Size = New System.Drawing.Size(98, 20)
+        Me.dtFromC.Size = New System.Drawing.Size(110, 20)
         Me.dtFromC.TabIndex = 37
         '
         'dtptoC
@@ -226,9 +241,9 @@ Partial Class FrmRptPeriod
         Me.dtptoC._value = New Date(2013, 5, 18, 0, 0, 0, 0)
         Me.dtptoC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.dtptoC.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.dtptoC.Location = New System.Drawing.Point(217, 92)
+        Me.dtptoC.Location = New System.Drawing.Point(231, 92)
         Me.dtptoC.Name = "dtptoC"
-        Me.dtptoC.Size = New System.Drawing.Size(98, 20)
+        Me.dtptoC.Size = New System.Drawing.Size(109, 20)
         Me.dtptoC.TabIndex = 38
         '
         'Label2
@@ -246,7 +261,7 @@ Partial Class FrmRptPeriod
         '
         Me.lnkFilter.AutoSize = True
         Me.lnkFilter.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold)
-        Me.lnkFilter.Location = New System.Drawing.Point(161, 130)
+        Me.lnkFilter.Location = New System.Drawing.Point(198, 175)
         Me.lnkFilter.Name = "lnkFilter"
         Me.lnkFilter.Size = New System.Drawing.Size(151, 16)
         Me.lnkFilter.TabIndex = 32
@@ -256,11 +271,11 @@ Partial Class FrmRptPeriod
         'TxtFilter
         '
         Me.TxtFilter.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TxtFilter.Location = New System.Drawing.Point(15, 156)
+        Me.TxtFilter.Location = New System.Drawing.Point(15, 201)
         Me.TxtFilter.Multiline = True
         Me.TxtFilter.Name = "TxtFilter"
         Me.TxtFilter.ReadOnly = True
-        Me.TxtFilter.Size = New System.Drawing.Size(300, 80)
+        Me.TxtFilter.Size = New System.Drawing.Size(343, 80)
         Me.TxtFilter.TabIndex = 35
         '
         'CHKOPEN
@@ -268,7 +283,7 @@ Partial Class FrmRptPeriod
         Me.CHKOPEN.AutoSize = True
         Me.CHKOPEN.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CHKOPEN.ForeColor = System.Drawing.Color.Green
-        Me.CHKOPEN.Location = New System.Drawing.Point(16, 129)
+        Me.CHKOPEN.Location = New System.Drawing.Point(16, 174)
         Me.CHKOPEN.Name = "CHKOPEN"
         Me.CHKOPEN.Size = New System.Drawing.Size(123, 20)
         Me.CHKOPEN.TabIndex = 31
@@ -280,7 +295,7 @@ Partial Class FrmRptPeriod
         Me.CHKADDFILTER.AutoSize = True
         Me.CHKADDFILTER.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CHKADDFILTER.ForeColor = System.Drawing.Color.FromArgb(CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.CHKADDFILTER.Location = New System.Drawing.Point(16, 313)
+        Me.CHKADDFILTER.Location = New System.Drawing.Point(16, 353)
         Me.CHKADDFILTER.Name = "CHKADDFILTER"
         Me.CHKADDFILTER.Size = New System.Drawing.Size(193, 20)
         Me.CHKADDFILTER.TabIndex = 40
@@ -292,10 +307,10 @@ Partial Class FrmRptPeriod
         Me.cmbAddFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbAddFilter.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cmbAddFilter.FormattingEnabled = True
-        Me.cmbAddFilter.Location = New System.Drawing.Point(16, 341)
+        Me.cmbAddFilter.Location = New System.Drawing.Point(16, 381)
         Me.cmbAddFilter.Margin = New System.Windows.Forms.Padding(4)
         Me.cmbAddFilter.Name = "cmbAddFilter"
-        Me.cmbAddFilter.Size = New System.Drawing.Size(296, 28)
+        Me.cmbAddFilter.Size = New System.Drawing.Size(341, 28)
         Me.cmbAddFilter.TabIndex = 45
         '
         'chkApplyFilter
@@ -303,7 +318,7 @@ Partial Class FrmRptPeriod
         Me.chkApplyFilter.AutoSize = True
         Me.chkApplyFilter.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.chkApplyFilter.ForeColor = System.Drawing.Color.Blue
-        Me.chkApplyFilter.Location = New System.Drawing.Point(16, 246)
+        Me.chkApplyFilter.Location = New System.Drawing.Point(16, 291)
         Me.chkApplyFilter.Name = "chkApplyFilter"
         Me.chkApplyFilter.Size = New System.Drawing.Size(119, 20)
         Me.chkApplyFilter.TabIndex = 36
@@ -315,10 +330,10 @@ Partial Class FrmRptPeriod
         Me.cmbRptTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbRptTypes.Font = New System.Drawing.Font("Microsoft Sans Serif", 10.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cmbRptTypes.FormattingEnabled = True
-        Me.cmbRptTypes.Location = New System.Drawing.Point(18, 269)
+        Me.cmbRptTypes.Location = New System.Drawing.Point(18, 314)
         Me.cmbRptTypes.Margin = New System.Windows.Forms.Padding(4)
         Me.cmbRptTypes.Name = "cmbRptTypes"
-        Me.cmbRptTypes.Size = New System.Drawing.Size(296, 28)
+        Me.cmbRptTypes.Size = New System.Drawing.Size(339, 28)
         Me.cmbRptTypes.TabIndex = 38
         '
         'CheckBox3
@@ -327,10 +342,10 @@ Partial Class FrmRptPeriod
         Me.CheckBox3.Checked = True
         Me.CheckBox3.CheckState = System.Windows.Forms.CheckState.Checked
         Me.CheckBox3.Enabled = False
-        Me.CheckBox3.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CheckBox3.Font = New System.Drawing.Font("Arial Narrow", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CheckBox3.Location = New System.Drawing.Point(16, 14)
         Me.CheckBox3.Name = "CheckBox3"
-        Me.CheckBox3.Size = New System.Drawing.Size(150, 20)
+        Me.CheckBox3.Size = New System.Drawing.Size(135, 24)
         Me.CheckBox3.TabIndex = 16
         Me.CheckBox3.Text = "Reporting Period"
         Me.CheckBox3.UseVisualStyleBackColor = True
@@ -340,7 +355,7 @@ Partial Class FrmRptPeriod
         Me.Label7.AutoSize = True
         Me.Label7.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label7.ForeColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
-        Me.Label7.Location = New System.Drawing.Point(184, 39)
+        Me.Label7.Location = New System.Drawing.Point(194, 39)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(26, 18)
         Me.Label7.TabIndex = 6
@@ -363,7 +378,7 @@ Partial Class FrmRptPeriod
         Me.dtpfrom.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.dtpfrom.Location = New System.Drawing.Point(73, 39)
         Me.dtpfrom.Name = "dtpfrom"
-        Me.dtpfrom.Size = New System.Drawing.Size(98, 20)
+        Me.dtpfrom.Size = New System.Drawing.Size(110, 20)
         Me.dtpfrom.TabIndex = 0
         '
         'dtpto
@@ -381,9 +396,9 @@ Partial Class FrmRptPeriod
         Me.dtpto._value = New Date(2013, 5, 18, 0, 0, 0, 0)
         Me.dtpto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.dtpto.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.dtpto.Location = New System.Drawing.Point(217, 39)
+        Me.dtpto.Location = New System.Drawing.Point(232, 39)
         Me.dtpto.Name = "dtpto"
-        Me.dtpto.Size = New System.Drawing.Size(98, 20)
+        Me.dtpto.Size = New System.Drawing.Size(109, 20)
         Me.dtpto.TabIndex = 1
         '
         'Label6
@@ -402,9 +417,9 @@ Partial Class FrmRptPeriod
         Me.cmdcancel.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.cmdcancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
         Me.cmdcancel.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cmdcancel.Location = New System.Drawing.Point(239, 384)
+        Me.cmdcancel.Location = New System.Drawing.Point(284, 422)
         Me.cmdcancel.Name = "cmdcancel"
-        Me.cmdcancel.Size = New System.Drawing.Size(68, 30)
+        Me.cmdcancel.Size = New System.Drawing.Size(68, 31)
         Me.cmdcancel.TabIndex = 5
         Me.cmdcancel.Text = "&Cancel"
         Me.cmdcancel.UseVisualStyleBackColor = False
@@ -414,23 +429,74 @@ Partial Class FrmRptPeriod
         Me.cmdok.BackColor = System.Drawing.SystemColors.ButtonFace
         Me.cmdok.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.cmdok.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cmdok.Location = New System.Drawing.Point(162, 384)
+        Me.cmdok.Location = New System.Drawing.Point(207, 422)
         Me.cmdok.Name = "cmdok"
-        Me.cmdok.Size = New System.Drawing.Size(68, 30)
+        Me.cmdok.Size = New System.Drawing.Size(68, 31)
         Me.cmdok.TabIndex = 4
         Me.cmdok.Text = "&OK"
         Me.cmdok.UseVisualStyleBackColor = False
         '
-        'txtolap
+        'chkSalePeriod
         '
-        Me.txtolap.Enabled = False
-        Me.txtolap.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.txtolap.Location = New System.Drawing.Point(281, 242)
-        Me.txtolap.Name = "txtolap"
-        Me.txtolap.ReadOnly = True
-        Me.txtolap.Size = New System.Drawing.Size(26, 25)
-        Me.txtolap.TabIndex = 46
-        Me.txtolap.Visible = False
+        Me.chkSalePeriod.AutoSize = True
+        Me.chkSalePeriod.Font = New System.Drawing.Font("Arial Narrow", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkSalePeriod.Location = New System.Drawing.Point(16, 120)
+        Me.chkSalePeriod.Name = "chkSalePeriod"
+        Me.chkSalePeriod.Size = New System.Drawing.Size(346, 24)
+        Me.chkSalePeriod.TabIndex = 50
+        Me.chkSalePeriod.Text = "Show data where sale qty is available for  this period"
+        Me.chkSalePeriod.UseVisualStyleBackColor = True
+        '
+        'Label3
+        '
+        Me.Label3.AutoSize = True
+        Me.Label3.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label3.ForeColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
+        Me.Label3.Location = New System.Drawing.Point(194, 145)
+        Me.Label3.Name = "Label3"
+        Me.Label3.Size = New System.Drawing.Size(26, 18)
+        Me.Label3.TabIndex = 49
+        Me.Label3.Text = "To"
+        '
+        'dtFromS
+        '
+        Me.dtFromS._DefaultDate = New Date(2009, 9, 23, 0, 0, 0, 0)
+        Me.dtFromS._DisableBackColor = System.Drawing.Color.Empty
+        Me.dtFromS._EnableBackColor = System.Drawing.Color.Empty
+        Me.dtFromS._font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dtFromS._MaxValue = New Date(2099, 1, 1, 0, 0, 0, 0)
+        Me.dtFromS._MinValue = New Date(1947, 1, 1, 0, 0, 0, 0)
+        Me.dtFromS._MoveOnEnter = True
+        Me.dtFromS._NextControl = "dtpTo"
+        Me.dtFromS._ParentControl = Nothing
+        Me.dtFromS._Text = "18-05-2013"
+        Me.dtFromS._value = New Date(2013, 5, 18, 0, 0, 0, 0)
+        Me.dtFromS.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.dtFromS.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dtFromS.Location = New System.Drawing.Point(73, 145)
+        Me.dtFromS.Name = "dtFromS"
+        Me.dtFromS.Size = New System.Drawing.Size(110, 20)
+        Me.dtFromS.TabIndex = 47
+        '
+        'dtptoS
+        '
+        Me.dtptoS._DefaultDate = New Date(2009, 9, 23, 0, 0, 0, 0)
+        Me.dtptoS._DisableBackColor = System.Drawing.Color.Empty
+        Me.dtptoS._EnableBackColor = System.Drawing.Color.Empty
+        Me.dtptoS._font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dtptoS._MaxValue = New Date(2099, 1, 1, 0, 0, 0, 0)
+        Me.dtptoS._MinValue = New Date(1947, 1, 1, 0, 0, 0, 0)
+        Me.dtptoS._MoveOnEnter = True
+        Me.dtptoS._NextControl = "dtpTo"
+        Me.dtptoS._ParentControl = Nothing
+        Me.dtptoS._Text = "18-05-2013"
+        Me.dtptoS._value = New Date(2013, 5, 18, 0, 0, 0, 0)
+        Me.dtptoS.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.dtptoS.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.dtptoS.Location = New System.Drawing.Point(232, 145)
+        Me.dtptoS.Name = "dtptoS"
+        Me.dtptoS.Size = New System.Drawing.Size(109, 20)
+        Me.dtptoS.TabIndex = 48
         '
         'FrmRptPeriod
         '
@@ -438,8 +504,12 @@ Partial Class FrmRptPeriod
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.AliceBlue
         Me.CancelButton = Me.cmdcancel
-        Me.ClientSize = New System.Drawing.Size(334, 455)
+        Me.ClientSize = New System.Drawing.Size(370, 502)
         Me.Controls.Add(Me.GroupBox1)
+        Me.Controls.Add(Me.DTPTC)
+        Me.Controls.Add(Me.DTPFC)
+        Me.Controls.Add(Me.dtpfrom1)
+        Me.Controls.Add(Me.dtpto2)
         Me.Font = New System.Drawing.Font("Arial", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.KeyPreview = True
@@ -480,6 +550,10 @@ Partial Class FrmRptPeriod
     Friend WithEvents DTPTC As DateControl.DateControl
     Friend WithEvents DTPFC As DateControl.DateControl
     Public WithEvents txtolap As TextBox
+    Friend WithEvents chkSalePeriod As CheckBox
+    Friend WithEvents Label3 As Label
+    Friend WithEvents dtFromS As DateControl.DateControl
+    Friend WithEvents dtptoS As DateControl.DateControl
 
     'Public Sub New()
 

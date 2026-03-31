@@ -73,33 +73,25 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AppMethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\REFERENCES\AppMethods.dll</HintPath>
+    <Reference Include="AppMethods">
+      <HintPath>..\..\..\..\REFERENCES\AppMethods.dll</HintPath>
     </Reference>
     <Reference Include="CustomPanelControl, Version=1.0.3521.20833, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Packs.POS\CLASS\wizPanel\CustomPanelControl.dll</HintPath>
     </Reference>
-    <Reference Include="Datamethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\REFERENCES\Datamethods.dll</HintPath>
+    <Reference Include="Datamethods">
+      <HintPath>..\..\..\..\REFERENCES\Datamethods.dll</HintPath>
     </Reference>
-    <Reference Include="DateControl, Version=1.0.6221.28342, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Packs.New\REFERENCES\DateControl.dll</HintPath>
+    <Reference Include="DateControl">
+      <HintPath>..\..\..\..\REFERENCES\DateControl.dll</HintPath>
     </Reference>
-    <Reference Include="FormClass, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Packs.New\REFERENCES\FormClass.dll</HintPath>
+    <Reference Include="FormClass">
+      <HintPath>..\..\..\..\REFERENCES\FormClass.dll</HintPath>
     </Reference>
     <Reference Include="GenFixReportEmail, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Packs.New\REFERENCES\GenFixReportEmail.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Office.Interop.Excel1">
-      <HintPath>..\..\REFERENCES\Microsoft.Office.Interop.Excel.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.ReportViewer.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.ReportViewer.WinForms, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -123,15 +115,13 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WizCommon">
-      <HintPath>..\..\REFERENCES\WizCommon.dll</HintPath>
+      <HintPath>..\..\..\..\REFERENCES\WizCommon.dll</HintPath>
     </Reference>
-    <Reference Include="wizGridView, Version=1.0.6914.24384, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Packs.New\REFERENCES\wizGridView.dll</HintPath>
+    <Reference Include="wizGridView">
+      <HintPath>..\..\..\..\REFERENCES\wizGridView.dll</HintPath>
     </Reference>
-    <Reference Include="WizTextBox, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Packs.New\REFERENCES\WizTextBox.dll</HintPath>
+    <Reference Include="WizTextBox">
+      <HintPath>..\..\..\..\REFERENCES\WizTextBox.dll</HintPath>
     </Reference>
     <Reference Include="XtremeMethods, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -341,6 +331,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="xpertMail.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Form1.resx">
@@ -523,15 +514,6 @@
       <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
       <VersionMajor>2</VersionMajor>
       <VersionMinor>4</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="VBIDE">
-      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
-      <VersionMajor>5</VersionMajor>
-      <VersionMinor>3</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
       <Isolated>False</Isolated>

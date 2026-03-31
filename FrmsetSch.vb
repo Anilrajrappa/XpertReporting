@@ -289,9 +289,18 @@ Public Class FrmSetsch
                         optExcel.Checked = True
                     ElseIf .Rows(0).Item("Attachment") = 2 Then
                         optPDF.Checked = True
+                    ElseIf .Rows(0).Item("Attachment") = 3 Then
+                        optFExcel.Checked = True
                     Else
                         optExcel.Checked = True
                     End If
+
+                    If convertbool(.Rows(0).Item("landScape")) Then
+                        chkLand.Checked = True
+                    Else
+                        chkLand.Checked = False
+                    End If
+
 
                     If .Rows(0).Item("Rpt_source") = 1 Then
                         OptUsergrp.Checked = True
@@ -391,6 +400,29 @@ Public Class FrmSetsch
         End Try
     End Function
 
+    Private Function convertbool(ByVal ob As Object) As Boolean
+        Try
+
+            Dim bValue As Boolean = True
+            Dim cValue As String = Convert.ToString(ob)
+
+            If (cValue = "") Then
+                bValue = False
+            ElseIf (cValue = "0") Then
+                bValue = False
+            ElseIf (cValue.ToUpper() = "FALSE") Then
+                bValue = False
+            ElseIf (cValue = "1") Then
+                bValue = True
+            ElseIf cValue.ToUpper() = "TRUE" Then
+                bValue = True
+            End If
+
+            Return bValue
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
 
     Private Sub GetEmailSubjectBody()
         Try
@@ -550,7 +582,7 @@ Public Class FrmSetsch
 
             ' Rep_sch
 
-            cExpr = "Delete From  wow_xpert_Rep_Sch where rep_id = '" & Crepid & "' and rep_type = '" & Creptype & "'"
+            cExpr = "Delete From  wow_xpert_Rep_Sch where rep_id = '" & Crepid & "' and (rep_type = '" & Creptype & "' or isnull(rep_type,'')= '')"
 
             If appSch.dmethod.SelectCmdTOSql(cExpr) = False Then
                 appSch.dmethod.RollBackTran()
@@ -589,6 +621,8 @@ Public Class FrmSetsch
                 iType = 1 ' CSV
             ElseIf optPDF.Checked = True Then
                 iType = 2
+            ElseIf optFExcel.Checked = True Then
+                iType = 3
             Else
                 iType = 1
             End If
@@ -690,11 +724,14 @@ Public Class FrmSetsch
                 Return False
             End If
 
-
+            Dim iLand As Integer = 0
+            If chkLand.Checked Then
+                iLand = 1
+            End If
             'Rep_sch
 
-            cExpr = "INSERT  wow_xpert_Rep_Sch (Rep_id,Rep_type,Sch_code,From_Days,TO_Days,Email_list,Attachment,Rpt_source,Rpt_usergrp,period_Type,Fix_date_value,inactive,Amount,N_Minutes,whatsApp,N_DAYS)" + vbCrLf +
-                         "values('" & Crepid & "','" & Creptype & "','" & cSchcode & "'," & iFrom & "," & iTo & ",'" & cEmail & "'," & iType & "," & iRSource & ",'" & cUserGrp & "'," & iPeriodType & ",'" & cFixPeriod & "'," & iinactive & ",0,0,'" & cWhatsapp & "',1)"
+            cExpr = "INSERT  wow_xpert_Rep_Sch (Rep_id,Rep_type,Sch_code,From_Days,TO_Days,Email_list,Attachment,Rpt_source,Rpt_usergrp,period_Type,Fix_date_value,inactive,Amount,N_Minutes,whatsApp,N_DAYS,landScape)" + vbCrLf +
+                    "values('" & Crepid & "','" & Creptype & "','" & cSchcode & "'," & iFrom & "," & iTo & ",'" & cEmail & "'," & iType & "," & iRSource & ",'" & cUserGrp & "'," & iPeriodType & ",'" & cFixPeriod & "'," & iinactive & ",0,0,'" & cWhatsapp & "',1," & iLand & ")"
 
 
 
@@ -934,6 +971,15 @@ Public Class FrmSetsch
                 appSch.dmethod.RollBackTran()
                 Return False
             End If
+
+
+            cExpr = "Delete From  wow_xpert_Rep_Sch where rep_id = '" & Crepid & "'"
+
+            If appSch.dmethod.SelectCmdTOSql(cExpr) = False Then
+                appSch.dmethod.RollBackTran()
+                Return False
+            End If
+
 
             cExpr = "Delete From  wow_xpert_Rep_crm where rep_id = '" & Crepid & "' and rep_code = '" & cRepCode & "'"
 

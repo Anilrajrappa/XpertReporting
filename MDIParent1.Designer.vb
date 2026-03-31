@@ -80,7 +80,9 @@ Partial Class MDIParent1
         Me.EDITREPORT = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.PRINTVIEW = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.VIEW_REPORT = New System.Windows.Forms.DataGridViewLinkColumn()
+        Me.PDFEXPORT = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.BulkExport = New System.Windows.Forms.DataGridViewLinkColumn()
+        Me.BCPEXPORT = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.GRIDVIEW = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.LAYOUT = New System.Windows.Forms.DataGridViewLinkColumn()
         Me.CreatedBY = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -535,7 +537,7 @@ Partial Class MDIParent1
         DataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
         Me.DgvRepList.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
         Me.DgvRepList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DgvRepList.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.CREPGROUP, Me.user_rep_type, Me.REPNAME, Me.REPRMK, Me.EDITREPORT, Me.PRINTVIEW, Me.VIEW_REPORT, Me.BulkExport, Me.GRIDVIEW, Me.LAYOUT, Me.CreatedBY, Me.LastMODIF, Me.rep_id, Me.DELETE, Me.ADDFILTER, Me.XN_TYPE})
+        Me.DgvRepList.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.CREPGROUP, Me.user_rep_type, Me.REPNAME, Me.REPRMK, Me.EDITREPORT, Me.PRINTVIEW, Me.VIEW_REPORT, Me.PDFEXPORT, Me.BulkExport, Me.BCPEXPORT, Me.GRIDVIEW, Me.LAYOUT, Me.CreatedBY, Me.LastMODIF, Me.rep_id, Me.DELETE, Me.ADDFILTER, Me.XN_TYPE})
         DataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
         DataGridViewCellStyle4.BackColor = System.Drawing.Color.White
         DataGridViewCellStyle4.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -609,7 +611,7 @@ Partial Class MDIParent1
         Me.EDITREPORT.ReadOnly = True
         Me.EDITREPORT.Text = "Edit Report"
         Me.EDITREPORT.UseColumnTextForLinkValue = True
-        Me.EDITREPORT.Width = 78
+        Me.EDITREPORT.Width = 87
         '
         'PRINTVIEW
         '
@@ -619,29 +621,51 @@ Partial Class MDIParent1
         Me.PRINTVIEW.Name = "PRINTVIEW"
         Me.PRINTVIEW.Text = "View Report"
         Me.PRINTVIEW.UseColumnTextForLinkValue = True
-        Me.PRINTVIEW.Width = 84
+        Me.PRINTVIEW.Width = 93
         '
         'VIEW_REPORT
         '
         Me.VIEW_REPORT.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
-        Me.VIEW_REPORT.HeaderText = "Run & Export "
+        Me.VIEW_REPORT.HeaderText = "Excel  "
         Me.VIEW_REPORT.MinimumWidth = 6
         Me.VIEW_REPORT.Name = "VIEW_REPORT"
         Me.VIEW_REPORT.ReadOnly = True
-        Me.VIEW_REPORT.Text = "Run & Export"
+        Me.VIEW_REPORT.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.VIEW_REPORT.Text = "Excel"
         Me.VIEW_REPORT.UseColumnTextForLinkValue = True
-        Me.VIEW_REPORT.Width = 95
+        Me.VIEW_REPORT.Width = 58
+        '
+        'PDFEXPORT
+        '
+        Me.PDFEXPORT.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
+        Me.PDFEXPORT.HeaderText = "PDF"
+        Me.PDFEXPORT.MinimumWidth = 6
+        Me.PDFEXPORT.Name = "PDFEXPORT"
+        Me.PDFEXPORT.ReadOnly = True
+        Me.PDFEXPORT.Text = "PDF"
+        Me.PDFEXPORT.UseColumnTextForLinkValue = True
+        Me.PDFEXPORT.Width = 44
         '
         'BulkExport
         '
         Me.BulkExport.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
-        Me.BulkExport.HeaderText = "Bulk Export"
+        Me.BulkExport.HeaderText = "Raw Data "
         Me.BulkExport.MinimumWidth = 6
         Me.BulkExport.Name = "BulkExport"
         Me.BulkExport.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.BulkExport.Text = "Bulk Export"
+        Me.BulkExport.Text = "Raw Data"
         Me.BulkExport.UseColumnTextForLinkValue = True
-        Me.BulkExport.Width = 79
+        Me.BulkExport.Width = 83
+        '
+        'BCPEXPORT
+        '
+        Me.BCPEXPORT.HeaderText = "Bulk Export"
+        Me.BCPEXPORT.MinimumWidth = 6
+        Me.BCPEXPORT.Name = "BCPEXPORT"
+        Me.BCPEXPORT.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.BCPEXPORT.Text = "Bulk Export"
+        Me.BCPEXPORT.UseColumnTextForLinkValue = True
+        Me.BCPEXPORT.Width = 95
         '
         'GRIDVIEW
         '
@@ -651,7 +675,7 @@ Partial Class MDIParent1
         Me.GRIDVIEW.Name = "GRIDVIEW"
         Me.GRIDVIEW.Text = "Grid View"
         Me.GRIDVIEW.UseColumnTextForLinkValue = True
-        Me.GRIDVIEW.Width = 68
+        Me.GRIDVIEW.Width = 76
         '
         'LAYOUT
         '
@@ -673,7 +697,7 @@ Partial Class MDIParent1
         Me.CreatedBY.Name = "CreatedBY"
         Me.CreatedBY.ReadOnly = True
         Me.CreatedBY.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.CreatedBY.Width = 78
+        Me.CreatedBY.Width = 87
         '
         'LastMODIF
         '
@@ -686,7 +710,7 @@ Partial Class MDIParent1
         Me.LastMODIF.Name = "LastMODIF"
         Me.LastMODIF.ReadOnly = True
         Me.LastMODIF.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.LastMODIF.Width = 82
+        Me.LastMODIF.Width = 91
         '
         'rep_id
         '
@@ -712,12 +736,12 @@ Partial Class MDIParent1
         'ADDFILTER
         '
         Me.ADDFILTER.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells
-        Me.ADDFILTER.HeaderText = "Additional Filter"
+        Me.ADDFILTER.HeaderText = "Output Filter"
         Me.ADDFILTER.MinimumWidth = 6
         Me.ADDFILTER.Name = "ADDFILTER"
-        Me.ADDFILTER.Text = "Additional Filter"
+        Me.ADDFILTER.Text = "Output Filter"
         Me.ADDFILTER.UseColumnTextForLinkValue = True
-        Me.ADDFILTER.Width = 101
+        Me.ADDFILTER.Width = 94
         '
         'XN_TYPE
         '
@@ -1236,6 +1260,10 @@ Partial Class MDIParent1
     Friend WithEvents PLNGRID As Panel
     Friend WithEvents dgvReport As DataGridView
     Friend WithEvents LBLREP As Label
+    Friend WithEvents tsEmail As ToolStripButton
+    Friend WithEvents ToolStripSeparator8 As ToolStripSeparator
+    Friend WithEvents TSSHORTCLOSE As ToolStripButton
+    Friend WithEvents TSSEPSHORTCLOSE As ToolStripSeparator
     Friend WithEvents CREPGROUP As DataGridViewTextBoxColumn
     Friend WithEvents user_rep_type As DataGridViewTextBoxColumn
     Friend WithEvents REPNAME As DataGridViewTextBoxColumn
@@ -1243,7 +1271,9 @@ Partial Class MDIParent1
     Friend WithEvents EDITREPORT As DataGridViewLinkColumn
     Friend WithEvents PRINTVIEW As DataGridViewLinkColumn
     Friend WithEvents VIEW_REPORT As DataGridViewLinkColumn
+    Friend WithEvents PDFEXPORT As DataGridViewLinkColumn
     Friend WithEvents BulkExport As DataGridViewLinkColumn
+    Friend WithEvents BCPEXPORT As DataGridViewLinkColumn
     Friend WithEvents GRIDVIEW As DataGridViewLinkColumn
     Friend WithEvents LAYOUT As DataGridViewLinkColumn
     Friend WithEvents CreatedBY As DataGridViewTextBoxColumn
@@ -1252,8 +1282,4 @@ Partial Class MDIParent1
     Friend WithEvents DELETE As DataGridViewLinkColumn
     Friend WithEvents ADDFILTER As DataGridViewLinkColumn
     Friend WithEvents XN_TYPE As DataGridViewTextBoxColumn
-    Friend WithEvents tsEmail As ToolStripButton
-    Friend WithEvents ToolStripSeparator8 As ToolStripSeparator
-    Friend WithEvents TSSHORTCLOSE As ToolStripButton
-    Friend WithEvents TSSEPSHORTCLOSE As ToolStripSeparator
 End Class

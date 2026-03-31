@@ -7,17 +7,20 @@
 
         ' Set the AutoSizeRowsMode property to allow row heights to adjust automatically
         DataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells
-
         ' Optionally, you can set the column width if you want
         'Anil Edit 27-05-25 10:02:38
         DataGridView1.Columns("Column2").Width = 133
+        ' Dim d As New Dat
 
-        'Rohit : 26-05-2025 Testing foor GIT HUB
 
-        'ROJITHIHTI
-        'Anil 5:05
-        'Anil Edit 5:32
-        'Anil Edit 5:38
+
+        ResumeLayout()
+
+        Try
+
+        Catch ex As Exception
+
+        End Try
 
     End Sub
 

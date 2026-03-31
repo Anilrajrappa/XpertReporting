@@ -129,7 +129,7 @@ Public Class Login
         ApplicationName = " " '"Xtreme Reporting System"
         pbWizApp.Visible = False
 
-        pbProductImage.Image = My.Resources.Resources.MIS
+        ' pbProductImage.Image = My.Resources.Resources.MIS
 
 
     End Sub
@@ -145,7 +145,7 @@ Public Class Login
         ApplicationName = " " '"Xtreme Reporting System"
         pbWizApp.Visible = False
 
-        pbProductImage.Image = My.Resources.Resources.MIS
+        '  pbProductImage.Image = My.Resources.Resources.MIS
 
         'dtdrill = New DataTable
 

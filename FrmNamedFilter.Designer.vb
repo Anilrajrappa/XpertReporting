@@ -28,11 +28,12 @@ Partial Class FrmNamedFilter
         Me.TxtTitle = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.txtFilter = New System.Windows.Forms.TextBox()
+        Me.txtOlap = New System.Windows.Forms.TextBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.TreeView1 = New System.Windows.Forms.TreeView()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.lnkFilter = New System.Windows.Forms.LinkLabel()
-        Me.txtOlap = New System.Windows.Forms.TextBox()
+        Me.lnkUpdate = New System.Windows.Forms.LinkLabel()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -127,6 +128,19 @@ Partial Class FrmNamedFilter
         Me.txtFilter.Size = New System.Drawing.Size(616, 200)
         Me.txtFilter.TabIndex = 1
         '
+        'txtOlap
+        '
+        Me.txtOlap.BackColor = System.Drawing.Color.White
+        Me.txtOlap.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.txtOlap.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.txtOlap.Location = New System.Drawing.Point(3, 222)
+        Me.txtOlap.Margin = New System.Windows.Forms.Padding(3, 4, 3, 4)
+        Me.txtOlap.Multiline = True
+        Me.txtOlap.Name = "txtOlap"
+        Me.txtOlap.ReadOnly = True
+        Me.txtOlap.Size = New System.Drawing.Size(616, 5)
+        Me.txtOlap.TabIndex = 2
+        '
         'ToolTip1
         '
         Me.ToolTip1.IsBalloon = True
@@ -139,9 +153,9 @@ Partial Class FrmNamedFilter
         Me.TreeView1.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.TreeView1.FullRowSelect = True
         Me.TreeView1.HotTracking = True
-        Me.TreeView1.Location = New System.Drawing.Point(0, 0)
+        Me.TreeView1.Location = New System.Drawing.Point(0, 79)
         Me.TreeView1.Name = "TreeView1"
-        Me.TreeView1.Size = New System.Drawing.Size(325, 620)
+        Me.TreeView1.Size = New System.Drawing.Size(325, 541)
         Me.TreeView1.TabIndex = 197
         '
         'GroupBox2
@@ -167,18 +181,16 @@ Partial Class FrmNamedFilter
         Me.lnkFilter.TabStop = True
         Me.lnkFilter.Text = "Create Filter"
         '
-        'txtOlap
+        'lnkUpdate
         '
-        Me.txtOlap.BackColor = System.Drawing.Color.White
-        Me.txtOlap.BorderStyle = System.Windows.Forms.BorderStyle.None
-        Me.txtOlap.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.txtOlap.Location = New System.Drawing.Point(3, 222)
-        Me.txtOlap.Margin = New System.Windows.Forms.Padding(3, 4, 3, 4)
-        Me.txtOlap.Multiline = True
-        Me.txtOlap.Name = "txtOlap"
-        Me.txtOlap.ReadOnly = True
-        Me.txtOlap.Size = New System.Drawing.Size(616, 5)
-        Me.txtOlap.TabIndex = 2
+        Me.lnkUpdate.AutoSize = True
+        Me.lnkUpdate.Font = New System.Drawing.Font("Arial", 10.2!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lnkUpdate.Location = New System.Drawing.Point(777, 544)
+        Me.lnkUpdate.Name = "lnkUpdate"
+        Me.lnkUpdate.Size = New System.Drawing.Size(182, 19)
+        Me.lnkUpdate.TabIndex = 198
+        Me.lnkUpdate.TabStop = True
+        Me.lnkUpdate.Text = "Update All Filter Detail"
         '
         'FrmNamedFilter
         '
@@ -191,6 +203,7 @@ Partial Class FrmNamedFilter
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 17.0!)
         Me.BackColor = System.Drawing.Color.White
         Me.ClientSize = New System.Drawing.Size(991, 620)
+        Me.Controls.Add(Me.lnkUpdate)
         Me.Controls.Add(Me.lnkFilter)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.TreeView1)
@@ -213,6 +226,7 @@ Partial Class FrmNamedFilter
         Me.Controls.SetChildIndex(Me.TreeView1, 0)
         Me.Controls.SetChildIndex(Me.GroupBox2, 0)
         Me.Controls.SetChildIndex(Me.lnkFilter, 0)
+        Me.Controls.SetChildIndex(Me.lnkUpdate, 0)
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
@@ -234,4 +248,5 @@ Partial Class FrmNamedFilter
     Friend WithEvents txtRepCat As WizTextBox.RTextBox
     Friend WithEvents txtFilter As TextBox
     Friend WithEvents txtOlap As TextBox
+    Friend WithEvents lnkUpdate As LinkLabel
 End Class

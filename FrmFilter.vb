@@ -99,7 +99,8 @@
 
 
             dtview.Table = appMain.dset.Tables("rep_det_SMRY")
-            dtview.RowFilter = "calculative_col=1"
+            'dtview.RowFilter = "calculative_col=1"
+            dtview.RowFilter = ""
 
             FillFilterList(gRepID)
 
@@ -213,7 +214,8 @@
            
 
             dtview.Table = appMain.dset.Tables("rep_det")
-            dtview.RowFilter = "Calculative_col=1"
+            'dtview.RowFilter = "Calculative_col=1"
+            dtview.RowFilter = ""
 
 
             Dim dT2 As New DataTable
@@ -384,8 +386,11 @@
 
                 appMain.dmethod.SelectCmdTOSql(cexpr)
 
+                cFilter = cFilter.Replace("`", "''")
+                cFilter_Org = cFilter_Org.Replace("`", "''")
+
                 cexpr = "INSERT REP_ADV_FILTER(rep_id,user_code,Filter,Filter_vw,Filter_org,Adv_Filter_id,Filter_Name)" + vbCrLf +
-                                      "Values('" & gRepID & "','" & appMain.GUSER_CODE & "','" & cFilter & "','" & cFilterV & "','" + cFilter_Org + "','" + cNewFilterId + "','" + cNameFilter + "')"
+                        "Values('" & gRepID & "','" & appMain.GUSER_CODE & "','" & cFilter & "','" & cFilterV & "','" + cFilter_Org + "','" + cNewFilterId + "','" + cNameFilter + "')"
 
                 appMain.dmethod.SelectCmdTOSql(cexpr)
 
@@ -447,7 +452,7 @@
 
                     If drow(0)("calculative_col") = False Then
                         cExValue = Convert.ToString(drow(0)("col_header"))
-                        cExValueCol = Convert.ToString(drow(0)("col_expr"))
+                        cExValueCol = Convert.ToString(drow(0)("col_header"))
                         cExValueSave = cExValue
                         cExValue = "[" + cExValue + "]"
                         cExValueCol = "[" + cExValueCol + "]"

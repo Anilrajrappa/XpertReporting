@@ -21,6 +21,7 @@
     Dim cOlapFilter As String = ""
     Dim cOlapFilter1 As String = ""
     Public addnlFilterId As String = ""
+    Public bShowSalePeriod As Boolean = False
     Public Sub New()
 
         ' This call is required by the designer.
@@ -89,18 +90,42 @@
     Private Sub FrmRptPeriod_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
         Try
+            appCustom.ApplyTheme("FRMUDRC3", Me, False)
+
+            If bShowSalePeriod = True Then
+                chkSalePeriod.Visible = True
+                dtFromS.Visible = True
+                dtptoS.Visible = True
+                chkSalePeriod.Checked = True
+                chkSalePeriod.Enabled = False
+                Label3.Visible = True
+
+            Else
+                chkSalePeriod.Visible = False
+                chkSalePeriod.Checked = False
+                dtFromS.Visible = False
+                dtptoS.Visible = False
+                chkSalePeriod.Enabled = False
+                Label3.Visible = False
+            End If
+
 
             dtpfrom1.Enabled = True
             DTPFC.Enabled = True
 
             dtpfrom._DefaultDate = appMain.GTODAYDATE
             dtFromC._DefaultDate = appMain.GTODAYDATE
+            dtFromS._DefaultDate = appMain.GTODAYDATE
 
 
             dtpto._DefaultDate = appMain.GTODAYDATE
             dtptoC._DefaultDate = appMain.GTODAYDATE
+            dtptoS._DefaultDate = appMain.GTODAYDATE
 
-
+            If bFirstStkView = False Then
+                dtFromS._value = appMain.GTODAYDATE
+                dtptoS._value = appMain.GTODAYDATE
+            End If
 
             dtpfrom._value = dtpfrom1._value
             dtpto._value = dtpto2._value
@@ -275,13 +300,17 @@
             If frmWizard1.ShowDialog() = Windows.Forms.DialogResult.OK Then
                 cRepID = Convert.ToString(appCustom.dset.Tables("rep_mst").Rows(0).Item("rep_id"))
                 cGRepId = cRepID
-                updateXpertFilterRepID(cRepID)
+                ' updateXpertFilterRepID(cRepID)
                 TviewSelect(cRepID, 1, bTran, cRepType)
                 TxtFilter.Text = cFilter.Replace(vbCrLf, "").Replace("'", "")
                 TxtFilter.Tag = cFilter1
-                txtOlap.Tag = cOlapFilter1
+                txtolap.Tag = cOlapFilter1
+                If TxtFilter.Text.Trim().Length > 0 Then
+                    updateXpertFilterRepID(cRepID)
+                Else
+                    updateXpertFilterRepID("")
+                End If
             End If
-
         Catch ex As Exception
             appCustom.ErrorShow(ex)
         End Try
@@ -892,7 +921,7 @@
                     cCol = Trim(drow2(0)("col_header"))
                     iDt = ConvertINT(drow2(0)("Data_type"))
                     cColExpr = Trim(drow2(0)("col_expr")).ToLower()
-                    If iDt <= 1 And cColExpr.ToUpper().Contains("ER_FLAG") = False Then
+                    If iDt <= 1 And cColExpr.ToUpper().Contains("ER_FLAG") = False And cColExpr.ToUpper().Contains("INACTIVE") = False And cColExpr.ToUpper().Contains("BARCODE_CODING") = False Then
                         cColExpr = "upper(trim(" + cColExpr + "))"
                     End If
                     cTableName = "[A]" 'Trim(drow2(0)("table_name"))

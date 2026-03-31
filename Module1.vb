@@ -3,6 +3,9 @@ Imports System.Threading
 Imports Microsoft.VisualBasic.CompilerServices
 Imports System.Runtime.CompilerServices
 
+Imports System.Text
+Imports System.Globalization
+
 Module Module1
 
 #Region "Global"
@@ -59,7 +62,7 @@ Module Module1
         appMain.StartupPath = Application.StartupPath
 
 
-        'Dim c As String = appMain.Encrypt("≠…»«")
+        ' Dim c As String = appMain.Encrypt("∞π¨∫» »ƒ")
         'End
 
         If 1 = 1 Then  ' appMain.checkForINI(Application.StartupPath, cApppath) = True Then
@@ -71,63 +74,63 @@ Module Module1
                 'create connection
                 If appMain.SetConnection(cApppath, False, False) = True Then
 
-                    '       If appMain.SetConnection("olap1.wizapp.in", "GULATISILK_NEW", "sanjiv", "vijnas@noida1904", True) = True Then
+                    '  If appMain.SetConnection("wizapp2.wizapp.in", "wizapp3stp", "sanjiv", "vijnas@noida1904", True) = True Then
 
                     appMain.dmethod.InitializeCommand()
-                        appMain.sqlCMD.Connection = appMain.sqlCON
+                    appMain.sqlCMD.Connection = appMain.sqlCON
 
-                        'appMain.sqlCMD.CommandText = "open symmetric key dbdx decryption by password='sspl@e6'"
-                        'appMain.sqlCMD.ExecuteNonQuery()
+                    'appMain.sqlCMD.CommandText = "open symmetric key dbdx decryption by password='sspl@e6'"
+                    'appMain.sqlCMD.ExecuteNonQuery()
 
-                        Dim cD As String = appMain.dmethod.cDatabase
-                        Dim ca As String = appMain.dmethod.cServer
-                        Dim cu As String = appMain.dmethod.cUid
-                        Dim p As String = appMain.dmethod.cPwd
+                    Dim cD As String = appMain.dmethod.cDatabase
+                    Dim ca As String = appMain.dmethod.cServer
+                    Dim cu As String = appMain.dmethod.cUid
+                    Dim p As String = appMain.dmethod.cPwd
 
-                        appMain.sqlCMD.CommandText = "set transaction isolation level read uncommitted"
-                        appMain.sqlCMD.ExecuteNonQuery()
+                    appMain.sqlCMD.CommandText = "set transaction isolation level read uncommitted"
+                    appMain.sqlCMD.ExecuteNonQuery()
 
-                        appMain.sqlCMD.CommandText = "Select @@SPID"
-                        gSpid = appMain.sqlCMD.ExecuteScalar
+                    appMain.sqlCMD.CommandText = "Select @@SPID"
+                    gSpid = appMain.sqlCMD.ExecuteScalar
 
-                        appMain.cWizApppath = appMain.GetWizAppPath(Application.StartupPath)
+                    appMain.cWizApppath = appMain.GetWizAppPath(Application.StartupPath)
 
-                        'dtdrill = New DataTable
+                    'dtdrill = New DataTable
 
-                        'dtdrill.TableName = "DrillTable"
-                        'dtdrill.Columns.Add("RepType", GetType(System.String))
-                        'dtdrill.Columns.Add("RepName", GetType(System.String))
+                    'dtdrill.TableName = "DrillTable"
+                    'dtdrill.Columns.Add("RepType", GetType(System.String))
+                    'dtdrill.Columns.Add("RepName", GetType(System.String))
 
-                        dtFilter = New DataTable
-                        dtFilter.TableName = "dtFilter"
-                        dtFilter.Columns.Add("col_name", GetType(System.String))
-                        dtFilter.Columns.Add("operator", GetType(System.String))
-                        dtFilter.Columns.Add("value", GetType(System.String))
-                        dtFilter.Columns.Add("AND", GetType(System.String))
-
-
-                        dtFilter_TOP = New DataTable
-                        dtFilter_TOP.TableName = "dtFilter_TOP"
-                        dtFilter_TOP.Columns.Add("col_name", GetType(System.String))
-                        dtFilter_TOP.Columns.Add("col_header", GetType(System.String))
-                        dtFilter_TOP.Columns.Add("operator", GetType(System.String))
-
-                        dtFilter_TOP.Columns.Add("value", GetType(System.String))
+                    dtFilter = New DataTable
+                    dtFilter.TableName = "dtFilter"
+                    dtFilter.Columns.Add("col_name", GetType(System.String))
+                    dtFilter.Columns.Add("operator", GetType(System.String))
+                    dtFilter.Columns.Add("value", GetType(System.String))
+                    dtFilter.Columns.Add("AND", GetType(System.String))
 
 
-                        Call GetConfigValue()
+                    dtFilter_TOP = New DataTable
+                    dtFilter_TOP.TableName = "dtFilter_TOP"
+                    dtFilter_TOP.Columns.Add("col_name", GetType(System.String))
+                    dtFilter_TOP.Columns.Add("col_header", GetType(System.String))
+                    dtFilter_TOP.Columns.Add("operator", GetType(System.String))
+
+                    dtFilter_TOP.Columns.Add("value", GetType(System.String))
 
 
-                        '   Application.UseWaitCursor = False
+                    Call GetConfigValue()
+
+
+                    '   Application.UseWaitCursor = False
 
 
 
 
-                        Application.Run(Login)
+                    Application.Run(Login)
 
 
-                    Else
-                        Application.UseWaitCursor = False
+                Else
+                    Application.UseWaitCursor = False
                         MsgBox("Invalid Connection Information,Plz Check Data Session" + vbCrLf +
                            "Or Contact sspl support center...", MsgBoxStyle.Information)
                     End If
@@ -3168,10 +3171,6 @@ Module Module1
     End Sub
 
 
-
-
-
-
     Public Sub FillR2(appRep As XtremeMethods.MISnCRM, ByVal cRepType As String)
 
 
@@ -3197,7 +3196,7 @@ Module Module1
                     "From wow_xpert_report_cols_xntypewise a  " + vbCrLf +
                     "Join wow_xpert_report_cols_expressions b On a. column_id= b. column_id " + vbCrLf +
                     "Join wow_xpert_report_colheaders d on d.major_column_id=a.major_column_id  " + vbCrLf +
-                    "Where col_mode =1  And a.xn_type  not In ('stock','WBOPEN','POPEN','STKQTY','ARS','PO','CON_SLS') and d.major_col_header not like '%Transaction%Date' " + vbCrLf +
+                    "Where col_mode =1  And a.xn_type  not In ('stock','WBOPEN','POPEN','STKQTY','ARS','PO','CON_SLS') and d.major_col_header  <> 'Transaction Date'" + vbCrLf +
                     "Order by 1"
 
         ElseIf cRepType = "WOD" Then
@@ -3263,9 +3262,9 @@ Module Module1
             Dim cArr() As String = ccolExpr.Split(".")
             Dim cColHead As String = Convert.ToString(Dr("col_header")).ToUpper.Trim()
 
-            'If cColHead.ToUpper().Contains("EOSS") Then
-            '    Continue For
-            'End If
+            If cColHead.ToUpper().Contains("EOSS") Then
+                Continue For
+            End If
 
             If cColHead.ToUpper().Contains("TRANSACTION") And cColHead.ToUpper().Contains("HSN") Then
                 Continue For
@@ -3305,6 +3304,15 @@ Module Module1
                 cExp = "Party_state"
             End If
 
+            If Convert.ToString(Dr("col_header")).ToUpper().Contains("PARTY") And Convert.ToString(Dr("col_header")).ToUpper().Contains("GST") And Convert.ToString(Dr("col_header")).ToUpper().Contains("STATE") Then
+                cExp = "Party_gst_state"
+            End If
+
+            If Convert.ToString(Dr("col_expr")).ToUpper().Contains("PARTY_CUSTDYM.MOBILE") And Convert.ToString(Dr("col_expr")).ToUpper().Contains("PARTY_LM01106.AC_CODE") Then
+                cExp = "party_mobile"
+            End If
+
+
             If Convert.ToString(Dr("col_header")).ToUpper().Contains("ACCOUNT POSTING DATE") Then
                 cExp = "account_posting_date"
             End If
@@ -3336,6 +3344,9 @@ Module Module1
             End If
 
 
+            If Convert.ToString(Dr("col_expr")).ToUpper().Contains("BILL_CHALLAN_MODE") Then
+                cExp = "BILLCHALLANMODE"
+            End If
 
 
             InsertRow(item, dataRow, Convert.ToString(Dr("col_header")), cExp, cBAseTable, Convert.ToString(Dr("col_expr")), Convert.ToString(Dr("col_expr")), num, Convert.ToString(Dr("columnGroup")), iDttype)
@@ -3817,6 +3828,367 @@ Module Module1
         'InsertRow(item, dataRow, "User Name", "username", "users", "user_code", "B.user_code", num, "MISC", 1)
 
     End Sub
+
+
+
+    'New
+    Public Sub ExportDataTable(dt As DataTable, filePath As String)
+        ' Large buffer for better throughput
+        Dim bufferSize As Integer = 4 * 1024 * 1024   ' 4 MB
+        Using fs As New FileStream(filePath, FileMode.Create, FileAccess.Write,
+                                   FileShare.None, bufferSize, FileOptions.SequentialScan)
+            Using sw As New StreamWriter(fs, Encoding.UTF8, bufferSize)
+                ' ----- Write header -----
+                Dim header(dt.Columns.Count - 1) As String
+                For i As Integer = 0 To dt.Columns.Count - 1
+                    header(i) = EscapeCsv(dt.Columns(i).ColumnName)
+                Next
+                sw.WriteLine(String.Join(",", header))
+
+                ' ----- Write rows -----
+                Dim rowCount As Integer = 0
+                For Each r As DataRow In dt.Rows
+                    Dim fields(dt.Columns.Count - 1) As String
+                    For c As Integer = 0 To dt.Columns.Count - 1
+                        If r.IsNull(c) Then
+                            fields(c) = ""
+                        Else
+                            fields(c) = EscapeCsv(Convert.ToString(r(c), CultureInfo.InvariantCulture))
+                        End If
+                    Next
+                    sw.WriteLine(String.Join(",", fields))
+
+                    rowCount += 1
+                    If rowCount Mod 50000 = 0 Then sw.Flush()  ' optional safety flush
+                Next
+                sw.Flush()
+            End Using
+        End Using
+    End Sub
+
+    ' Quote values that contain commas, quotes, or line breaks.
+    'Private Function EscapeCsv(value As String) As String
+    '    If String.IsNullOrEmpty(value) Then Return ""
+    '    If value.IndexOfAny({","c, """"c, ControlChars.Cr, ControlChars.Lf}) >= 0 Then
+    '        value = value.Replace("""", """""")      ' double internal quotes
+    '        Return $"""{value}"""
+    '    End If
+    '    Return value
+    'End Function
+
+
+    Private Function EscapeCsv(value As Object) As String
+        If value Is Nothing OrElse Convert.IsDBNull(value) Then Return ""
+
+        Dim s As String = value.ToString()
+
+        ' Decide whether it's numeric
+        Dim n As Double
+        Dim isNumeric As Boolean = Double.TryParse(s, Globalization.NumberStyles.Any,
+                                                   Globalization.CultureInfo.InvariantCulture, n)
+
+        ' If it's numeric AND starts with "0" (and has >1 char), prefix with '
+        If isNumeric AndAlso s.Length > 1 AndAlso s.StartsWith("0") Then
+            s = "'" & s
+        End If
+
+        ' Escape for CSV if it contains comma, quote, or line break
+        If s.IndexOfAny({","c, """"c, ControlChars.Cr, ControlChars.Lf}) >= 0 Then
+            s = s.Replace("""", """""")
+            s = $"""{s}"""
+        End If
+
+        Return s
+    End Function
+
+
+    Public Function PivotData(ByVal source As DataTable,
+                          ByVal rowFields As String(),
+                          ByVal columnField As String,
+                          ByVal valueField As String, ByVal bsort As Boolean) As DataTable
+        '===============================================================
+        '  Create a pivot / cross-tab with:
+        '     - One row per unique combination of rowFields
+        '     - One column per distinct value of columnField
+        '     - Sum of valueField as cell value
+        '     - RowTotal column at the end
+        '===============================================================
+
+        '----- 1. Collect distinct column headers -----
+        Dim cSortCol As String = ""
+
+        For Each c As DataColumn In source.Columns
+            If c.ColumnName.ToUpper().Contains("SIZE") And c.ColumnName.ToUpper().Contains("_ORDER") Then
+                cSortCol = c.ColumnName
+            End If
+        Next
+
+
+        Dim colKeys As New List(Of String)()
+
+        If cSortCol <> "" Then
+            Dim dv As New DataView(source)
+            dv.Sort = cSortCol
+            For Each dr As DataRow In dv.ToTable().Rows
+                Dim cKey As String = Convert.ToString(dr(columnField))
+                If Not colKeys.Contains(cKey) Then colKeys.Add(cKey)
+            Next
+        Else
+            For Each dr As DataRow In source.Rows
+                Dim cKey As String = Convert.ToString(dr(columnField))
+                If Not colKeys.Contains(cKey) Then colKeys.Add(cKey)
+            Next
+        End If
+
+        'For Each dr As DataRow In source.Rows
+        '    Dim cKey As String = Convert.ToString(dr(columnField))
+        '    If Not colKeys.Contains(cKey) Then colKeys.Add(cKey)
+        'Next
+
+        ' colKeys.Sort()
+
+        '----- 2. Prepare result DataTable -----
+        Dim result As New DataTable()
+
+            'Row field columns
+            For Each rf As String In rowFields
+
+                If rf.StartsWith("N_") Then
+                    result.Columns.Add(rf.Replace("N_", ""), GetType(Decimal))
+                Else
+                    result.Columns.Add(rf, GetType(String))
+                End If
+            Next
+
+            'Pivot columns
+            For Each colName As String In colKeys
+                If colName.Trim() = "" Then
+                    result.Columns.Add(" ", GetType(Double))
+                Else
+                    result.Columns.Add(colName, GetType(Double))
+                End If
+            Next
+
+            'Row total
+            result.Columns.Add("RowTotal", GetType(Double))
+
+            '----- 3. Map composite key -> output row -----
+            Dim rowMap As New Dictionary(Of String, DataRow)()
+
+            '----- 4. Loop source rows -----
+            For Each dr As DataRow In source.Rows
+                Try
+                    '---- Build a stable composite key for this row ----
+                    Dim keyBuilder As New Text.StringBuilder()
+                    For i As Integer = 0 To rowFields.Length - 1
+                        If i > 0 Then keyBuilder.Append("|")
+                        Dim cCol As String = rowFields(i).Replace("N_", "")
+
+                        Dim raw As Object = dr(cCol)
+                        Dim part As String = ""
+
+                        If raw IsNot DBNull.Value Then
+                            'Normalize numbers (round to 2 decimals) and trim text
+                            If TypeOf raw Is Double OrElse TypeOf raw Is Decimal OrElse TypeOf raw Is Single Then
+                                part = Math.Round(Convert.ToDouble(raw), 2).ToString()
+                            Else
+                                part = Convert.ToString(raw).Trim()
+                            End If
+                        End If
+
+                        keyBuilder.Append(part)
+                    Next
+                    Dim key As String = keyBuilder.ToString()
+
+                    '---- Get or create output row ----
+                    Dim outRow As DataRow
+                    If rowMap.ContainsKey(key) Then
+                        outRow = rowMap(key)
+                    Else
+                        outRow = result.NewRow()
+
+                        'Fill row header values
+                        Dim parts() As String = key.Split("|"c)
+                        For i As Integer = 0 To rowFields.Length - 1
+                            Dim cCol As String = rowFields(i).Replace("N_", "")
+                            outRow(cCol) = parts(i)
+                        Next
+
+                        'Init numeric columns
+                        Try
+                            For Each c As String In colKeys
+                                outRow(c) = 0D
+                            Next
+                            outRow("RowTotal") = 0D
+                        Catch ex As Exception
+
+                        End Try
+
+                        result.Rows.Add(outRow)
+                        rowMap.Add(key, outRow)
+                    End If
+
+                    '---- Add value to the proper column & row total ----
+                    Dim colName As String = Convert.ToString(dr(columnField))
+                    Dim valObj As Object = dr(valueField)
+                    Dim val As Double = 0D
+                    If valObj IsNot DBNull.Value Then
+                        Double.TryParse(Convert.ToString(valObj), val)
+                    End If
+
+                    outRow(colName) = CDbl(outRow(colName)) + val
+                    outRow("RowTotal") = CDbl(outRow("RowTotal")) + val
+                Catch ex As Exception
+
+                End Try
+
+            Next
+
+            Return result
+    End Function
+
+    Private Function ToDoubleSafe(ByVal val As Object) As Double
+        If val Is Nothing OrElse val Is DBNull.Value Then Return 0
+        Dim d As Double
+        If Double.TryParse(Convert.ToString(val), d) Then Return d
+        Return 0
+    End Function
+
+    Private Function IsNumericValue(ByVal val As Object) As Boolean
+        If val Is Nothing OrElse val Is DBNull.Value Then Return False
+        Dim d As Double
+        Return Double.TryParse(Convert.ToString(val), d)
+    End Function
+
+
+    Public Function PivotDataMulti(ByVal source As DataTable,
+                              ByVal rowFields As String(),
+                              ByVal obsFields As String(),
+                              ByVal columnField As String,
+                              ByVal valueField As String, bSort As Boolean) As DataTable
+
+        'Merge rowFields + obsFields into one list for grouping
+        Dim allKeys As New List(Of String)()
+        allKeys.AddRange(rowFields)
+
+        '---- 1. Collect unique column headers from Size ----
+        Dim colKeys As New List(Of String)()
+        'For Each dr As DataRow In source.Rows
+        '    Dim key As String = Convert.ToString(dr(columnField)).Trim()
+        '    If Not colKeys.Contains(key) Then colKeys.Add(key)
+        'Next
+
+        If source.Columns.Contains("Size Name_Order") Then
+            Dim dv As New DataView(source)
+            dv.Sort = "size Name_order ASC"   ' or DESC
+            For Each drv As DataRowView In dv
+                Dim dr As DataRow = drv.Row
+                Dim key As String = Convert.ToString(dr(columnField)).Trim()
+                If Not colKeys.Contains(key) Then colKeys.Add(key)
+            Next
+            bSort = False
+
+        ElseIf source.Columns.Contains(columnField + "_Order") Then
+            Dim dv As New DataView(source)
+            dv.Sort = columnField + "_Order ASC"   ' or DESC
+            For Each drv As DataRowView In dv
+                Dim dr As DataRow = drv.Row
+                Dim key As String = Convert.ToString(dr(columnField)).Trim()
+                If Not colKeys.Contains(key) Then colKeys.Add(key)
+            Next
+            bSort = False
+        Else
+            For Each dr As DataRow In source.Rows
+                Dim key As String = Convert.ToString(dr(columnField)).Trim()
+                If Not colKeys.Contains(key) Then colKeys.Add(key)
+            Next
+        End If
+
+
+
+        If bSort = True Then
+            colKeys.Sort()
+        End If
+
+        '---- 2. Build result ----
+        Dim result As New DataTable()
+        For Each rf As String In rowFields
+            result.Columns.Add(rf, GetType(String))
+        Next
+        For Each ofld As String In obsFields
+            result.Columns.Add(ofld, GetType(Double))
+        Next
+
+
+        'For Each ck As String In colKeys
+        '    result.Columns.Add(ck, GetType(Double))
+        'Next
+
+        For Each colName As String In colKeys
+            If colName.Trim() = "" Then
+                result.Columns.Add(" ", GetType(Double))
+            Else
+                result.Columns.Add(colName, GetType(Double))
+            End If
+        Next
+
+
+
+        result.Columns.Add("RowTotal", GetType(Double))
+
+        '---- 3. Group rows ----
+        Dim map As New Dictionary(Of String, DataRow)()
+
+        For Each dr As DataRow In source.Rows
+            Try
+                'key built only on rowFields (Obs fields are aggregated)
+                Dim keyParts As New List(Of String)()
+                For Each rf As String In rowFields
+                    keyParts.Add(Convert.ToString(dr(rf)).Trim())
+                Next
+                Dim key As String = String.Join("|", keyParts.ToArray())
+
+                Dim outRow As DataRow
+                If map.ContainsKey(key) Then
+                    outRow = map(key)
+                Else
+                    outRow = result.NewRow()
+                    For Each rf As String In rowFields
+                        outRow(rf) = dr(rf).ToString()
+                    Next
+                    For Each ofld As String In obsFields
+                        outRow(ofld) = 0D
+                    Next
+                    Try
+                        For Each ck As String In colKeys
+                            outRow(ck) = 0D
+                        Next
+                    Catch ex As Exception
+
+                    End Try
+                    outRow("RowTotal") = 0D
+                    result.Rows.Add(outRow)
+                    map.Add(key, outRow)
+                End If
+
+                'Sum Obs fields
+                For Each ofld As String In obsFields
+                    outRow(ofld) = CDbl(outRow(ofld)) + ToDoubleSafe(dr(ofld))
+                Next
+
+                'Add cell value to its Size column
+                Dim sizeCol As String = dr(columnField).ToString()
+                Dim cbsVal As Double = ToDoubleSafe(dr(valueField))
+                outRow(sizeCol) = ToDoubleSafe(outRow(sizeCol)) + cbsVal
+                outRow("RowTotal") = ToDoubleSafe(outRow("RowTotal")) + cbsVal
+            Catch ex As Exception
+
+            End Try
+        Next
+
+        Return result
+    End Function
+
 
 
 End Module

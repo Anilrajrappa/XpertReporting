@@ -123,6 +123,8 @@ Partial Class FrmAddReport
         Me.Label8 = New System.Windows.Forms.Label()
         Me.TabPage5 = New System.Windows.Forms.TabPage()
         Me.TabPage6 = New System.Windows.Forms.TabPage()
+        Me.cmbSoldColumn = New System.Windows.Forms.ComboBox()
+        Me.CHK_show_data_for_solditems_only = New System.Windows.Forms.CheckBox()
         Me.chkCompany = New System.Windows.Forms.CheckBox()
         Me.chkshowSubtotals = New System.Windows.Forms.CheckBox()
         Me.plnpay = New System.Windows.Forms.Panel()
@@ -1231,6 +1233,8 @@ Partial Class FrmAddReport
         '
         'TabPage6
         '
+        Me.TabPage6.Controls.Add(Me.cmbSoldColumn)
+        Me.TabPage6.Controls.Add(Me.CHK_show_data_for_solditems_only)
         Me.TabPage6.Controls.Add(Me.chkCompany)
         Me.TabPage6.Controls.Add(Me.chkshowSubtotals)
         Me.TabPage6.Controls.Add(Me.plnpay)
@@ -1254,12 +1258,35 @@ Partial Class FrmAddReport
         Me.TabPage6.Text = "TabPage6"
         Me.TabPage6.UseVisualStyleBackColor = True
         '
+        'cmbSoldColumn
+        '
+        Me.cmbSoldColumn.BackColor = System.Drawing.Color.White
+        Me.cmbSoldColumn.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.cmbSoldColumn.FormattingEnabled = True
+        Me.cmbSoldColumn.Location = New System.Drawing.Point(427, 286)
+        Me.cmbSoldColumn.Margin = New System.Windows.Forms.Padding(4)
+        Me.cmbSoldColumn.Name = "cmbSoldColumn"
+        Me.cmbSoldColumn.Size = New System.Drawing.Size(255, 25)
+        Me.cmbSoldColumn.TabIndex = 87
+        '
+        'CHK_show_data_for_solditems_only
+        '
+        Me.CHK_show_data_for_solditems_only.AutoSize = True
+        Me.CHK_show_data_for_solditems_only.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.CHK_show_data_for_solditems_only.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CHK_show_data_for_solditems_only.Location = New System.Drawing.Point(405, 257)
+        Me.CHK_show_data_for_solditems_only.Name = "CHK_show_data_for_solditems_only"
+        Me.CHK_show_data_for_solditems_only.Size = New System.Drawing.Size(392, 22)
+        Me.CHK_show_data_for_solditems_only.TabIndex = 86
+        Me.CHK_show_data_for_solditems_only.Text = "Show data where sale qty is available for Column"
+        Me.CHK_show_data_for_solditems_only.UseVisualStyleBackColor = True
+        '
         'chkCompany
         '
         Me.chkCompany.AutoSize = True
         Me.chkCompany.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.chkCompany.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.chkCompany.Location = New System.Drawing.Point(406, 408)
+        Me.chkCompany.Location = New System.Drawing.Point(406, 427)
         Me.chkCompany.Name = "chkCompany"
         Me.chkCompany.Size = New System.Drawing.Size(236, 22)
         Me.chkCompany.TabIndex = 85
@@ -1271,7 +1298,7 @@ Partial Class FrmAddReport
         Me.chkshowSubtotals.AutoSize = True
         Me.chkshowSubtotals.BackColor = System.Drawing.Color.Transparent
         Me.chkshowSubtotals.ForeColor = System.Drawing.Color.Black
-        Me.chkshowSubtotals.Location = New System.Drawing.Point(665, 339)
+        Me.chkshowSubtotals.Location = New System.Drawing.Point(667, 358)
         Me.chkshowSubtotals.Name = "chkshowSubtotals"
         Me.chkshowSubtotals.Size = New System.Drawing.Size(226, 21)
         Me.chkshowSubtotals.TabIndex = 84
@@ -1282,7 +1309,7 @@ Partial Class FrmAddReport
         '
         Me.plnpay.Controls.Add(Me.optpaygrp)
         Me.plnpay.Controls.Add(Me.optpayname)
-        Me.plnpay.Location = New System.Drawing.Point(432, 366)
+        Me.plnpay.Location = New System.Drawing.Point(432, 385)
         Me.plnpay.Name = "plnpay"
         Me.plnpay.Size = New System.Drawing.Size(423, 36)
         Me.plnpay.TabIndex = 83
@@ -1314,7 +1341,7 @@ Partial Class FrmAddReport
         Me.chkPaymode.AutoSize = True
         Me.chkPaymode.BackColor = System.Drawing.Color.Transparent
         Me.chkPaymode.ForeColor = System.Drawing.Color.Black
-        Me.chkPaymode.Location = New System.Drawing.Point(405, 339)
+        Me.chkPaymode.Location = New System.Drawing.Point(405, 358)
         Me.chkPaymode.Name = "chkPaymode"
         Me.chkPaymode.Size = New System.Drawing.Size(254, 21)
         Me.chkPaymode.TabIndex = 82
@@ -1326,11 +1353,11 @@ Partial Class FrmAddReport
         Me.chkQuery.AutoSize = True
         Me.chkQuery.BackColor = System.Drawing.Color.Transparent
         Me.chkQuery.ForeColor = System.Drawing.Color.Black
-        Me.chkQuery.Location = New System.Drawing.Point(665, 307)
+        Me.chkQuery.Location = New System.Drawing.Point(666, 326)
         Me.chkQuery.Name = "chkQuery"
-        Me.chkQuery.Size = New System.Drawing.Size(233, 21)
+        Me.chkQuery.Size = New System.Drawing.Size(217, 21)
         Me.chkQuery.TabIndex = 81
-        Me.chkQuery.Text = "Use Query For X Tab Reporting"
+        Me.chkQuery.Text = "X Tab View  (Tabular Format)"
         Me.chkQuery.UseVisualStyleBackColor = False
         '
         'cmbAge
@@ -1338,7 +1365,7 @@ Partial Class FrmAddReport
         Me.cmbAge.BackColor = System.Drawing.Color.White
         Me.cmbAge.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.cmbAge.FormattingEnabled = True
-        Me.cmbAge.Location = New System.Drawing.Point(405, 250)
+        Me.cmbAge.Location = New System.Drawing.Point(405, 216)
         Me.cmbAge.Margin = New System.Windows.Forms.Padding(4)
         Me.cmbAge.Name = "cmbAge"
         Me.cmbAge.Size = New System.Drawing.Size(450, 25)
@@ -1349,7 +1376,7 @@ Partial Class FrmAddReport
         Me.Label11.AutoSize = True
         Me.Label11.BackColor = System.Drawing.Color.Transparent
         Me.Label11.ForeColor = System.Drawing.Color.Black
-        Me.Label11.Location = New System.Drawing.Point(258, 255)
+        Me.Label11.Location = New System.Drawing.Point(258, 221)
         Me.Label11.Name = "Label11"
         Me.Label11.Size = New System.Drawing.Size(139, 17)
         Me.Label11.TabIndex = 79
@@ -1362,7 +1389,7 @@ Partial Class FrmAddReport
         Me.CHKREPEAT.Checked = True
         Me.CHKREPEAT.CheckState = System.Windows.Forms.CheckState.Checked
         Me.CHKREPEAT.ForeColor = System.Drawing.Color.Black
-        Me.CHKREPEAT.Location = New System.Drawing.Point(405, 307)
+        Me.CHKREPEAT.Location = New System.Drawing.Point(405, 326)
         Me.CHKREPEAT.Name = "CHKREPEAT"
         Me.CHKREPEAT.Size = New System.Drawing.Size(176, 21)
         Me.CHKREPEAT.TabIndex = 77
@@ -1389,7 +1416,7 @@ Partial Class FrmAddReport
         Me.txtRmk.MaxLength = 4000
         Me.txtRmk.Multiline = True
         Me.txtRmk.Name = "txtRmk"
-        Me.txtRmk.Size = New System.Drawing.Size(450, 105)
+        Me.txtRmk.Size = New System.Drawing.Size(450, 74)
         Me.txtRmk.TabIndex = 75
         '
         'Label7
@@ -1998,4 +2025,6 @@ Partial Class FrmAddReport
     Friend WithEvents lnkNamed As LinkLabel
     Friend WithEvents chkshowSubtotals As CheckBox
     Friend WithEvents chkCompany As CheckBox
+    Friend WithEvents cmbSoldColumn As ComboBox
+    Friend WithEvents CHK_show_data_for_solditems_only As CheckBox
 End Class

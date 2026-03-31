@@ -40,36 +40,37 @@ Public Class frmreport
         Try
 
             Me.ReportViewer1.Reset()
+            ReportViewer1.LocalReport.DataSources.Clear()
+            GC.Collect()
+
 
             ReportViewer1.ShowPageNavigationControls = True
 
 
-                Dim report As LocalReport
-                report = Me.ReportViewer1.LocalReport
-                Dim reportsource As New ReportDataSource
-                ' report.ExecuteReportInSandboxAppDomain()
+            Dim report As LocalReport
+            report = Me.ReportViewer1.LocalReport
+            Dim reportsource As New ReportDataSource
+            ' report.ExecuteReportInSandboxAppDomain()
 
-                report.ExecuteReportInCurrentAppDomain(System.Reflection.Assembly.GetExecutingAssembly().Evidence)
-
-
-                report.EnableExternalImages = True
-                '  report.EnableHyperlinks = True
-
-                report.ReportPath = PrepName
-                reportsource.Name = "DataSet1"
-                reportsource.Value = dTable
-                report.DataSources.Add(reportsource)
-
-                ' Me.ReportViewer1.ZoomMode = ZoomMode.PageWidth
-                ' Me.ReportViewer1.SetDisplayMode(DisplayMode.PrintLayout)
-                Me.ReportViewer1.RefreshReport()
+            '  report.ExecuteReportInCurrentAppDomain(System.Reflection.Assembly.GetExecutingAssembly().Evidence)
 
 
+            report.EnableExternalImages = True
+            report.EnableHyperlinks = True
+
+            report.ReportPath = PrepName
+            reportsource.Name = "DataSet1"
+            reportsource.Value = dTable
+            report.DataSources.Add(reportsource)
+
+
+            Me.ReportViewer1.RefreshReport()
 
 
         Catch ex As Exception
             MsgBox(ex.Message)
         Finally
+            GC.Collect()
             Me.Cursor = Cursors.Default
         End Try
     End Sub
@@ -77,25 +78,45 @@ Public Class frmreport
 
         Try
 
-
             Dim cIMGID As String = Trim(e.BookmarkId)
             Dim cData As String = appMain.dmethod.cDatabase + "_IMAGE..IMAGE_INFO"
 
-            Dim cexpr As String = "Select prod_image From " + cData + " Where IMG_ID= '" + cIMGID + "'"
-            appMain.sqlCMD.CommandText = cexpr
-            Dim b As Byte() = appMain.sqlCMD.ExecuteScalar()
+            If cIMGID.ToUpper().Contains("HTTP") Then
 
-            If b.Length > 0 Then
+                Dim imgUrl As String = cIMGID
 
-                Dim Frm As New FrmIMG
-                Dim MS As New System.IO.MemoryStream(b)
-                Frm.PictureBox1.Image = Image.FromStream(MS)
-                Frm.ShowDialog()
+                Try
+                    Dim Frm As New FrmIMG
+                    Using wc As New Net.WebClient()
+                        Dim imgBytes As Byte() = wc.DownloadData(imgUrl)
+                        Using ms As New IO.MemoryStream(imgBytes)
+                            Frm.PictureBox1.Image = Image.FromStream(ms)
+                        End Using
+                    End Using
+                    Frm.ShowDialog()
+                Catch ex As Exception
+                    'appMain.ErrorShow(ex)
+                End Try
+
+
             Else
-                MsgBox("Record Not Found")
+
+
+                Dim cexpr As String = "Select prod_image From " + cData + " Where IMG_ID= '" + cIMGID + "'"
+                appMain.sqlCMD.CommandText = cexpr
+                Dim b As Byte() = appMain.sqlCMD.ExecuteScalar()
+
+                If b.Length > 0 Then
+
+                    Dim Frm As New FrmIMG
+                    Dim MS As New System.IO.MemoryStream(b)
+                    Frm.PictureBox1.Image = Image.FromStream(MS)
+                    Frm.ShowDialog()
+                Else
+                    MsgBox("Record Not Found")
+                End If
+
             End If
-
-
             'Return
 
 
@@ -231,7 +252,6 @@ Public Class frmreport
 
         XPertCode = xPertRepCode
 
-
     End Sub
 
     Private Sub ReportViewer1_ReportExport(ByVal sender As Object, ByVal e As Microsoft.Reporting.WinForms.ReportExportEventArgs) Handles ReportViewer1.ReportExport
@@ -303,11 +323,6 @@ Public Class frmreport
 
         Return dTable
     End Function
-
-
-
-
-
 
     Private Sub frmreport_Activated(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Activated
         ' MDIParent1.frm1 = Me

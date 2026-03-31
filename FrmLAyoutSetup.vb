@@ -788,6 +788,10 @@ Public Class FrmLAyoutSetup
     End Sub
 
     Private Sub frmAttrm_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
+
+
+        Appoj.ApplyTheme("FRMUDRC3", Me, False)
+
         MenuStrip1().Enabled = False
         MenuStrip1().Visible = False
         _AppMethod = Me.Appoj

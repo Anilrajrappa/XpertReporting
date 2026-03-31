@@ -9,6 +9,7 @@ Public Class FrmNamedFilter
 
     Private Sub FrmCustomRpt_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        appCustom.ApplyTheme("FRMUDRC3", Me, False)
         'appCustom.APP_ActiveForm = Me
         Me.MenuStrip1.Enabled = False
         Me.MenuStrip1.Visible = False
@@ -34,14 +35,12 @@ Public Class FrmNamedFilter
         Call Enable_Disable_Controls(Me, _AddMode, _EditMode)
 
         txtOlap.Enabled = False
-
+        lnkUpdate.Enabled = True
 
         TreeView1.Select()
 
-
         cload = True
     End Sub
-
 
 
     Private Sub FillTree()
@@ -96,7 +95,7 @@ Public Class FrmNamedFilter
             If ctableAlias = "" Or Trim(UCase(ctableAlias)) = "TLU" Then
 
                 cexpr = "SELECT a.filter_id,a.filter_name ,b.Rep_type,b.rep_category FROM xpert_filter_mst a (NOLOCK)  join reporttype b on a.rep_code= b.rep_code" & vbCrLf +
-                        "where b.rep_Code IN ('TR01','X001','TR02','TR04','TR05') " + vbCrLf +
+                        "where b.rep_Code IN ('TR01','X001','TR02','TR04','TR05','TR06') " + vbCrLf +
                         "order by rep_type,filter_name"
 
 
@@ -108,7 +107,7 @@ Public Class FrmNamedFilter
 
             If ctableAlias = "" Or Trim(UCase(ctableAlias)) = "TSETREP" Then
 
-                cexpr = "Delete from reporttype where rep_code in ( 'TR01' ,'TR02','TR03','TR04','TR05')"
+                cexpr = "Delete from reporttype where rep_code in ( 'TR01' ,'TR02','TR03','TR04','TR05','TR06')"
 
                 appCustom.dmethod.SelectCmdTOSql(cexpr, False)
 
@@ -119,6 +118,7 @@ Public Class FrmNamedFilter
                         "Select 'XNS'  rep_category, 'TR04' as rep_Code,'Purchase Order Analysis'  as rep_type union All" + vbCrLf +
                         "Select 'XNS'  rep_category, 'TR05' as rep_Code,'Eoss based Sales and Stock Reporting'  as rep_type"
 
+                ' "--Select 'XNS'  rep_category, 'TR06' as rep_Code,'WPS Pending Reports'  as rep_type union All" + vbCrLf +
 
                 appCustom.dmethod.SelectCmdTOSql(cexpr, False)
             End If
@@ -147,6 +147,9 @@ Public Class FrmNamedFilter
                         "Select 'Dynamic Stock/Inventory Reports' as rep_type, 'X001' as REP_CODE ,'XNS' as  rep_category " + vbCrLf +
                         "UNION " + vbCrLf +
                         "Select 'Eoss based Sales and Stock Reporting' as rep_type, 'TR05' as REP_CODE ,'XNS' as  rep_category "
+
+                '"UNION " + vbCrLf +
+                '"Select 'WPS Pending Reports' as rep_type, 'TR06' as REP_CODE ,'XNS' as  rep_category "
 
 
 
@@ -202,6 +205,9 @@ Public Class FrmNamedFilter
             ElseIf cRepCode.ToUpper().Trim() = "TR05" Then
                 bTran = True
                 cRepT = "EOSS"
+            ElseIf cRepCode.ToUpper().Trim() = "TR06" Then
+                bTran = True
+                cRepT = "WPIPEN"
             Else
                 bTran = False
                 cRepT = "STOCK"
@@ -274,6 +280,7 @@ Public Class FrmNamedFilter
         lnkFilter.Enabled = True
         txtOlap.Enabled = False
         txtFilter.Enabled = False
+        lnkUpdate.Enabled = False
         txtRepCat.Focus()
     End Sub
 
@@ -293,6 +300,7 @@ Public Class FrmNamedFilter
             lnkFilter.Enabled = True
             txtFilter.Enabled = False
             txtOlap.Enabled = False
+            lnkUpdate.Enabled = False
             TxtTitle.Focus()
         End If
     End Sub
@@ -331,7 +339,7 @@ Public Class FrmNamedFilter
             Me._AddMode = False
             SetTools(False)
             Call Enable_Disable_Controls(Me, _AddMode, _EditMode)
-
+            lnkUpdate.Enabled = True
             lnkFilter.Enabled = False
             FillTree()
 
@@ -559,6 +567,7 @@ Public Class FrmNamedFilter
             FillTree()
             Call Enable_Disable_Controls(Me, _AddMode, _EditMode)
             lnkFilter.Enabled = False
+            lnkUpdate.Enabled = True
         End If
 
     End Sub
@@ -627,13 +636,14 @@ Public Class FrmNamedFilter
     'End Sub
 
 
-
+    Dim clastcode As String = ""
     Private Sub TreeView1_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles TreeView1.AfterSelect
         Try
             If _AddMode = False And _EditMode = False Then
 
                 If Not TreeView1.SelectedNode Is Nothing Then
                     Dim cCode As String = Convert.ToString(TreeView1.SelectedNode.Name)
+                    clastcode = cCode
                     PopLocalCursorNew(cCode)
                 End If
             End If
@@ -677,6 +687,9 @@ Public Class FrmNamedFilter
             ElseIf cRepCode.ToUpper().Trim() = "TR05" Then
                 bTran = True
                 cRepTy = "EOSS"
+            ElseIf cRepCode.ToUpper().Trim() = "TR06" Then
+                bTran = True
+                cRepTy = "WPIPEN"
             Else
                 bTran = False
                 cRepTy = "STOCK"
@@ -981,12 +994,11 @@ Public Class FrmNamedFilter
                     cCol = Trim(drow2(0)("col_header"))
                     iDt = ConvertINT(drow2(0)("Data_type"))
                     cColExpr = Trim(drow2(0)("col_expr")).ToLower()
-                    If iDt <= 1 And cColExpr.ToUpper().Contains("ER_FLAG") = False Then
+                    If iDt <= 1 And cColExpr.ToUpper().Contains("ER_FLAG") = False And cColExpr.ToUpper().Contains("INACTIVE") = False And cColExpr.ToUpper().Contains("BARCODE_CODING") = False Then
                         cColExpr = "upper(trim(" + cColExpr + "))"
                     End If
                     cTableName = "[A]" 'Trim(drow2(0)("table_name"))
                 End If
-
 
                 cContain = dtFilter.Rows(i).Item("cContaining")
 
@@ -1222,10 +1234,45 @@ Public Class FrmNamedFilter
         End Try
     End Sub
 
+    Private Sub lnkUpdate_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles lnkUpdate.LinkClicked
+        Try
+            Dim RetValMsg As MsgBoxResult = MsgBox("Are you sure to Update All Filter ?", MsgBoxStyle.YesNo + MsgBoxStyle.Question + MsgBoxStyle.DefaultButton1)
 
+            If RetValMsg = MsgBoxResult.No Then
+                Exit Sub
+            End If
 
+            Dim cExpr As String = ""
 
+            Me.Cursor = Cursors.WaitCursor
 
+            cExpr = "select filter_id from Xpert_filter_Mst (nolock) where isnull(olapNamedfiltercriteria,'') =''"
+
+            appCustom.dmethod.SelectCmdTOSql(appCustom.dset, cExpr, "TUPD", False)
+
+            If appCustom.dset.Tables("TUPD").Rows.Count <= 0 Then
+                Return
+            End If
+
+            For Each dr As DataRow In appCustom.dset.Tables("TUPD").Rows
+                Dim cCode As String = Convert.ToString(dr("Filter_id"))
+                PopLocalCursorNew(cCode)
+                Dim cOplap As String = Convert.ToString(txtOlap.Tag)
+                Dim cOlapFilter As String = ""
+                ReplaceOlapFilter(cOplap, cOlapFilter)
+                cExpr = "update Xpert_filter_Mst set olapNamedfiltercriteria = '" + cOlapFilter.Replace("'", "''") + "' where  Filter_id = '" + cCode + "'"
+                appCustom.dmethod.SelectCmdTOSql(cExpr, True)
+            Next
+
+            MsgBox("Filter updated Successfully.", MsgBoxStyle.OkOnly)
+
+        Catch ex As Exception
+            appCustom.ErrorShow(ex)
+        Finally
+            PopLocalCursorNew(clastcode)
+            Me.Cursor = Cursors.Default
+        End Try
+    End Sub
 End Class
 
 

@@ -1,0 +1,14 @@
+﻿ SELECT dept_id,PRODUCT_CODE,(CASE  WHEN selling_days <=15 THEN '_1' 
+                      WHEN selling_days BETWEEN 16 AND 30 THEN '_2'  
+                      WHEN selling_days BETWEEN 31 AND 45 THEN '_3' 
+                      WHEN selling_days BETWEEN 46 AND 60 THEN '_4' 
+                      WHEN selling_days BETWEEN 61 AND 90 THEN '_5' 
+                      ELSE '_6' END)  as AGEING_ORDER1, 
+                      (CASE  WHEN selling_days <=15 THEN '<=15' 
+                      WHEN selling_days BETWEEN 16 AND 30 THEN '16-30'  
+                      WHEN selling_days BETWEEN 31 AND 45 THEN '31-45' 
+                     WHEN selling_days BETWEEN 46 AND 60 THEN '46-60' 
+                     WHEN selling_days BETWEEN 61 AND 90 THEN '61-90' 
+ELSE '>90' END)  as AGEING_2 
+into SALE_SKU_AGEING145 from  cmm01106 (nolock) 
+JOIN CMD01106 (nolock) ON CMm01106.cm_id= cmd01106.cm_id  where cmm01106.cancelled=0 

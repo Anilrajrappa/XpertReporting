@@ -1520,7 +1520,47 @@ Public Class FrmGemWizard
             ElseIf Trim(drow(0)("Col_expr")).ToUpper = "PRODUCT_CODE" Then
                 cExpr = ""
                 '  chkContaining.Enabled = False
+                wtxtFilter.Enabled = False
+                chkContaining.Checked = True
+                txtcontaining.Visible = True
+                LstFilterList.Visible = False
 
+            ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("OEM_AC_NAME") Then
+
+                Try
+
+
+                    Dim cwhere As String = ""
+                    Dim caccode As String = ""
+
+                    caccode = appWizard.Travtree("0000000021")
+                    cwhere = " where  head_code in(" + caccode + ") and ac_name <> '' OR  ALLOW_CREDITOR_DEBTOR =1 order by ac_name   "
+
+                    ' cExpr = "SELECT top 1000  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+                    cExpr = "SELECT  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+
+                Catch ex As Exception
+                    cExpr = "SELECT top 100 [ac_name] AS ac_name FROM lmv01106  (NOLOCK)" + vbCrLf +
+                       "Where ac_name <> '' "
+
+                    cColName = "ac_name"
+                End Try
+
+
+            ElseIf Trim(drow(0)("Col_expr")).ToUpper.Trim() = "VENDOR_EAN_NO" Then
+
+                'cExpr = "SELECT distinct TOP 200 VENDOR_EAN_NO FROM SKU_NAMES  (NOLOCK)" + vbCrLf +
+                '        "WHERE ISNULL(VENDOR_EAN_NO,'') <> ''  "
+
+                'cColName = "VENDOR_EAN_NO"
+                wtxtFilter.Enabled = False
+
+                chkContaining.Checked = True
+                txtcontaining.Visible = True
+                LstFilterList.Visible = False
+
+
+                cExpr = ""
 
             ElseIf Trim(drow(0)("Col_expr")).ToUpper = "ARTICLE_NO" Then
 
@@ -1905,19 +1945,21 @@ Public Class FrmGemWizard
 
         Me.LstFilterList.Items.Clear()
 
+        If appWizard.dset.Tables.Contains("rFilter") Then
+            appWizard.dset.Tables.Remove("rFilter")
+        End If
+
         cExpr = Select_filter_rec(cAttr, cColName)
 
         wtxtFilter.Text = ""
         wtxtFilter.Tag = ""
+        wtxtFilter.Enabled = True
 
         If cExpr = "" Then
             Fill_Attr(cAttr)
             Exit Sub
         End If
 
-        If appWizard.dset.Tables.Contains("rFilter") Then
-            appWizard.dset.Tables.Remove("rFilter")
-        End If
 
         Me.Cursor = Cursors.WaitCursor
 
@@ -2272,8 +2314,60 @@ Public Class FrmGemWizard
         chkCellValue.DisplayMember = "col_header"
         chkCellValue.ValueMember = "col_expr"
 
+    End Sub
+
+    Private Sub takeBkpFilter(ByVal repid As String)
+
+        Try
+
+            Dim cExpr As String = ""
+            ' DELETE
+            cExpr = "DELETE FROM Eoss_rep_filter WHERE rep_id = '" + repid + "'" + vbCrLf +
+                    "DELETE From Eoss_rep_filter_det Where rep_id = '" + repid + "'" + vbCrLf +
+                    "DELETE From Eoss_rep_mst Where rep_id = '" + repid + "'"
+
+            appWizard.sqlCMD.CommandText = cExpr
+            appWizard.sqlCMD.ExecuteNonQuery()
+
+            ' INSERT MST
+            cExpr = "INSERT INTO Eoss_rep_mst (appenFilterWithAdd, last_update, rep_id, rep_operator) " + vbCrLf +
+                    "SELECT a.appenFilterWithAdd, a.last_update, a.rep_id, a.rep_operator " + vbCrLf +
+                    "FROM rep_mst a WITH(NOLOCK) " + vbCrLf +
+                    "Where rep_id = '" + repid + "'"
+
+            appWizard.sqlCMD.CommandText = cExpr
+            appWizard.sqlCMD.ExecuteNonQuery()
+
+            ' INSERT FILTER
+            cExpr = "INSERT INTO Eoss_rep_filter (cattr, cContaining, cINLIST, cnot, colDatatype, filter_lbl, rep_id, row_id) " + vbCrLf +
+                    "SELECT a.cattr, a.cContaining, a.cINLIST, a.cnot, a.colDatatype, a.filter_lbl, a.rep_id, a.row_id " + vbCrLf +
+                    "FROM rep_filter a WITH(NOLOCK) " + vbCrLf +
+                    "INNER JOIN rep_mst b WITH(NOLOCK) ON a.rep_id = b.rep_id " + vbCrLf +
+                    "Where b.rep_id = '" + repid + "'"
+
+            appWizard.sqlCMD.CommandText = cExpr
+            appWizard.sqlCMD.ExecuteNonQuery()
+
+            ' INSERT FILTER DET
+            cExpr = "INSERT INTO Eoss_rep_filter_det (attr_value, cattr, filter_lbl, rep_id, row_id) " + vbCrLf +
+                    "SELECT a.attr_value, a.cattr, a.filter_lbl, a.rep_id, a.row_id " + vbCrLf +
+                    "FROM rep_filter_det a With(NOLOCK) " + vbCrLf +
+                    "INNER JOIN rep_mst b WITH(NOLOCK) ON a.rep_id = b.rep_id " + vbCrLf +
+                    "Where b.rep_id = '" + repid + "'"
+
+            appWizard.sqlCMD.CommandText = cExpr
+            appWizard.sqlCMD.ExecuteNonQuery()
+
+            ' COMMIT
+
+
+        Catch ex As Exception
+
+            MessageBox.Show(ex.Message)
+        End Try
 
     End Sub
+
 
 
     Private Sub cmdfinish_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdfinish.Click
@@ -2302,53 +2396,102 @@ Public Class FrmGemWizard
 
             Dim transaction As SqlTransaction
 
-            transaction = appWizard.sqlCON.BeginTransaction()
-            appWizard.sqlCMD.Transaction = transaction
+            Try
+
+                Dim cRepid As String = Convert.ToString(appWizard.dset.Tables("rep_mst").Rows(0).Item("rep_id"))
+
+                takeBkpFilter(cRepid)
+
+                EnableTrigger(1)
+
+                transaction = appWizard.sqlCON.BeginTransaction()
+                appWizard.sqlCMD.Transaction = transaction
 
 
-            If bValid = True Then
-                If EossFilter = True Then
-                    bValid = InsertrepMstEoss()
-                Else
-                    bValid = InsertrepMst()
+                If bValid = True Then
+                    If EossFilter = True Then
+                        bValid = InsertrepMstEoss()
+                    Else
+                        bValid = InsertrepMst()
+                    End If
                 End If
-            End If
 
-            Dim cID As String = Convert.ToString(appWizard.dset.Tables("rep_mst").Rows(0).Item("rep_id"))
+                Dim cID As String = Convert.ToString(appWizard.dset.Tables("rep_mst").Rows(0).Item("rep_id"))
 
-            bValid = DeleteRepFilter()
+                bValid = DeleteRepFilter()
 
 
-            If bValid = True Then
-                If EossFilter = True Then
-                    bValid = SaveTempRecord(appWizard, "eoss_rep_filter", "rep_filter", appWizard.dset.Tables("rep_filter"), True, cID)
-                Else
-                    bValid = SaveTempRecord(appWizard, "rep_filter", "rep_filter", appWizard.dset.Tables("rep_filter"), True, cID)
+                If bValid = True Then
+                    If EossFilter = True Then
+                        bValid = SaveTempRecord(appWizard, "eoss_rep_filter", "rep_filter", appWizard.dset.Tables("rep_filter"), True, cID)
+                    Else
+                        bValid = SaveTempRecord(appWizard, "rep_filter", "rep_filter", appWizard.dset.Tables("rep_filter"), True, cID)
+                    End If
                 End If
-            End If
 
-            bValid = DeleteRepFilterDet()
+                bValid = DeleteRepFilterDet()
 
-            If bValid = True Then
-                If EossFilter = True Then
-                    bValid = SaveTempRecord(appWizard, "eoss_rep_filter_det", "rep_filter_det", appWizard.dset.Tables("rep_filter_det"), True, cID)
-                Else
-                    bValid = SaveTempRecord(appWizard, "rep_filter_det", "rep_filter_det", appWizard.dset.Tables("rep_filter_det"), True, cID)
+                If bValid = True Then
+                    If EossFilter = True Then
+                        bValid = SaveTempRecord(appWizard, "eoss_rep_filter_det", "rep_filter_det", appWizard.dset.Tables("rep_filter_det"), True, cID)
+                    Else
+                        bValid = SaveTempRecord(appWizard, "rep_filter_det", "rep_filter_det", appWizard.dset.Tables("rep_filter_det"), True, cID)
+                    End If
                 End If
-            End If
 
-            If bValid = True Then
-                transaction.Commit()
-            Else
-                transaction.Rollback()
-            End If
-
+                If bValid = True Then
+                    transaction.Commit()
+                Else
+                    transaction.Rollback()
+                End If
+            Catch ex As Exception
+                appWizard.ErrorShow(ex)
+            Finally
+                EnableTrigger(2)
+            End Try
             Me.Close()
         Catch ex As Exception
             appWizard.ErrorShow(ex)
         End Try
     End Sub
 
+
+    Private Sub EnableTrigger(mode As Integer)
+        Try
+
+            If (mode = 1) Then
+                appWizard.sqlCMD.CommandText = "ALTER TABLE  REP_FILTER_DET " + vbCrLf +
+                                               "DISABLE TRIGGER  TRG_VALIDATE_SCHEME_FILTER"
+
+                appWizard.sqlCMD.ExecuteNonQuery()
+
+                appWizard.sqlCMD.CommandText = "ALTER TABLE  REP_FILTER " + vbCrLf +
+                                               "DISABLE TRIGGER  TRG_VALIDATE_SCHEME_REP_FILTER"
+
+                appWizard.sqlCMD.ExecuteNonQuery()
+
+
+
+            Else
+                appWizard.sqlCMD.CommandText = "ALTER TABLE  REP_FILTER_DET " + vbCrLf +
+                                               "ENABLE TRIGGER  TRG_VALIDATE_SCHEME_FILTER"
+
+
+                appWizard.sqlCMD.ExecuteNonQuery()
+
+                appWizard.sqlCMD.CommandText = "ALTER TABLE  REP_FILTER " + vbCrLf +
+                                               "ENABLE TRIGGER  TRG_VALIDATE_SCHEME_REP_FILTER"
+
+                appWizard.sqlCMD.ExecuteNonQuery()
+
+            End If
+
+
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
 
     Private Function SaveTempRecord(ByVal Appobj As Object, ByVal cTempT As String, ByVal cOrgT As String, ByVal dtResult As DataTable, ByVal bManual As Boolean, ByVal repid As String) As Boolean
         Try
@@ -2365,7 +2508,7 @@ Public Class FrmGemWizard
                 Appobj.dset.Tables.Remove("Temp")
             End If
 
-            cExpr = "select * from " + cTable + " where 1=2"
+            cExpr = "Select * from " + cTable + " where 1=2"
             Appobj.dmethod.SelectCmdTOSql(Appobj.dset, cExpr, "Temp", False, False)
 
 
@@ -2420,7 +2563,7 @@ Public Class FrmGemWizard
                 End If
 
 
-                AppObjects.dmethod.SelectCmdTOSql(AppObjects.dset, "SELECT * FROM " + cTableName + " WHERE 1=2", "TCURSOR" + cTableName, False)
+                AppObjects.dmethod.SelectCmdTOSql(AppObjects.dset, "Select * FROM " + cTableName + " WHERE 1=2", "TCURSOR" + cTableName, False)
 
                 For Each dcol As DataColumn In AppObjects.dset.Tables("TCURSOR" + cTableName).Columns
                     If (dt.Columns.Contains(dcol.ColumnName)) Then
@@ -2455,7 +2598,7 @@ Public Class FrmGemWizard
     '            sqlbulkcopy.ColumnMappings.Clear();
     '            If (AppObjects.dset.Tables.Contains("TCURSOR" + cTableName))
     '                AppObjects.dset.Tables.Remove("TCURSOR" + cTableName);
-    '            AppObjects.dmethod.SelectCmdTOSql(ref AppObjects.dset, "SELECT * FROM " + cTableName + " WHERE 1=2", "TCURSOR" + cTableName, false);
+    '            AppObjects.dmethod.SelectCmdTOSql(ref AppObjects.dset, "Select * FROM " + cTableName + " WHERE 1=2", "TCURSOR" + cTableName, false);
 
     '            foreach (DataColumn dcol in AppObjects.dset.Tables["TCURSOR" + cTableName].Columns)
     '            {
@@ -2761,7 +2904,6 @@ Public Class FrmGemWizard
             Next
 
 
-
         Catch ex As Exception
             Return False
         End Try
@@ -2789,9 +2931,20 @@ Public Class FrmGemWizard
             Return True
 
         Catch ex As Exception
+            appWizard.ErrorShow(ex)
             Return False
         End Try
     End Function
+
+    Private Sub BkpFilter()
+        Try
+            Dim cExpr As String = ""
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
 
     Private Function DeleteRepFilter() As Boolean
         Try
@@ -2803,7 +2956,6 @@ Public Class FrmGemWizard
 
                 appWizard.sqlCMD.CommandText = "DELETE FROM eoss_rep_filter  WHERE rep_id='" & grepid & "'"
                 appWizard.sqlCMD.ExecuteNonQuery()
-
 
 
             Else
@@ -2818,10 +2970,11 @@ Public Class FrmGemWizard
             Return True
 
         Catch ex As Exception
+            appWizard.ErrorShow(ex)
             Return False
+
         End Try
     End Function
-
 
 
     Private Sub LstFilterList_ItemCheck(ByVal sender As Object, ByVal e As System.Windows.Forms.ItemCheckEventArgs) Handles LstFilterList.ItemCheck
@@ -3890,6 +4043,10 @@ Public Class FrmGemWizard
     End Sub
     Private Sub ADDMISSINGVALUE()
         Try
+            If Not appWizard.dset.Tables.contains("rFilter") Then
+                Return
+            End If
+
             For i As Integer = 0 To appWizard.dset.Tables("rFilter").Rows.Count - 1
 
                 Dim cFieldVAlue As String = Convert.ToString(appWizard.dset.Tables("rFilter").Rows(i)(0))

@@ -30,6 +30,7 @@ Partial Class FrmConfig
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
         Me.GroupBox10 = New System.Windows.Forms.GroupBox()
+        Me.chkFormat = New System.Windows.Forms.CheckBox()
         Me.chkIMGL = New System.Windows.Forms.CheckBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.chkPaging = New System.Windows.Forms.CheckBox()
@@ -80,7 +81,7 @@ Partial Class FrmConfig
         '
         Me.cmdCancelModal.BackColor = System.Drawing.SystemColors.Desktop
         Me.cmdCancelModal.ForeColor = System.Drawing.SystemColors.ActiveCaptionText
-        Me.cmdCancelModal.Location = New System.Drawing.Point(196, 397)
+        Me.cmdCancelModal.Location = New System.Drawing.Point(189, 437)
         Me.cmdCancelModal.Size = New System.Drawing.Size(74, 26)
         Me.cmdCancelModal.UseVisualStyleBackColor = False
         Me.cmdCancelModal.Visible = False
@@ -93,7 +94,7 @@ Partial Class FrmConfig
         Me.TabControl1.Location = New System.Drawing.Point(0, 0)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(488, 392)
+        Me.TabControl1.Size = New System.Drawing.Size(488, 415)
         Me.TabControl1.TabIndex = 26
         '
         'TabPage1
@@ -109,7 +110,7 @@ Partial Class FrmConfig
         Me.TabPage1.Location = New System.Drawing.Point(4, 30)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(480, 358)
+        Me.TabPage1.Size = New System.Drawing.Size(480, 381)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "Configuration"
         '
@@ -127,9 +128,10 @@ Partial Class FrmConfig
         'Label1
         '
         Me.Label1.AutoSize = True
+        Me.Label1.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label1.Location = New System.Drawing.Point(213, 17)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(139, 20)
+        Me.Label1.Size = New System.Drawing.Size(118, 18)
         Me.Label1.TabIndex = 27
         Me.Label1.Text = " Header Height"
         '
@@ -211,31 +213,43 @@ Partial Class FrmConfig
         '
         'GroupBox10
         '
+        Me.GroupBox10.Controls.Add(Me.chkFormat)
         Me.GroupBox10.Controls.Add(Me.chkIMGL)
+        Me.GroupBox10.Controls.Add(Me.Label2)
+        Me.GroupBox10.Controls.Add(Me.txtIMGH)
         Me.GroupBox10.Location = New System.Drawing.Point(8, 304)
         Me.GroupBox10.Name = "GroupBox10"
-        Me.GroupBox10.Size = New System.Drawing.Size(456, 46)
+        Me.GroupBox10.Size = New System.Drawing.Size(456, 69)
         Me.GroupBox10.TabIndex = 36
         Me.GroupBox10.TabStop = False
+        '
+        'chkFormat
+        '
+        Me.chkFormat.AutoSize = True
+        Me.chkFormat.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.chkFormat.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkFormat.Location = New System.Drawing.Point(7, 18)
+        Me.chkFormat.Name = "chkFormat"
+        Me.chkFormat.Size = New System.Drawing.Size(238, 22)
+        Me.chkFormat.TabIndex = 26
+        Me.chkFormat.Text = "Show Value in Indian Format"
+        Me.chkFormat.UseVisualStyleBackColor = True
         '
         'chkIMGL
         '
         Me.chkIMGL.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.chkIMGL.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.chkIMGL.Location = New System.Drawing.Point(366, 18)
+        Me.chkIMGL.Location = New System.Drawing.Point(7, 42)
         Me.chkIMGL.Name = "chkIMGL"
-        Me.chkIMGL.Size = New System.Drawing.Size(99, 22)
+        Me.chkIMGL.Size = New System.Drawing.Size(297, 22)
         Me.chkIMGL.TabIndex = 25
         Me.chkIMGL.Text = "Img Wise Report in Landscape"
         Me.chkIMGL.UseVisualStyleBackColor = True
-        Me.chkIMGL.Visible = False
         '
         'GroupBox4
         '
         Me.GroupBox4.Controls.Add(Me.chkPaging)
         Me.GroupBox4.Controls.Add(Me.chkSheet)
-        Me.GroupBox4.Controls.Add(Me.Label2)
-        Me.GroupBox4.Controls.Add(Me.txtIMGH)
         Me.GroupBox4.Controls.Add(Me.chkSorting)
         Me.GroupBox4.Controls.Add(Me.Label7)
         Me.GroupBox4.Controls.Add(Me.chkFilter)
@@ -280,7 +294,8 @@ Partial Class FrmConfig
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(318, 45)
+        Me.Label2.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label2.Location = New System.Drawing.Point(257, 22)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(89, 18)
         Me.Label2.TabIndex = 19
@@ -315,14 +330,14 @@ Partial Class FrmConfig
         Me.txtIMGH.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.txtIMGH.ForeColor = System.Drawing.Color.Black
         Me.txtIMGH.LeaveColor = System.Drawing.Color.AliceBlue
-        Me.txtIMGH.Location = New System.Drawing.Point(401, 45)
+        Me.txtIMGH.Location = New System.Drawing.Point(369, 21)
         Me.txtIMGH.MaxLength = 50
         Me.txtIMGH.Name = "txtIMGH"
         Me.txtIMGH.NumericFormat = "####,##,##,##0.00"
         Me.txtIMGH.ParseFieldName = Nothing
         Me.txtIMGH.Replace_ColName = ""
         Me.txtIMGH.SearchMode = False
-        Me.txtIMGH.Size = New System.Drawing.Size(53, 25)
+        Me.txtIMGH.Size = New System.Drawing.Size(59, 25)
         Me.txtIMGH.SQLConnectionString = ""
         Me.txtIMGH.SQLProcedure = False
         Me.txtIMGH.SQLStatement = ""
@@ -417,6 +432,7 @@ Partial Class FrmConfig
         Me.GroupBox8.Controls.Add(Me.OPTCLIP)
         Me.GroupBox8.Controls.Add(Me.OPTAUTO)
         Me.GroupBox8.Controls.Add(Me.OPTFP)
+        Me.GroupBox8.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox8.Location = New System.Drawing.Point(6, 196)
         Me.GroupBox8.Name = "GroupBox8"
         Me.GroupBox8.Size = New System.Drawing.Size(458, 55)
@@ -430,7 +446,7 @@ Partial Class FrmConfig
         Me.OPTFIT.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.OPTFIT.Location = New System.Drawing.Point(258, 24)
         Me.OPTFIT.Name = "OPTFIT"
-        Me.OPTFIT.Size = New System.Drawing.Size(51, 24)
+        Me.OPTFIT.Size = New System.Drawing.Size(46, 22)
         Me.OPTFIT.TabIndex = 3
         Me.OPTFIT.TabStop = True
         Me.OPTFIT.Text = "Fit"
@@ -442,7 +458,7 @@ Partial Class FrmConfig
         Me.OPTCLIP.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.OPTCLIP.Location = New System.Drawing.Point(333, 24)
         Me.OPTCLIP.Name = "OPTCLIP"
-        Me.OPTCLIP.Size = New System.Drawing.Size(62, 24)
+        Me.OPTCLIP.Size = New System.Drawing.Size(54, 22)
         Me.OPTCLIP.TabIndex = 2
         Me.OPTCLIP.TabStop = True
         Me.OPTCLIP.Text = "Clip"
@@ -454,7 +470,7 @@ Partial Class FrmConfig
         Me.OPTAUTO.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.OPTAUTO.Location = New System.Drawing.Point(176, 24)
         Me.OPTAUTO.Name = "OPTAUTO"
-        Me.OPTAUTO.Size = New System.Drawing.Size(69, 24)
+        Me.OPTAUTO.Size = New System.Drawing.Size(63, 22)
         Me.OPTAUTO.TabIndex = 1
         Me.OPTAUTO.TabStop = True
         Me.OPTAUTO.Text = "Auto"
@@ -466,7 +482,7 @@ Partial Class FrmConfig
         Me.OPTFP.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.OPTFP.Location = New System.Drawing.Point(8, 24)
         Me.OPTFP.Name = "OPTFP"
-        Me.OPTFP.Size = New System.Drawing.Size(160, 24)
+        Me.OPTFP.Size = New System.Drawing.Size(141, 22)
         Me.OPTFP.TabIndex = 0
         Me.OPTFP.TabStop = True
         Me.OPTFP.Text = "Fit Proportional"
@@ -477,6 +493,7 @@ Partial Class FrmConfig
         Me.GroupBox5.Controls.Add(Me.chkR)
         Me.GroupBox5.Controls.Add(Me.chko)
         Me.GroupBox5.Controls.Add(Me.chkF)
+        Me.GroupBox5.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox5.Location = New System.Drawing.Point(6, 135)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(459, 54)
@@ -524,6 +541,7 @@ Partial Class FrmConfig
         '
         Me.GroupBox6.Controls.Add(Me.chkWIP)
         Me.GroupBox6.Controls.Add(Me.chkZerovalue)
+        Me.GroupBox6.Font = New System.Drawing.Font("Verdana", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.GroupBox6.Location = New System.Drawing.Point(6, 65)
         Me.GroupBox6.Name = "GroupBox6"
         Me.GroupBox6.Size = New System.Drawing.Size(459, 60)
@@ -560,7 +578,7 @@ Partial Class FrmConfig
         Me.bttnCancel.BackColor = System.Drawing.SystemColors.Control
         Me.bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
         Me.bttnCancel.ForeColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
-        Me.bttnCancel.Location = New System.Drawing.Point(382, 398)
+        Me.bttnCancel.Location = New System.Drawing.Point(375, 438)
         Me.bttnCancel.Name = "bttnCancel"
         Me.bttnCancel.Size = New System.Drawing.Size(93, 30)
         Me.bttnCancel.TabIndex = 30
@@ -571,7 +589,7 @@ Partial Class FrmConfig
         '
         Me.cmdok.BackColor = System.Drawing.SystemColors.Control
         Me.cmdok.ForeColor = System.Drawing.Color.FromArgb(CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer), CType(CType(64, Byte), Integer))
-        Me.cmdok.Location = New System.Drawing.Point(292, 398)
+        Me.cmdok.Location = New System.Drawing.Point(285, 438)
         Me.cmdok.Name = "cmdok"
         Me.cmdok.Size = New System.Drawing.Size(80, 30)
         Me.cmdok.TabIndex = 29
@@ -604,7 +622,7 @@ Partial Class FrmConfig
         Me.AutoScaleDimensions = New System.Drawing.SizeF(10.0!, 18.0!)
         Me.BackColor = System.Drawing.Color.AliceBlue
         Me.CancelButton = Me.bttnCancel
-        Me.ClientSize = New System.Drawing.Size(488, 442)
+        Me.ClientSize = New System.Drawing.Size(488, 482)
         Me.Controls.Add(Me.TabControl1)
         Me.Controls.Add(Me.cmdok)
         Me.Controls.Add(Me.bttnCancel)
@@ -626,6 +644,7 @@ Partial Class FrmConfig
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox10.ResumeLayout(False)
+        Me.GroupBox10.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
         Me.GroupBox8.ResumeLayout(False)
@@ -683,4 +702,5 @@ Partial Class FrmConfig
     Friend WithEvents chkReapeatImg As CheckBox
     Friend WithEvents Label1 As Label
     Public WithEvents txtHeight As WizTextBox.RTextBox
+    Friend WithEvents chkFormat As CheckBox
 End Class

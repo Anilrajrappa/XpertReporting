@@ -20,7 +20,7 @@ Partial Class FrmSetsch
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FrmSetsch))
         Me.cmdok = New System.Windows.Forms.Button()
         Me.cmdcancel = New System.Windows.Forms.Button()
@@ -70,12 +70,14 @@ Partial Class FrmSetsch
         Me.txtbody = New WizTextBox.RTextBox(Me.components)
         Me.txtSubject = New WizTextBox.RTextBox(Me.components)
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
+        Me.optFExcel = New System.Windows.Forms.RadioButton()
         Me.optPDF = New System.Windows.Forms.RadioButton()
         Me.optExcel = New System.Windows.Forms.RadioButton()
         Me.grpRepSource = New System.Windows.Forms.GroupBox()
         Me.OptUsergrp = New System.Windows.Forms.RadioButton()
         Me.optinv = New System.Windows.Forms.RadioButton()
         Me.chkInactive = New System.Windows.Forms.CheckBox()
+        Me.chkLand = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox8.SuspendLayout()
         Me.grpRPeriod.SuspendLayout()
@@ -117,11 +119,11 @@ Partial Class FrmSetsch
         '
         'lbls
         '
-        Me.lbls.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lbls.Font = New System.Drawing.Font("Arial Narrow", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lbls.Location = New System.Drawing.Point(0, 552)
         Me.lbls.Name = "lbls"
         Me.lbls.Padding = New System.Windows.Forms.Padding(10, 0, 0, 0)
-        Me.lbls.Size = New System.Drawing.Size(276, 18)
+        Me.lbls.Size = New System.Drawing.Size(448, 18)
         Me.lbls.TabIndex = 44
         Me.lbls.Text = "."
         Me.lbls.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -572,14 +574,14 @@ Partial Class FrmSetsch
         Me.dgvsch.BindToList = True
         Me.dgvsch.COLUMNFORMAT = False
         Me.dgvsch.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.[Single]
-        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
-        DataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Desktop
-        DataGridViewCellStyle1.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        DataGridViewCellStyle1.ForeColor = System.Drawing.Color.White
-        DataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight
-        DataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText
-        DataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.dgvsch.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle1
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft
+        DataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Desktop
+        DataGridViewCellStyle2.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        DataGridViewCellStyle2.ForeColor = System.Drawing.Color.White
+        DataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight
+        DataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText
+        DataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.dgvsch.ColumnHeadersDefaultCellStyle = DataGridViewCellStyle2
         Me.dgvsch.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvsch.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.Email, Me.WhatsApp, Me.Filter_name, Me.Filter_id, Me.gcBlank})
         Me.dgvsch.Display_ColName = Nothing
@@ -606,6 +608,7 @@ Partial Class FrmSetsch
         Me.dgvsch.LastEntryColumn = -1
         Me.dgvsch.Location = New System.Drawing.Point(3, 21)
         Me.dgvsch.Name = "dgvsch"
+        Me.dgvsch.NormalMovement = False
         Me.dgvsch.NumericColumns = ""
         Me.dgvsch.ParseFieldName = Nothing
         Me.dgvsch.PrimaryColumn = "Row_Id"
@@ -777,26 +780,38 @@ Partial Class FrmSetsch
         '
         'GroupBox4
         '
+        Me.GroupBox4.Controls.Add(Me.chkLand)
+        Me.GroupBox4.Controls.Add(Me.optFExcel)
         Me.GroupBox4.Controls.Add(Me.optPDF)
         Me.GroupBox4.Controls.Add(Me.optExcel)
         Me.GroupBox4.Location = New System.Drawing.Point(3, 493)
         Me.GroupBox4.Name = "GroupBox4"
-        Me.GroupBox4.Size = New System.Drawing.Size(197, 42)
+        Me.GroupBox4.Size = New System.Drawing.Size(353, 42)
         Me.GroupBox4.TabIndex = 4
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Email Attachment Type"
+        '
+        'optFExcel
+        '
+        Me.optFExcel.AutoSize = True
+        Me.optFExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.optFExcel.Location = New System.Drawing.Point(86, 18)
+        Me.optFExcel.Name = "optFExcel"
+        Me.optFExcel.Size = New System.Drawing.Size(64, 21)
+        Me.optFExcel.TabIndex = 13
+        Me.optFExcel.Text = "Excel"
+        Me.optFExcel.UseVisualStyleBackColor = True
         '
         'optPDF
         '
         Me.optPDF.AutoSize = True
         Me.optPDF.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.optPDF.Location = New System.Drawing.Point(89, 17)
+        Me.optPDF.Location = New System.Drawing.Point(167, 17)
         Me.optPDF.Name = "optPDF"
         Me.optPDF.Size = New System.Drawing.Size(85, 21)
         Me.optPDF.TabIndex = 12
         Me.optPDF.Text = "PDF File"
         Me.optPDF.UseVisualStyleBackColor = True
-        Me.optPDF.Visible = False
         '
         'optExcel
         '
@@ -815,9 +830,9 @@ Partial Class FrmSetsch
         '
         Me.grpRepSource.Controls.Add(Me.OptUsergrp)
         Me.grpRepSource.Controls.Add(Me.optinv)
-        Me.grpRepSource.Location = New System.Drawing.Point(208, 495)
+        Me.grpRepSource.Location = New System.Drawing.Point(369, 495)
         Me.grpRepSource.Name = "grpRepSource"
-        Me.grpRepSource.Size = New System.Drawing.Size(190, 42)
+        Me.grpRepSource.Size = New System.Drawing.Size(176, 42)
         Me.grpRepSource.TabIndex = 45
         Me.grpRepSource.TabStop = False
         Me.grpRepSource.Text = "Report Source"
@@ -851,12 +866,23 @@ Partial Class FrmSetsch
         '
         Me.chkInactive.AutoSize = True
         Me.chkInactive.Font = New System.Drawing.Font("Arial", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.chkInactive.Location = New System.Drawing.Point(518, 507)
+        Me.chkInactive.Location = New System.Drawing.Point(575, 507)
         Me.chkInactive.Name = "chkInactive"
         Me.chkInactive.Size = New System.Drawing.Size(90, 22)
         Me.chkInactive.TabIndex = 13
         Me.chkInactive.Text = " Inactive"
         Me.chkInactive.UseVisualStyleBackColor = True
+        '
+        'chkLand
+        '
+        Me.chkLand.AutoSize = True
+        Me.chkLand.Font = New System.Drawing.Font("Arial", 7.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.chkLand.Location = New System.Drawing.Point(260, 18)
+        Me.chkLand.Name = "chkLand"
+        Me.chkLand.Size = New System.Drawing.Size(102, 20)
+        Me.chkLand.TabIndex = 46
+        Me.chkLand.Text = "LandScape"
+        Me.chkLand.UseVisualStyleBackColor = True
         '
         'FrmSetsch
         '
@@ -961,4 +987,6 @@ Partial Class FrmSetsch
     Friend WithEvents Filter_name As DataGridViewTextBoxColumn
     Friend WithEvents Filter_id As DataGridViewTextBoxColumn
     Friend WithEvents gcBlank As DataGridViewTextBoxColumn
+    Friend WithEvents optFExcel As RadioButton
+    Friend WithEvents chkLand As CheckBox
 End Class

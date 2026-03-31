@@ -30,6 +30,19 @@ Public Class FrmAddReport
     Dim bEnforceStockNa As Boolean = False
     Dim bLoad As Boolean = False
     Dim bOlapSubTotal As Boolean = False
+    Dim bolap As Boolean = False
+
+    Public Property Olap() As Boolean
+        Get
+            Return bolap
+        End Get
+        Set(ByVal value As Boolean)
+            bolap = value
+        End Set
+    End Property
+
+
+
     Public Property TRANHISTORY() As Boolean
         Get
             Return XN_HISTORY
@@ -111,6 +124,7 @@ Public Class FrmAddReport
 
     Private Sub FrmAddReport_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+        AppWiz.ApplyTheme("FRMUDRC3", Me, False)
         bReturnTrue = False
         bOlapSubTotal = False
 
@@ -121,6 +135,9 @@ Public Class FrmAddReport
         Else
             bEnforceStockNa = False
         End If
+
+
+
 
 
         Dim cExpr As String = "select value from config (nolock) where config_option like '%activate%olap%analysis%' and isnull(value,0)=1"
@@ -168,43 +185,49 @@ Public Class FrmAddReport
             If XPERT_REP_CODE.Trim() = "R1" Then
                 cRepGrp = "'R1"
                 GetTranGroup(REPID, "R1")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
-        ElseIf XPERT_REP_CODE.Trim() = "R2" Then
-            cRepGrp = "'R2"
-            GetTranGroup(REPID, "R2")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
+            ElseIf XPERT_REP_CODE.Trim() = "R2" Then
+                cRepGrp = "'R2"
+                GetTranGroup(REPID, "R2")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
 
-        ElseIf XPERT_REP_CODE.Trim() = "R3" Then
-            cRepGrp = "'R3"
-            GetTranGroup(REPID, "R3")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
-        ElseIf XPERT_REP_CODE.Trim() = "R4" Then
-            cRepGrp = "'R4"
-            GetTranGroup(REPID, "R4")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
+            ElseIf XPERT_REP_CODE.Trim() = "R3" Then
+                cRepGrp = "'R3"
+                GetTranGroup(REPID, "R3")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
+            ElseIf XPERT_REP_CODE.Trim() = "R4" Then
+                cRepGrp = "'R4"
+                GetTranGroup(REPID, "R4")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
 
-        ElseIf XPERT_REP_CODE.Trim() = "R5" Then
-            cRepGrp = "'R5"
-            GetTranGroup(REPID, "R5")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
+            ElseIf XPERT_REP_CODE.Trim() = "R5" Then
+                cRepGrp = "'R5"
+                GetTranGroup(REPID, "R5")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
 
-        ElseIf XPERT_REP_CODE.Trim() = "R6" Then
-            cRepGrp = "'R6"
-            GetTranGroup(REPID, "R6")
-            filllayout(cRepGrp)
-            GCol_type.Visible = False
-            Me.TabControl1.SelectedIndex = 6
-        Else
+            ElseIf XPERT_REP_CODE.Trim() = "R6" Then
+                cRepGrp = "'R6"
+                GetTranGroup(REPID, "R6")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
+            ElseIf XPERT_REP_CODE.Trim() = "R7" Then
+                cRepGrp = "'R7"
+                GetTranGroup(REPID, "R7")
+                filllayout(cRepGrp)
+                GCol_type.Visible = False
+                Me.TabControl1.SelectedIndex = 6
+            Else
             cRepGrp = "'R1"
                 GetTranGroup(REPID, "R1")
                 filllayout(cRepGrp)
@@ -234,7 +257,7 @@ Public Class FrmAddReport
 
             drtype.Table = AppWiz.dset.Tables("TRPTGRP")
 
-            drtype.RowFilter = "report_grp_code in ('R1','R2','R3','R4','R5','R6')"
+            drtype.RowFilter = "report_grp_code in ('R1','R2','R3','R4','R5','R6','R7')"
 
 
             cmbRptTypes.DataSource = drtype
@@ -250,6 +273,10 @@ Public Class FrmAddReport
                 cmbRptTypes.SelectedIndex = 3
             ElseIf XPERT_REP_CODE.Trim() = "R5" Then
                 cmbRptTypes.SelectedIndex = 4
+            ElseIf XPERT_REP_CODE.Trim() = "R6" Then
+                cmbRptTypes.SelectedIndex = 5
+            ElseIf XPERT_REP_CODE.Trim() = "R7" Then
+                cmbRptTypes.SelectedIndex = 6
             Else
                 cmbRptTypes.SelectedIndex = 0
             End If
@@ -279,6 +306,15 @@ Public Class FrmAddReport
                 If convertbool(AppWiz.dset.Tables("rep_mst").Rows(0).Item("showReportHeader")) = False Then
                     AppWiz.dset.Tables("rep_mst").Rows(0).Item("showReportHeader") = False
                 End If
+
+                If convertbool(AppWiz.dset.Tables("rep_mst").Rows(0).Item("show_data_for_solditems_only")) = False Then
+                    AppWiz.dset.Tables("rep_mst").Rows(0).Item("show_data_for_solditems_only") = False
+                End If
+
+                If Convert.ToString(AppWiz.dset.Tables("rep_mst").Rows(0).Item("spl_column_id")).Trim() = "" Then
+                    AppWiz.dset.Tables("rep_mst").Rows(0).Item("spl_column_id") = ""
+                End If
+
             End If
 
             FillReportTypeGroup()
@@ -472,7 +508,7 @@ Public Class FrmAddReport
 
             chkCompany.DataBindings.Add("CHECKED", AppWiz.dset.Tables("rep_mst"), "showReportHeader")
 
-
+            CHK_show_data_for_solditems_only.DataBindings.Add("CHECKED", AppWiz.dset.Tables("rep_mst"), "show_data_for_solditems_only")
 
 
             Dim icross As Int32 = ConvertINT(AppWiz.dset.Tables("rep_mst").Rows(0)("crossTabusingQuery"))
@@ -495,6 +531,9 @@ Public Class FrmAddReport
                 chkPaymode.Checked = False
                 plnpay.Enabled = False
             End If
+
+
+            cmbSoldColumn.Enabled = CHK_show_data_for_solditems_only.Checked
 
 
             If XPERT_REP_CODE.Trim() <> "R2" Then
@@ -1017,13 +1056,17 @@ Public Class FrmAddReport
                 cwhere = "  a.xn_type  In ('EOSS')  "
                 cwhereCol = "  a.xn_type  In ('EOSS')"
                 cRepCode = "'TR05'"
+            ElseIf XpertCode = "R7" Then
+                cwhere = "  a.xn_type  In ('WPIPEN')  "
+                cwhereCol = "  a.xn_type  In ('WPIPEN')"
+                cRepCode = "'TR06'"
             ElseIf XpertCode = "R4" Then
                 cwhere = "  a.xn_type  In ('STKQTY')"
                 cwhereCol = "  a.xn_type  In ('STKQTY') and d.major_column_id not like 'PC%'"
                 cRepCode = "'TR03'"
             Else
-                cwhere = "  a.xn_type  not In ('Stock','WBOPEN','POPEN','STKQTY','GRRECO','EOSS','PO','CON_SLS','ARS')"
-                cwhereCol = "  a.xn_type  not In ('Stock','WBOPEN','POPEN','STKQTY','GRRECO','EOSS','PO','CON_SLS','ARS')"
+                cwhere = "  a.xn_type  not In ('Stock','WBOPEN','POPEN','STKQTY','GRRECO','EOSS','PO','CON_SLS','ARS','WPIPEN_')"
+                cwhereCol = "  a.xn_type  not In ('Stock','WBOPEN','POPEN','STKQTY','GRRECO','EOSS','PO','CON_SLS','ARS','WPIPEN_')"
                 cRepCode = "'TR01'"
             End If
 
@@ -1047,7 +1090,8 @@ Public Class FrmAddReport
 
             If TRANHISTORY = True Or XpertCode.Trim().ToUpper() = "R1" Or
                 XpertCode.Trim().ToUpper() = "R3" Or XpertCode.Trim().ToUpper() = "R4" Or
-                XpertCode.Trim().ToUpper() = "R5" Or XpertCode.Trim().ToUpper() = "R6" Then
+                XpertCode.Trim().ToUpper() = "R5" Or XpertCode.Trim().ToUpper() = "R6" Or
+                XpertCode.Trim().ToUpper() = "R5" Or XpertCode.Trim().ToUpper() = "R7" Then
                 For Each dr As DataRow In AppWiz.dset.Tables("TTRANGRP").Rows
                     dr("Required") = True
                 Next
@@ -1181,8 +1225,6 @@ Public Class FrmAddReport
         End Try
     End Sub
 
-
-
     Private Sub RemoveColFromRepCol(ByVal cRepCode As String)
         Try
             Dim strArrays() As String = {"Select key_col from USER_XTREAM_LAYOUT_SETUP a (NOLOCK)" & vbCrLf & "join users b (NOLOCK) On a.role_id= b.ROLE_ID " & vbCrLf & "where a.rep_code= '", cRepCode, "' and b.user_code = '", Me.AppWiz.GUSER_CODE, "'"}
@@ -1221,7 +1263,6 @@ Public Class FrmAddReport
         End Try
 
     End Sub
-
 
     Private Function getColId(cXntype As String, cColheader As String) As String
         Try
@@ -1648,6 +1689,48 @@ Public Class FrmAddReport
     End Sub
 
 
+    Private Sub FillSaleOnColumn()
+        Try
+
+
+            If Olap = True And XPERT_REP_CODE.Trim().ToUpper() = "R1" Then
+                CHK_show_data_for_solditems_only.Enabled = True
+                cmbSoldColumn.Enabled = True
+            Else
+                CHK_show_data_for_solditems_only.Enabled = False
+                cmbSoldColumn.Enabled = False
+                CHK_show_data_for_solditems_only.Checked = False
+                Return
+            End If
+
+
+            Dim cColid As String = Convert.ToString(AppWiz.dset.Tables("rep_mst").Rows(0).Item("spl_column_id")).Trim()
+
+            Dim dtV As New DataView
+            dtV.Table = AppWiz.dset.Tables("rep_det") '.Select("(calculative_col=0 or calculative_col= false) and org_col_header <>'stockNa'", "")
+            dtV.RowFilter = "calculative_col=0 or calculative_col= false"
+            Dim dt As New DataTable("TSS")
+            dt = dtV.ToTable(True, "column_id", "col_header")
+
+            cmbSoldColumn.DataSource = dt
+            cmbSoldColumn.ValueMember = "column_id"
+            cmbSoldColumn.DisplayMember = "col_header"
+
+            Dim dr() As DataRow = dt.Select("column_id='" + cColid + "'")
+
+            If dr.Length > 0 Then
+                Dim cHeader As String = Convert.ToString(dr(0)("col_header"))
+                Dim i As Integer = cmbSoldColumn.FindString(cHeader)
+                If i >= 0 Then
+                    cmbSoldColumn.SelectedIndex = i
+                End If
+            End If
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
     Private Function VALIDATEPAGE(nPage) As Boolean
         Try
 
@@ -1656,7 +1739,8 @@ Public Class FrmAddReport
 
 
                     If XPERT_REP_CODE = "R1" Or XPERT_REP_CODE = "R2" Or XPERT_REP_CODE = "R3" Or
-                        XPERT_REP_CODE = "R4" Or XPERT_REP_CODE = "R5" Or XPERT_REP_CODE = "R6" Then
+                        XPERT_REP_CODE = "R4" Or XPERT_REP_CODE = "R5" Or XPERT_REP_CODE = "R6" Or
+                        XPERT_REP_CODE = "R7" Then
 
                         Dim Dr As DataRow() = AppWiz.dset.Tables("TTRANGRP").Select("required= true or required=1")
                         Dim Dr1 As DataRow() = AppWiz.dset.Tables("TTRANCOLMASTER").Select("required= true or required=1")
@@ -1671,6 +1755,10 @@ Public Class FrmAddReport
 
                         If Dr1.Length <= 0 Then
                             Return False
+                        ElseIf Dr1.Length = 1 Then
+                            If Convert.ToString(Dr1(0).Item("base_col_header")).Trim().ToUpper() = "STOCKNA" Then
+                                Return False
+                            End If
                         End If
 
                         If Dr2.Length <= 0 Then
@@ -1815,6 +1903,11 @@ Public Class FrmAddReport
                     filllayout(cRepGrp)
                     GCol_type.Visible = False
                     Me.TabControl1.SelectedIndex = 6
+                ElseIf XPERT_REP_CODE.Trim() = "R7" Then
+                    GetTranGroup(REPID, "R7")
+                    filllayout(cRepGrp)
+                    GCol_type.Visible = False
+                    Me.TabControl1.SelectedIndex = 6
                 End If
 
             Case 1
@@ -1830,9 +1923,14 @@ Public Class FrmAddReport
                 End If
 
             Case 3
-                cmdnext.Enabled = False
-                cmdfinish.Enabled = True
-                Me.TabControl1.SelectedIndex = 5
+                Try
+                    cmdnext.Enabled = False
+                    cmdfinish.Enabled = True
+                    FillSaleOnColumn()
+                    Me.TabControl1.SelectedIndex = 5
+                Catch ex As Exception
+                    AppWiz.ErrorShow(ex)
+                End Try
 
             Case 6
                 If VALIDATEPAGE(1) Then
@@ -1866,6 +1964,11 @@ Public Class FrmAddReport
                         dvRepDetCalvalue.RowFilter = ""
                         GCol_type.Visible = False
                     ElseIf XPERT_REP_CODE = "R6" Then
+                        FillRepDetForTran_Master(XPERT_REP_CODE)
+
+                        dvRepDetCalvalue.RowFilter = ""
+                        GCol_type.Visible = False
+                    ElseIf XPERT_REP_CODE = "R7" Then
                         FillRepDetForTran_Master(XPERT_REP_CODE)
 
                         dvRepDetCalvalue.RowFilter = ""
@@ -1947,6 +2050,8 @@ Public Class FrmAddReport
                 cExpr = " EXEC SP3S_XPERTREPORTING_WOW 6,'" + AppWiz.GUSER_CODE + "','TR04' "
             ElseIf XPERT_REP_CODE.Trim() = "R6" Then
                 cExpr = " EXEC SP3S_XPERTREPORTING_WOW 6,'" + AppWiz.GUSER_CODE + "','TR05' "
+            ElseIf XPERT_REP_CODE.Trim() = "R7" Then
+                cExpr = " EXEC SP3S_XPERTREPORTING_WOW 6,'" + AppWiz.GUSER_CODE + "','TR06' "
 
             Else
                 cExpr = " EXEC SP3S_XPERTREPORTING_WOW 6,'" + AppWiz.GUSER_CODE + "','" + cRepCode + "'"
@@ -2544,7 +2649,15 @@ Public Class FrmAddReport
                 AppWiz.dset.Tables("rep_mst").Rows(0).Item("showRetailsalePaymentsViewMode") = 0
             End If
 
-
+            If CHK_show_data_for_solditems_only.Checked = True Then
+                Dim cCol As String = ""
+                If cmbSoldColumn.Items.Count > 0 Then
+                    cCol = Convert.ToString(cmbSoldColumn.SelectedValue)
+                End If
+                AppWiz.dset.Tables("rep_mst").Rows(0).Item("spl_column_id") = cCol
+            Else
+                AppWiz.dset.Tables("rep_mst").Rows(0).Item("spl_column_id") = ""
+            End If
 
             Dim cExpr As String = "Select rep_name From wow_xpert_rep_mst (nolock) where RTRIM(LTRIM(rep_name)) = '" + txtReportName.Text.Trim() + "' and user_code = '" + AppWiz.GUSER_CODE + "' and rep_id <> '" + cRepid + "' and XPERT_REP_CODE = '" + XPERT_REP_CODE + "'"
 
@@ -3583,5 +3696,15 @@ Public Class FrmAddReport
         Catch ex As Exception
 
         End Try
+    End Sub
+
+    Private Sub CHK_show_data_for_solditems_only_CheckedChanged(sender As Object, e As EventArgs) Handles CHK_show_data_for_solditems_only.CheckedChanged
+        cmbSoldColumn.Enabled = CHK_show_data_for_solditems_only.Checked
+    End Sub
+
+    Private Sub txtReportName_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtReportName.KeyPress
+        If e.KeyChar = "/"c OrElse e.KeyChar = "\"c Then
+            e.Handled = True   'Block the character
+        End If
     End Sub
 End Class

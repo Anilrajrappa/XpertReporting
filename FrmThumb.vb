@@ -18,7 +18,7 @@
 
 
 
-            Dim Dr() As DataRow = dtCol.Select("column_id= 'C0042'", "")
+            Dim Dr() As DataRow = dtCol.Select("col_header= 'StockNa'", "")
             If Dr.Length > 0 Then
                 For Each D As DataRow In Dr
                     dtCol.Rows.Remove(D)

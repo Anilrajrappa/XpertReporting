@@ -221,6 +221,9 @@ Public Class frmWizard
 
     Private Sub frmWizard_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         Try
+
+            appWizard.ApplyTheme("FRMUDRC3", Me, False)
+
             SetMe()
 
             TxtMaster.Text = "Type Here to Search"
@@ -3068,6 +3071,10 @@ Public Class frmWizard
         ElseIf Trim(drow(0)("col_expr")).ToUpper.ToUpper().Contains("SCHEME_NAME") Then
             cExpr = "select distinct schemeName  from wow_SchemeSetup_Title_Det  (nolock)"
 
+        ElseIf Trim(drow(0)("col_expr")).ToUpper.ToUpper().Contains("BILLCHALLANMODE") Then
+            cExpr = "select 'Bill' as BILLCHALLANMODE  union all select 'Challan'  as BILLCHALLANMODE"
+
+
         ElseIf Trim(drow(0)("col_expr")).ToUpper.ToUpper().Contains("BUYER_ORDER_MST.ORDER_NO") Then
             cExpr = "select top 50 ORDER_NO  from BUYER_ORDER_MST  (nolock) where ORDER_NO <>''"
             cColName = "ORDER_NO"
@@ -3126,16 +3133,16 @@ Public Class frmWizard
 
 
             ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("SUB_SECTION_ALIAS") Then
-                cExpr = "select distinct alias as SUB_SECTION_ALIAS  from sectionD"
+            cExpr = "select distinct alias as SUB_SECTION_ALIAS  from sectionD where inactive=0"
 
 
 
-            ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("SECTION_ALIAS") Then
-                cExpr = "select distinct alias as SECTION_ALIAS  from sectionm"
+        ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("SECTION_ALIAS") Then
+            cExpr = "select distinct alias as SECTION_ALIAS  from sectionm where inactive=0"
 
 
 
-            ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("LMP01106.PRINT_NAME") Then
+        ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("LMP01106.PRINT_NAME") Then
                 cExpr = "select distinct print_name from LMP01106 where PRINT_NAME <> ''"
 
             ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains(".INACTIVE") Then
@@ -3146,13 +3153,12 @@ Public Class frmWizard
 
 
             ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("BIN_ALIAS") Then
-                cExpr = "select BIN_ALIAS from BIN"
+            cExpr = "select BIN_ALIAS from BIN where inactive=0"
 
-            ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("BIN_NAME") Then
-                cExpr = "select BIN_NAME from BIN"
+        ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("BIN_NAME") Then
+            cExpr = "select BIN_NAME from BIN where inactive=0"
 
-
-            ElseIf Trim(drow(0)("col_expr")).ToUpper = "SKU_NAMES.STOCK_NA" Then
+        ElseIf Trim(drow(0)("col_expr")).ToUpper = "SKU_NAMES.STOCK_NA" Then
                 cExpr = "select 'TRUE' as stock_NA union select 'FALSE' as STOCK_NA"
 
             ElseIf Trim(drow(0)("col_expr")).ToUpper.Contains("SEASON_NAME") Then
@@ -3166,11 +3172,40 @@ Public Class frmWizard
             ElseIf Trim(drow(0)("col_expr")).ToUpper = "TRANSACTION_LOCATION_INACTIVE" Then
                 cExpr = "select  0 as Transaction_Location_Inactive UNION  select 1 as  Transaction_Location_Inactive "
             ElseIf Trim(drow(0)("col_expr")).ToUpper = "AC_NAME" Then
-                cExpr = "select distinct ac_name  from lm01106"
-            ElseIf Trim(drow(0)("col_expr")).ToUpper = "SUPPLIER_NAME" Then
-                cExpr = "select top 50  ac_name  from lm01106 where inactive=0 "
-                cColName = "AC_NAME"
-            ElseIf drow(0)("col_expr").ToUpper().Contains("CITY") Then
+            ' cExpr = "select distinct ac_name  from lm01106"
+            '  cExpr = "select top 50  ac_name  from lm01106 where inactive=0 "
+            ' cColName = "AC_NAME"
+
+            Dim cwhere As String = ""
+            Dim caccode As String = ""
+
+            caccode = appMain.Travtree("0000000021")
+            cwhere = " where  head_code in(" + caccode + ") and ac_name <> '' OR  ALLOW_CREDITOR_DEBTOR =1 order by ac_name   "
+
+            ' cExpr = "SELECT top 1000  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+            cExpr = "SELECT  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+
+
+
+        ElseIf Trim(drow(0)("col_expr")).ToUpper = "SUPPLIER_NAME" Then
+            '  cExpr = "select top 50  ac_name  from lm01106 where inactive=0 "
+            ' cColName = "AC_NAME"
+
+            Dim cwhere As String = ""
+            Dim caccode As String = ""
+
+            caccode = appMain.Travtree("0000000021")
+            cwhere = " where  head_code in(" + caccode + ") and ac_name <> '' OR  ALLOW_CREDITOR_DEBTOR =1 order by ac_name   "
+
+            ' cExpr = "SELECT top 1000  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+            cExpr = "SELECT  [ac_name] AS ac_name FROM lmv01106 " + cwhere
+
+            ' cColName = "AC_NAME"
+
+
+
+
+        ElseIf drow(0)("col_expr").ToUpper().Contains("CITY") Then
                 cExpr = "select distinct city  from city"
             ElseIf drow(0)("col_expr").ToUpper().Contains("STATE") Then
                 cExpr = "select distinct state  from State"
@@ -3302,14 +3337,14 @@ Public Class frmWizard
 
             ElseIf Trim(drow(0)("Col_expr")).ToUpper.Contains("SKU_NAMES.SECTION_NAME") Then
 
-                cExpr = "SELECT distinct Section_name from Sectionm (NOLOCK)  order by Section_name"
+            cExpr = "SELECT distinct Section_name from Sectionm (NOLOCK)  where inactive=0 order by Section_name"
 
-            ElseIf Trim(drow(0)("Col_expr")).ToUpper.Contains("SKU_NAMES.SUB_SECTION_NAME") Then
+        ElseIf Trim(drow(0)("Col_expr")).ToUpper.Contains("SKU_NAMES.SUB_SECTION_NAME") Then
 
-                cExpr = "SELECT distinct sub_Section_name from Sectiond (NOLOCK)  order by sub_Section_name"
+            cExpr = "SELECT distinct sub_Section_name from Sectiond (NOLOCK) where inactive=0  order by sub_Section_name"
 
 
-            ElseIf Trim(drow(0)("Col_expr")).ToUpper.Contains("ARTICLE_NO") Then
+        ElseIf Trim(drow(0)("Col_expr")).ToUpper.Contains("ARTICLE_NO") Then
 
                 'If cjoin.ToUpper().Contains("WHERE") Then
                 '    cExpr = "SELECT article_no from article (NOLOCK)  " + cjoin + " AND article.inactive in (0) order by article_no"
@@ -3768,12 +3803,15 @@ Public Class frmWizard
             Dim drow() As DataRow = dvRepDet.ToTable.Select("col_expr='" & appWizard.dset.Tables("tgenFilter").Rows(i).Item("cattr") & "'")
             'Dim drow1() As DataRow = appWizard.dset.Tables("repcol").Select("col_expr='" & appWizard.dset.Tables("tgenFilter").Rows(i).Item("cattr") & "'")
             Dim drow1() As DataRow = dtRepcol.Select("col_expr='" & appWizard.dset.Tables("tgenFilter").Rows(i).Item("cattr") & "'")
-            If drow.Length = 1 Then
+
+            If drow.Length > 0 Then
                 str1 = drow(0)("col_header")
             End If
-            If drow1.Length = 1 Then
+
+            If drow1.Length > 0 Then
                 str1 = drow1(0)("col_header")
             End If
+
             If Trim(str1).ToUpper = str.ToUpper Then
                 If appWizard.dset.Tables("tgenFilter").Rows(i).Item("cContaining") = False Then 'chkContaining.Checked = False Then
                     Dim rIndex As Integer

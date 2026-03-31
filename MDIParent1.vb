@@ -40,10 +40,15 @@ Public Class MDIParent1
 
 
 #Region "LocalVariable"
+
+    Dim dset As New DataSet
+    Dim bIndianFormat As Boolean = False
     Dim bMsgForOlap As String = ""
+    Dim cValidUptoDate As String = ""
     Dim bFirstToken As Boolean = False
     Dim cGToken As String = ""
     Dim bR1Olap As Boolean = False
+    Dim bR1Olap_ORG As Boolean = False
     Public frm1 As Object
     Dim bWSLORDER As Boolean = False
     Dim bPOORDER As Boolean = False
@@ -503,6 +508,8 @@ Public Class MDIParent1
     End Sub
 
 
+
+
     'Private Function SendWhatsAppMsg(bAttach As Boolean, cRecMob As String, cSendMob As String, cMsg As String, cFile As String) As Boolean
 
 
@@ -688,6 +695,8 @@ Public Class MDIParent1
                     Dim cN As String = Dc.ColumnName
                     If cN.ToUpper().Contains("PENDINGORDERQTY") Then
                         cPendingOrderqty = cN
+                    ElseIf cN.ToUpper().Contains("ORDERQTY") Then
+                        cPendingOrderqty = cN
                     End If
                 Next
 
@@ -769,6 +778,8 @@ Public Class MDIParent1
                 Dim cN As String = Dc.ColumnName
 
                 If cN.ToUpper().Contains("PENDINGORDERQTY") Then
+                    cPendingOrderqty = cN
+                ElseIf cN.ToUpper().Contains("ORDERQTY") Then
                     cPendingOrderqty = cN
                 Else
                     cPendingOrderqty = ""
@@ -880,7 +891,12 @@ Public Class MDIParent1
 
                     Dim cCol As New DataGridViewCheckBoxColumn
                     cCol.HeaderText = "Short Close"
-                    cCol.Tag = "PENDINGORDERQTY"
+                    If TSSHORTCLOSE.Tag = "WSLORD" Then
+                        cCol.Tag = "ORDERQTY"
+                    Else
+                        cCol.Tag = "PENDINGORDERQTY"
+                    End If
+
                     cCol.DataPropertyName = "CHK"
                     cCol.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
                     cCol.SortMode = DataGridViewColumnSortMode.NotSortable
@@ -1669,7 +1685,6 @@ Public Class MDIParent1
 
 #End Region
 
-
     Public Sub GENXTREMEREPORT_WOW(AppXtreme As XtremeMethods.MISnCRM, cLocid As String, cpath As String)
 
 
@@ -1678,7 +1693,15 @@ Public Class MDIParent1
 
         Try
 
+            If 1 = 1 Then
+                Return
+            End If
+
             Logevent(AppXtreme, "P2", "GENXTREMEREPORT", System.DateTime.Now.ToString(), "", "", True)
+
+            cExpr = " SET DATEFIRST 1"
+            AppXtreme.dmethod.SelectCmdTOSql(cExpr, True)
+
 
             AppXtreme.dmethod.SelectCmdTOSql(AppXtreme.dset, "Select * from location (NOLOCK) where dept_id='" + cLocid + "'", "tLocation", False)
             AppXtreme.AppMonitor_EXENAME = "WIZAPPENC"
@@ -1746,6 +1769,8 @@ Public Class MDIParent1
                 Dim cDTTIME As DateTime = System.DateTime.Now
                 ' Dim cNDString = cDTTIME.ToString("yyyy-MM-dd")
 
+                'iSCHFREQ_TYPE - 4 Month, 5 Quarter, 6 ,half, 7 Year
+
                 Logevent(AppXtreme, "P3", "REPORT-" + cRepID, System.DateTime.Now.ToString(), "", "", True)
 
 
@@ -1797,8 +1822,8 @@ Public Class MDIParent1
                 End If
 
 
-                GetXpertReportDataWow(AppXtreme, cXpertCode, cRepID, cRepname, cpath, False)
-                EMAILXTREMEREPORT(AppXtreme, cpath, bsend)
+                GetXpertReportDataWow(AppXtreme, cXpertCode, cRepID, cRepname, cpath, False, iSCHFREQ_TYPE)
+                'EMAILXTREMEREPORTWOW(AppXtreme, cpath, cRepID, bsend)
                 bsend = True
 
                 AppXtreme.dmethod.WriteToErrorLog("UPDATE SCH TABLE START", "", "XTREME MAIL", "", "XTREME", "EMAIL")
@@ -1835,30 +1860,12 @@ Public Class MDIParent1
         Catch ex As Exception
             AppXtreme.dmethod.WriteToErrorLog(ex.Message, "", "XTREME MAIL", "", "XTREME", "EMAIL")
         Finally
-            'Logevent(AppXtreme, "P2", "GENXTREMEREPORT", "", System.DateTime.Now.ToString(), "", False)
+            Logevent(AppXtreme, "P2", "GENXTREMEREPORT", "", System.DateTime.Now.ToString(), "", False)
         End Try
     End Sub
 
-    Public Sub Logevent(ByVal Appobj As XtremeMethods.MISnCRM, ByVal cProcessID As String, ByVal cProcess As String, ByVal cStart As String, ByVal cEnd As String, ByVal cRmk As String, ByVal bAdd As Boolean)
-        Try
-            Dim cExpr As String = ""
 
-            If bAdd = True Then
-
-                cExpr = "INSERT Campaign_log( PROCESS_ID,Process_Name, Start_Time, End_Time, Remarks )  " + vbCrLf +
-                        "SELECT '" + cProcessID + "' AS PROCESS_ID,'" + cProcess + "' AS Process_Name, '" + cStart + "' AS Start_Time, '" + cEnd + "' As End_Time, '" + cRmk + "' AS Remarks "
-            Else
-                cExpr = "UPDATE Campaign_log SET End_Time= '" + cEnd + "' WHERE PROCESS_ID= '" + cProcessID + "' and process_name = '" + cProcess + "'"
-            End If
-
-            Appobj.dmethod.SelectCmdTOSql(cExpr, False)
-
-        Catch ex As Exception
-            Appobj.dmethod.WriteToErrorLog(ex.Message, "Logevent", "", "", "LOGEVENT", "EVENT")
-        End Try
-    End Sub
-
-    Public Sub GetXpertReportDataWow(AppXtreme As XtremeMethods.MISnCRM, cXpertRepCode As String, ReportId As String, ReportName As String, cPath As String, bDebug As Boolean)
+    Public Sub GetXpertReportDataWow(AppXtreme As XtremeMethods.MISnCRM, cXpertRepCode As String, ReportId As String, ReportName As String, cPath As String, bDebug As Boolean, Optional iSCHFREQ_TYPE As Integer = 0)
         Try
 
             Dim cErrMsg As String = ""
@@ -1905,9 +1912,9 @@ Public Class MDIParent1
 
 
             If iRptSource = 1 Then
-                cExpr = "Select rep_id,rep_name From wow_xpert_Rep_MSt (NOLOCK) Where xpert_rep_code= '" + cXpertRepCode + "' and  rep_grouping = '" + cUserGroup + "'"
+                cExpr = "Select rep_id,rep_name,filter_rep_id,FILTER_CRITERIA From wow_xpert_Rep_MSt (NOLOCK) Where xpert_rep_code= '" + cXpertRepCode + "' and  rep_grouping = '" + cUserGroup + "'"
             Else
-                cExpr = "Select rep_id,rep_name From wow_xpert_Rep_MSt (NOLOCK) Where  rep_id = '" + ReportId + "'"
+                cExpr = "Select rep_id,rep_name,filter_rep_id,FILTER_CRITERIA From wow_xpert_Rep_MSt (NOLOCK) Where  rep_id = '" + ReportId + "'"
             End If
 
             AppXtreme.dmethod.SelectCmdTOSql(AppXtreme.dset, cExpr, "TREPORTLIST", False, False)
@@ -1937,44 +1944,110 @@ Public Class MDIParent1
             DtF.Table = AppXtreme.dset.Tables("TSCHDET")
             Dim DtDistinct As New DataTable
             DtDistinct = DtF.ToTable(True, "Filter_id")
+            Dim iFrom As Integer = 1
+            Dim iTo As Integer = 1
 
 
-            Dim iFrom As Integer = Conversions.ToInteger(AppXtreme.dset.Tables("TSCH").Rows(0)("From_Days"))
-            Dim iTo As Integer = Conversions.ToInteger(AppXtreme.dset.Tables("TSCH").Rows(0)("To_Days"))
+            iFrom = Conversions.ToInteger(AppXtreme.dset.Tables("TSCH").Rows(0)("From_Days"))
+            iTo = Conversions.ToInteger(AppXtreme.dset.Tables("TSCH").Rows(0)("To_Days"))
 
             FromDate = Strings.Format(DateAndTime.DateAdd(DateInterval.Day, iFrom, DateAndTime.Now), "yyyy-MM-dd")
             ToDate = Strings.Format(DateAndTime.DateAdd(DateInterval.Day, iTo, DateAndTime.Now), "yyyy-MM-dd")
 
 
             Dim cFromD As String = Strings.Format(DateAndTime.DateAdd(DateInterval.Day, iFrom, DateAndTime.Now), "dd-MM-yyyy")
-            Dim cToD = Strings.Format(DateAndTime.DateAdd(DateInterval.Day, iTo, DateAndTime.Now), "dd-MM-yyyy")
+            Dim cToD As String = Strings.Format(DateAndTime.DateAdd(DateInterval.Day, iTo, DateAndTime.Now), "dd-MM-yyyy")
 
+            If iSCHFREQ_TYPE = 4 Then
+                Dim DtReport As DateTime = System.DateTime.Now.AddMonths(-1)
+                Dim iYear As Integer = DtReport.Year
+                Dim month As Integer = DtReport.Month
+                Dim cFrom As DateTime = New DateTime(iYear, month, 1)
+                Dim iLastDay As Integer = System.DateTime.DaysInMonth(iYear, month)
+                Dim cToDt As DateTime = New DateTime(iYear, month, iLastDay)
+                FromDate = cFrom.ToString("yyyy-MM-dd")
+                ToDate = cToDt.ToString("yyyy-MM-dd")
+                cFromD = cFrom.ToString("dd-MM-yyyy")
+                cToD = cToDt.ToString("dd-MM-yyyy")
+            ElseIf iSCHFREQ_TYPE = 6 Then
+                Dim DtReport As DateTime = System.DateTime.Now.AddMonths(-3)
+                Dim iYear As Integer = DtReport.Year
+                Dim month As Integer = DtReport.Month
+                Dim cFrom As DateTime = New DateTime(iYear, month, 1)
+                month = month + 2
+                Dim iLastDay As Integer = System.DateTime.DaysInMonth(iYear, month)
+                Dim cToDt As DateTime = New DateTime(iYear, month, iLastDay)
+                FromDate = cFrom.ToString("yyyy-MM-dd")
+                ToDate = cToDt.ToString("yyyy-MM-dd")
+                cFromD = cFrom.ToString("dd-MM-yyyy")
+                cToD = cToDt.ToString("dd-MM-yyyy")
+            ElseIf iSCHFREQ_TYPE = 7 Then
+                Dim DtReport As DateTime = System.DateTime.Now.AddMonths(-6)
+                Dim iYear As Integer = DtReport.Year
+                Dim month As Integer = DtReport.Month
+                Dim cFrom As DateTime = New DateTime(iYear, month, 1)
+                month = month + 5
+                Dim iLastDay As Integer = System.DateTime.DaysInMonth(iYear, month)
+                Dim cToDt As DateTime = New DateTime(iYear, month, iLastDay)
+                FromDate = cFrom.ToString("yyyy-MM-dd")
+                ToDate = cToDt.ToString("yyyy-MM-dd")
+                cFromD = cFrom.ToString("dd-MM-yyyy")
+                cToD = cToDt.ToString("dd-MM-yyyy")
+
+            ElseIf iSCHFREQ_TYPE = 8 Then
+                Dim DtReport As DateTime = System.DateTime.Now.AddMonths(-12)
+                Dim iYear As Integer = DtReport.Year
+                Dim month As Integer = DtReport.Month
+                Dim cFrom As DateTime = New DateTime(iYear, month, 1)
+                month = month + 11
+                Dim iLastDay As Integer = System.DateTime.DaysInMonth(iYear, month)
+                Dim cToDt As DateTime = New DateTime(iYear, month, iLastDay)
+                FromDate = cFrom.ToString("yyyy-MM-dd")
+                ToDate = cToDt.ToString("yyyy-MM-dd")
+                cFromD = cFrom.ToString("dd-MM-yyyy")
+                cToD = cToDt.ToString("dd-MM-yyyy")
+            End If
 
 
             Dim cSubJect As String = Convert.ToString(AppXtreme.dset.Tables("TCRM").Rows(0)("Subject"))
             Dim cBody As String = Convert.ToString(AppXtreme.dset.Tables("TCRM").Rows(0)("EMAIL"))
-
+            Dim cOpenFilter As String = ""
 
             For Each DrRL As DataRow In AppXtreme.dset.Tables("TREPORTLIST").Rows
 
                 ReportId = Convert.ToString(DrRL("Rep_id"))
                 ReportName = Convert.ToString(DrRL("Rep_name")).Trim()
+                cOpenFilter = Convert.ToString(DrRL("FILTER_CRITERIA"))
 
-                If iAttachmenttype = 3 Then
-                    cFileName = ReportName + ".csv"
-                ElseIf iAttachmenttype = 2 Then
-                    cFileName = ReportName + ".pdf"
-                Else
-                    cFileName = ReportName + ".csv"
-                End If
-
-                cFileFullPath = cFilePath + "\" + cFileName
+                'If iAttachmenttype = 3 Then
+                '    cFileName = ReportName + ".csv"
+                'ElseIf iAttachmenttype = 2 Then
+                '    cFileName = ReportName + ".pdf"
+                'Else
+                '    cFileName = ReportName + ".csv"
+                'End If
 
 
                 For Each Dr As DataRow In DtDistinct.Rows
 
-                    Filtertid = Convert.ToString(Dr("Filter_id"))
+                    Filtertid = Convert.ToString(Dr("Filter_id")).Trim()
                     cEmailId = ""
+                    cFileName = ""
+
+                    If iAttachmenttype = 3 Then
+                        cFileName = ReportName + ".csv"
+                    ElseIf iAttachmenttype = 2 Then
+                        cFileName = ReportName + ".pdf"
+                    Else
+                        cFileName = ReportName + ".csv"
+                    End If
+
+                    If Filtertid <> "" Then
+                        cFileFullPath = cFilePath + "\" + Filtertid + "-" + cFileName
+                        cFileName = Filtertid + "-" + cFileName
+                    Else
+                        cFileFullPath = cFilePath + "\" + cFileName
+                    End If
 
                     Dim d As DataRow() = AppXtreme.dset.Tables("TSCHDET").Select("Filter_id= '" + Filtertid + "'", "")
 
@@ -1995,17 +2068,59 @@ Public Class MDIParent1
 
                     Dim cFilterDisplay As String = Convert.ToString(AppXtreme.sqlCMD.ExecuteScalar())
 
-
                     cExpr = "select company_name  from company (nolock)   where company_code = '01' "
 
                     AppXtreme.sqlCMD.CommandText = cExpr
 
                     Dim cCompanyName As String = Convert.ToString(AppXtreme.sqlCMD.ExecuteScalar())
+                    Dim cRepFilterDisp As String = "Named Filter : " + cFilterDisplay.Replace(vbCrLf, " ")
+                    Dim cPrimaryFilter As String = "Primary Filter : " + cOpenFilter.Replace(vbCrLf, " ").Replace("'", "").Replace("_", " ")
 
+                    cErrMsg = cOpenFilter.Replace("'", "")
+                    cExpr = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	'Primary Filter : " + cErrMsg + "' As   Error_Msg, getdate() as START_TIME, 2   "
+                    AppXtreme.sqlCMD.CommandText = cExpr
+                    AppXtreme.sqlCMD.ExecuteNonQuery()
 
+                    Dim cPeriodDisp As String = "Reporting Period From : " & cFromD & " to " & cToD
 
                     cRFilter = cRFilter.Replace("[", "").Replace("]", "")
+
+                    If (cOpenFilter.Trim() <> "") Then
+                        cRFilter = cRFilter + IIf(cRFilter = "", "", " AND ") + cOpenFilter
+                    End If
+
                     Dim cFilter As String = cRFilter
+                    Dim addnlFilterId As String = ""
+                    Dim cAddFilter As String = ""
+
+                    Try
+                        cExpr = "select addnlFilterId from wow_xpert_rep_mst a  (nolock) " + vbCrLf +
+                                    "where a.rep_id= '" + ReportId + "' "
+
+
+                        AppXtreme.sqlCMD.CommandText = cExpr
+
+                        addnlFilterId = Convert.ToString(AppXtreme.sqlCMD.ExecuteScalar())
+
+                        If addnlFilterId.Trim() <> "" Then
+
+                            cExpr = "select Filter from wow_xpert_rep_mst a  (nolock) " + vbCrLf +
+                                        "Join Rep_Adv_Filter  b (nolock) On a.addnlFilterId=b.Adv_filter_id " + vbCrLf +
+                                        "where a.rep_id= '" + ReportId + "' "
+
+                            AppXtreme.sqlCMD.CommandText = cExpr
+
+                            cAddFilter = Convert.ToString(AppXtreme.sqlCMD.ExecuteScalar())
+                        End If
+
+                    Catch ex As Exception
+
+                    End Try
+
+                    cErrMsg = cAddFilter.Replace("'", "")
+                    cExpr = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	'Additional Filter : " + cErrMsg + "' As   Error_Msg, getdate() as START_TIME, 2   "
+                    AppXtreme.sqlCMD.CommandText = cExpr
+                    AppXtreme.sqlCMD.ExecuteNonQuery()
 
 
                     Dim cColErFlag As String = ""
@@ -2016,25 +2131,52 @@ Public Class MDIParent1
                     cFilter = cFilter.Replace("[A].", "")
 
 
-                    If cRFilter.ToUpper().Contains("SOURCELOCATION.INACTIVE") = False Then
-                        cRFilter = cRFilter + IIf(cRFilter = "", "", " AND ") + " sourcelocation.inactive = 0" + vbCrLf
+                    'If cRFilter.ToUpper().Contains("SOURCELOCATION.INACTIVE") = False Then
+                    '    cRFilter = cRFilter + IIf(cRFilter = "", "", " AND ") + " sourcelocation.inactive = 0" + vbCrLf
+                    'End If
+
+
+                    If cXpertRepCode.ToUpper() = "R1" Then
+                        cFilter = cFilter + IIf(cFilter = "", "", " AND ") + " sourcebin.BIN_ID  NOT IN ('999') " + vbCrLf
                     End If
 
-                    'If Not cRFilter.Contains("SKU_ER_FLAG") Then
-                    '    If bEstimate = False Then
-                    '        cRFilter = cRFilter + IIf(cRFilter = "", "", " AND ") + " Sku_Names.Sku_Er_Flag IN (0 , 1 )" + vbCrLf
-                    '    End If
-                    'End If
+
+                    If Not cFilter.Contains("SKU_ER_FLAG") Then
+                        If bEstimate = False Then
+                            cFilter = cFilter + IIf(cFilter = "", "", " AND ") + " isnull(Sku_Names.Sku_Er_Flag,0) IN (0 , 1 )" + vbCrLf
+                        End If
+                    End If
+
+
+
+                    If Not cFilter.Contains("SKU_ITEM_TYPE") And cXpertRepCode.Trim().ToUpper() <> "R3" Then
+                        cFilter = cFilter + IIf(cFilter = "", "", " AND ") + " ISNULL(SKU_NAMES.sku_item_type,1) IN (0,1)" + vbCrLf
+                    End If
+
+
+                    If cFilter.ToUpper().Contains("PARTY_CUSTDYM.CUSTOMER_FNAME+CHAR(13)+PARTY_CUSTDYM.CUSTOMER_LNAME") = True Then
+                        cFilter = cFilter.Replace("PARTY_CUSTDYM.CUSTOMER_FNAME+CHAR(13)+PARTY_CUSTDYM.CUSTOMER_LNAME", "PARTY_NAME")
+                    End If
+
+
+
+                    If cRFilter.ToUpper().Contains("PIM01106.RECEIPT_DT") = True Then
+                        cRFilter = cRFilter.Replace("PIM01106.RECEIPT_DT", "PURCHASE_RECEIPT_DATE")
+                    End If
+
+
+                    If cFilter.ToUpper().Contains("SKU_NAMES.PURCHASE_RECEIPT_DT") = True Then
+                        cFilter = cFilter.Replace("SKU_NAMES.PURCHASE_RECEIPT_DT", "PURCHASE_RECEIPT_DATE")
+                    End If
 
 
 
                     cFilter = cFilter.Replace("'", "''")
 
-                    cErrMsg = cRFilter.Replace("'", "")
+                    cErrMsg = cFilter.Replace("'", "")
                     cExpr = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	'" + cErrMsg + "' As   Error_Msg, getdate() as START_TIME, 2   "
                     AppXtreme.sqlCMD.CommandText = cExpr
                     AppXtreme.sqlCMD.ExecuteNonQuery()
-
 
 
 
@@ -2045,13 +2187,19 @@ Public Class MDIParent1
                             AppXtreme.dset.Tables.Remove("TREPORT")
                         End If
 
+                        MRPCAT(False)
 
-                        cExpr = "Update wow_xpert_rep_mst set FILTER_CRITERIA = '" + cFilter + "' where rep_id= '" + ReportId + "'"
 
-                        AppXtreme.sqlCMD.CommandText = cExpr
-                        AppXtreme.sqlCMD.ExecuteNonQuery()
 
-                        cExpr = "EXEC SPWOW_GENXPERT_REPDATA  @nMode=1,@cRepId= '" + ReportId + "' ,@dFromDt ='" + FromDate + "',@dToDt = '" + ToDate + "'"
+                        GenRepMstTemptable(AppXtreme, ReportId, 1, 1, cFilter, addnlFilterId, "", cAddFilter)
+
+
+                        If cXpertRepCode.Trim().ToUpper() = "R1" Then
+                            CreatePmt(AppXtreme, FromDate, ToDate, ReportId)
+                        End If
+
+
+                        cExpr = "EXEC SPWOW_GENXPERT_REPDATA  @nMode=1,@cRepId= '" + ReportId + "' ,@dFromDt ='" + FromDate + "',@dToDt = '" + ToDate + "',@bGetPmtOnTheFly=1"
 
 
                         cErrMsg = cExpr.Replace("'", "")
@@ -2060,12 +2208,31 @@ Public Class MDIParent1
                         AppXtreme.sqlCMD.CommandText = cExpr1
                         AppXtreme.sqlCMD.ExecuteNonQuery()
 
+                        cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	'" + cPeriodDisp.Replace("'", "") + "' As   Error_Msg, getdate() as START_TIME, 3   "
+                        AppXtreme.sqlCMD.CommandText = cExpr1
+                        AppXtreme.sqlCMD.ExecuteNonQuery()
+
+
+
+
                         AppXtreme.sqlCMD.CommandText = cExpr
                         AppXtreme.sqlCMD.CommandType = CommandType.Text
                         AppXtreme.sqlADP.SelectCommand = AppXtreme.sqlCMD
                         AppXtreme.sqlADP.Fill(AppXtreme.dset, "TREPORT")
 
+
+
+                        cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	'PROC EXECUTED ' As   Error_Msg, getdate() as START_TIME, 3   "
+                        AppXtreme.sqlCMD.CommandText = cExpr1
+                        AppXtreme.sqlCMD.ExecuteNonQuery()
+
+
                         If AppXtreme.dset.Tables("TREPORT").Rows.Count > 0 Then
+
+                            cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	' RECORD FOUND' As   Error_Msg, getdate() as START_TIME, 3   "
+                            AppXtreme.sqlCMD.CommandText = cExpr1
+                            AppXtreme.sqlCMD.ExecuteNonQuery()
+
 
                             If AppXtreme.dset.Tables("TREPORT").Columns.Contains("errmsg") Then
                                 If Convert.ToString(AppXtreme.dset.Tables("TREPORT").Rows(0).Item("errmsg")) <> "" Then
@@ -2083,9 +2250,11 @@ Public Class MDIParent1
                                 End If
                             End If
 
+                            cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	' CHECKING IMG COL' As   Error_Msg, getdate() as START_TIME, 3   "
+                            AppXtreme.sqlCMD.CommandText = cExpr1
+                            AppXtreme.sqlCMD.ExecuteNonQuery()
 
-
-                            'InsertImgDataWOW(AppXtreme, AppXtreme.dset.Tables("TREPORT"))
+                            InsertImgDataWOW(AppXtreme, AppXtreme.dset.Tables("TREPORT"))
 
 
                             If System.IO.File.Exists(cFileFullPath) Then
@@ -2093,8 +2262,13 @@ Public Class MDIParent1
                             End If
 
 
+                            cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	' DELETE OLD FILE' As   Error_Msg, getdate() as START_TIME, 3   "
+                            AppXtreme.sqlCMD.CommandText = cExpr1
+                            AppXtreme.sqlCMD.ExecuteNonQuery()
+
+
                             If iAttachmenttype = 2 Then
-                                '  printRDlcAudit(AppXtreme, AppXtreme.dset.Tables("TREPORT"), ReportId, cFilterDisplay, cCompanyName, ReportName, cFromD, cToD, cPath, cFileFullPath, bDebug)
+                                ' printRDlcAudit(AppXtreme, AppXtreme.dset.Tables("TREPORT"), ReportId, cFilterDisplay, cCompanyName, ReportName, cFromD, cToD, cPath, cFileFullPath, bDebug)
                             Else
                                 If AppXtreme.dset.Tables("TREPORT").Columns.Contains("TOTAL_MODE") Then
                                     AppXtreme.dset.Tables("TREPORT").Columns.Remove("TOTAL_MODE")
@@ -2104,7 +2278,19 @@ Public Class MDIParent1
                                     AppXtreme.dset.Tables("TREPORT").Columns.Remove("org_rowno")
                                 End If
 
-                                CopyToExcelWow(AppXtreme.dset.Tables("TREPORT"), cFileFullPath)
+
+                                cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	' COPY TO CSV START' As   Error_Msg, getdate() as START_TIME, 3   "
+                                AppXtreme.sqlCMD.CommandText = cExpr1
+                                AppXtreme.sqlCMD.ExecuteNonQuery()
+
+
+                                ' CopyToExcelWow(AppXtreme.dset.Tables("TREPORT"), cFileFullPath, ReportName, cPeriodDisp, cRepFilterDisp, ReportId, cPrimaryFilter)
+
+                                cExpr1 = " INSERT email_log	( Error_Msg, START_TIME, STEP )  SELECT 	' COPY TO CSV FININSHED' As   Error_Msg, getdate() as START_TIME, 3   "
+                                AppXtreme.sqlCMD.CommandText = cExpr1
+                                AppXtreme.sqlCMD.ExecuteNonQuery()
+
+
                             End If
 
                             If System.IO.File.Exists(cFileFullPath) Then
@@ -2144,6 +2330,675 @@ Public Class MDIParent1
             End If
         End Try
     End Sub
+
+
+    Private Sub CreatePmt(appRep As XtremeMethods.MISnCRM, cFromDt As String, cToDt As String, cRepid As String)
+        Try
+            Dim cExpr As String = ""
+
+            appRep.dmethod.WriteToErrorLog("STEP 1", "PMTBUILD", "", "", "PMTBUILD", "")
+
+
+            Dim cPmtDatewise As String = Convert.ToString(appRep.GETCONFIG("", "REPORTS", "PMT_BUILD_DATEWISE", True))
+
+            If cPmtDatewise.Trim() = "1" Then
+                appRep.dmethod.WriteToErrorLog("STEP 1.5 DATE WISE PMT IS ENABLE", "PMTBUILD", "", "", "PMTBUILD", "")
+                Return
+            End If
+
+            cExpr = "if object_id('tempdb..#pmtops','U') is not null " + vbCrLf +
+                        "DROP TABLE #pmtops
+"
+
+            If Not appRep.dmethod.SelectCmdTOSql(cExpr) Then
+                Return
+            End If
+
+
+            cExpr = "if object_id('tempdb..#pmtcbs','U') is not null " + vbCrLf +
+                    "DROP TABLE #pmtcbs"
+
+            If Not appRep.dmethod.SelectCmdTOSql(cExpr) Then
+                Return
+            End If
+
+            appRep.dmethod.WriteToErrorLog("STEP 2", "PMTBUILD", "", "", "PMTBUILD", "")
+
+
+
+            cExpr = "Select  product_code,bin_id,dept_id,quantity_in_stock cbs_qty,purchase_ageing_days,shelf_ageing_days into #pmtops from pmt01106 where 1=2 "
+
+            appRep.sqlCMD.CommandText = cExpr
+            appRep.sqlCMD.ExecuteNonQuery()
+
+            cExpr = "Select  product_code,bin_id,dept_id,quantity_in_stock cbs_qty,purchase_ageing_days,shelf_ageing_days into  #pmtcbs from pmt01106 where 1=2 "
+
+
+            appRep.sqlCMD.CommandText = cExpr
+            appRep.sqlCMD.ExecuteNonQuery()
+
+            appRep.dmethod.WriteToErrorLog("STEP 3", "PMTBUILD", "", "", "PMTBUILD", "")
+
+
+
+            'cExpr = "EXEC SPWOW_GENXPERT_OBSCBS_STK '" + cFromDt + "','" + cToDt + "','" + cRepid + "'"
+
+
+            cExpr = "Declare @cErr varchar(max) " + vbCrLf +
+                        "EXEC SPWOW_GENXPERT_PMTSTK_ONTHEFLY '" + cFromDt + "','" + cToDt + "','" + cRepid + "',@cErrormsg=@cErr output" + vbCrLf +
+                        "Select  isnull(@cErr,'') as  errmsg"
+
+
+
+
+            appRep.dmethod.WriteToErrorLog("STEP 3.5" + cExpr, "PMTBUILD", "", "", "PMTBUILD", "")
+
+
+
+            If appRep.dset.Tables.Contains("TPMT") Then
+                appRep.dset.Tables.Remove("TPMT")
+            End If
+
+
+            appRep.sqlCMD.CommandText = cExpr
+            appRep.sqlCMD.CommandType = CommandType.Text
+            appRep.sqlADP.SelectCommand = appRep.sqlCMD
+            appRep.sqlADP.Fill(appRep.dset, "TPMT")
+
+
+            If appRep.dset.Tables("TPMT").Rows.Count > 0 Then
+                If appRep.dset.Tables("TPMT").Columns.Contains("errmsg") Then
+                    If Convert.ToString(appRep.dset.Tables("TPMT").Rows(0).Item("errmsg")) <> "" Then
+                        Return
+                    End If
+                End If
+            End If
+
+
+            appRep.dmethod.WriteToErrorLog("Step  4", "PMTBUILD", "", "", "PMTBUILD", "")
+
+
+        Catch ex As Exception
+            appRep.ErrorShow(ex)
+        Finally
+            appRep.dmethod.WriteToErrorLog("Step 5", "PMTBUILD", "", "", "PMTBUILD", "")
+        End Try
+    End Sub
+
+
+    'Private Function printRDlcAudit(AppXtreme As XtremeMethods.MISnCRM, Dt As DataTable, gRepID As String, cFilterDisplay As String, gCompanyName As String, gReportname As String, cFrom As String, ctoDate As String, cPath As String, cFileName As String, bDebug As Boolean) As Boolean
+
+    '    Try
+
+    '        Dim flag As Boolean
+    '        Dim flag1 As Boolean = False
+    '        Dim flag2 As Boolean = False
+    '        Dim bImgcol As Boolean = False
+    '        Dim bCenterText As Boolean = False
+    '        Dim bLandscape As Boolean = False
+    '        Dim bhidepageheader As Boolean = False
+    '        Dim cAddress As String = ""
+    '        Dim cphone As String = ""
+
+    '        If Dt.Columns.Contains("IMAGE") Then
+    '            bImgcol = True
+    '            bCenterText = True
+    '            If (Microsoft.VisualBasic.CompilerServices.Operators.CompareString(Convert.ToString(AppXtreme.GETCONFIG("", "XTREME", "IMAGE_LANDSCAPE", True, "WIZCNF.INI")), "1", False) <> 0) Then
+    '                bLandscape = False
+    '            Else
+    '                bLandscape = True
+    '            End If
+    '        End If
+
+
+    '        If (Microsoft.VisualBasic.CompilerServices.Operators.CompareString(Convert.ToString(AppXtreme.GETCONFIG("", "XTREME", "HIDE_PAGEHEADER", True, "WIZCNF.INI")), "1", False) <> 0) Then
+    '            bhidepageheader = False
+    '        Else
+    '            bhidepageheader = True
+    '        End If
+
+
+    '        cExpr = "select a.*,(case when b.col_mode=2 then cast(1 as int) else cast(0 as int) end) as calculative_col,'' as CAL_COLUMN_GRP,'' as COL_VALUE_TYPE," + vbCrLf +
+    '                    "cast(0 as bit) as Required from wow_xpert_rep_det  a " + vbCrLf +
+    '                    "join wow_xpert_report_cols_expressions b on a.column_id= b.column_id " + vbCrLf +
+    '                    "where  rep_id = '" + gRepID + "' "
+
+    '        AppXtreme.dmethod.SelectCmdTOSql(AppXtreme.dset, cExpr, "REP_DET", False, True)
+
+
+    '        Dim cFile As String = cPath + "\rdlcfile\" + gRepID + ".rdlc"
+
+    '        If Not System.IO.Directory.Exists(cPath + "\rdlcfile") Then
+    '            System.IO.Directory.CreateDirectory(cPath + "\rdlcfile")
+    '        End If
+
+    '        If System.IO.File.Exists(cFile) Then
+    '            System.IO.File.Delete(cFile)
+    '        End If
+
+    '        Dim m_Fields(0, 8) As Object
+
+    '        Dim dtCopy As New DataTable
+    '        dtCopy = Dt.Copy
+
+    '        Dim Dr() As DataRow = dtCopy.Select("total_mode=1", "")
+    '        If Dr.Length > 0 Then
+    '            For Each d As DataRow In Dr
+    '                dtCopy.Rows.Remove(d)
+    '            Next
+    '        End If
+
+    '        dtCopy.AcceptChanges()
+
+    '        Dim cPeriod As String = "Reporting Period From : " & cFrom & " to " & ctoDate
+
+
+    '        Call GetFieldListAudit(dtCopy, m_Fields, bDebug, AppXtreme.dset.Tables("REP_DET"))
+
+    '        Dim rptTable As New XtremeMethods.generateRdlc
+
+
+    '        Me.cExpr = " Select company_name,Address1,Address2,(city) as Cityname,phones_fax,Pin  from company (NOLOCK)  WHERE company_code='01'"
+    '        Try
+    '            If (Me.dmethod.SelectCmdTOSql(Me.dset, Me.cExpr, "tCompany1", False, False)) Then
+    '                Dim str As String = ""
+    '                Dim str1 As String = ""
+    '                Dim str2 As String = ""
+    '                Dim str3 As String = ""
+    '                Dim str4 As String = ""
+
+    '                str = Conversions.ToString(Interaction.IIf(Information.IsDBNull(RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Address1"))), "", RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Address1"))))
+    '                str1 = Conversions.ToString(Interaction.IIf(Information.IsDBNull(RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Address2"))), "", RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Address2"))))
+    '                str2 = Conversions.ToString(Interaction.IIf(Information.IsDBNull(RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Cityname"))), "", RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("Cityname"))))
+    '                str3 = Conversions.ToString(Interaction.IIf(Information.IsDBNull(RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("pin"))), "", RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("pin"))))
+    '                str4 = Conversions.ToString(Interaction.IIf(Information.IsDBNull(RuntimeHelpers.GetObjectValue(Me.dset.Tables("tcompany1").Rows(0)("phones_fax"))), "", String.Concat("Phone No.", Strings.Trim(Conversions.ToString(Me.dset.Tables("tcompany1").Rows(0)("phones_fax"))))))
+
+    '                cAddress = Conversions.ToString(Microsoft.VisualBasic.CompilerServices.Operators.AddObject(str, Interaction.IIf(Microsoft.VisualBasic.CompilerServices.Operators.CompareString(str, "", False) = 0, str1, String.Concat(",", str1))))
+    '                cAddress = Conversions.ToString(Microsoft.VisualBasic.CompilerServices.Operators.AddObject(cAddress, Interaction.IIf(Microsoft.VisualBasic.CompilerServices.Operators.CompareString(cAddress, "", False) = 0, "", String.Concat(",", str2))))
+
+    '                cphone = str4
+
+    '            End If
+    '        Catch exception As System.Exception
+    '            ProjectData.SetProjectError(exception)
+    '            ProjectData.ClearProjectError()
+    '        End Try
+
+
+    '        With rptTable
+
+    '            .cFilter = cFilterDisplay
+    '            .cCompany = gCompanyName
+    '            .cAddress = cAddress
+    '            .cphone = cphone
+    '            .cRepTitle = ""
+    '            .cReportingPeriod = cPeriod
+    '            .cReportName = gReportname
+    '            .blnwrap = True
+    '            .pImgSource = 0
+    '            .cPrintedby = ""
+    '            .blncolor = True
+    '            .m_Fields = m_Fields
+    '            .ReportType = "TABLE"
+    '            .bRowTotal = False
+    '            .bShowimg = False
+    '            .bImgcol = bImgcol
+    '            .bImgData = True
+    '            .iImgViewMode = 1
+    '            .bLandscape = bLandscape
+    '            .bCenterText = bCenterText
+    '            .bHidePageHeader = bhidepageheader
+    '            .RdlcTable(cFile)
+    '        End With
+
+
+    '        ViewReport(cFile, gReportname, dtCopy, 2, cFileName, gReportname, bDebug)
+
+
+
+    '    Catch ex As Exception
+    '        If bDebug = True Then
+    '            MsgBox(ex.Message)
+    '        End If
+    '    End Try
+    'End Function
+
+    Private Function ViewReport(ByVal PrepName As String, ByVal CrepName As String, ByVal dTable As DataTable, ByVal iEmail As Integer, ByRef cFile As String, ByRef cFileName As String, Optional bDebug As Boolean = False) As Boolean
+        Dim flag As Boolean
+        Dim reportViewer As Microsoft.Reporting.WinForms.ReportViewer = New Microsoft.Reporting.WinForms.ReportViewer()
+        Dim localReport As Microsoft.Reporting.WinForms.LocalReport = New Microsoft.Reporting.WinForms.LocalReport()
+        Try
+            Try
+                localReport = reportViewer.LocalReport
+                localReport.ExecuteReportInCurrentAppDomain(AppDomain.CurrentDomain.Evidence)
+                Dim reportDataSource As Microsoft.Reporting.WinForms.ReportDataSource = New Microsoft.Reporting.WinForms.ReportDataSource()
+                localReport.EnableExternalImages = True
+                localReport.EnableHyperlinks = True
+                localReport.ReportPath = PrepName
+                reportDataSource.Name = "DataSet1"
+                reportDataSource.Value = dTable
+                localReport.DataSources.Add(reportDataSource)
+                reportViewer.RefreshReport()
+                flag = If(Me.ExportFile(reportViewer, CrepName, iEmail, cFile, cFileName, dTable), True, False)
+            Catch exception As System.Exception
+
+
+                If bDebug = True Then
+                    MsgBox(exception.Message)
+                End If
+                ProjectData.SetProjectError(exception)
+                'Me.dmethod.WriteToErrorLog(exception.Message, "ViewReport", "AutoRepGeneration", "")
+                flag = False
+                ProjectData.ClearProjectError()
+            End Try
+        Finally
+            reportViewer.Dispose()
+            localReport.Dispose()
+        End Try
+        Return flag
+    End Function
+    Dim StartupPath As String = Application.StartupPath
+    Private Function ExportFile(ByVal rv As ReportViewer, ByVal cRepName As String, ByVal iEmail As Integer, ByRef cFile As String, ByRef cFileName As String, ByVal Dt As DataTable) As Boolean
+        Dim flag As Boolean
+        Dim numArray As Byte() = Nothing
+        Dim str As String
+        Dim str1 As String
+        Dim str2 As String
+        Dim warningArray As Warning()
+        Try
+            Try
+                If (Not My.Computer.FileSystem.DirectoryExists(String.Concat(Me.StartupPath, "\Tempreport"))) Then
+                    My.Computer.FileSystem.CreateDirectory(String.Concat(Me.StartupPath, "\Tempreport"))
+                End If
+                Dim str3 As String = "xls"
+                If (iEmail = 1) Then
+                    str3 = ".xls"
+                ElseIf (iEmail <> 2) Then
+                    str3 = If(iEmail <> 3, ".pdf", ".xls")
+                Else
+                    str3 = ".pdf"
+                End If
+
+                'Dim startupPath() As String = {Me.StartupPath, "\Tempreport\", cRepName, Strings.Format(DateAndTime.Now, "dd-MM-yy_hh_mm_tt"), str3}
+                'cFile = String.Concat(startupPath)
+                'cFileName = String.Concat(cRepName, Strings.Format(DateAndTime.Now, "dd-MM-yy_hh_mm_tt"), str3)
+
+                Dim startupPath() As String = {Me.StartupPath, "\Tempreport\", cRepName, str3}
+                cFile = String.Concat(startupPath)
+                cFileName = String.Concat(cRepName, str3)
+
+
+                If (My.Computer.FileSystem.FileExists(cFile)) Then
+                    My.Computer.FileSystem.DeleteFile(cFile)
+                End If
+
+                If (iEmail = 1) Then
+                    str = Nothing
+                    str1 = Nothing
+                    str2 = Nothing
+                    startupPath = Nothing
+                    warningArray = Nothing
+                    numArray = rv.LocalReport.Render("EXCEL", Nothing, str, str1, str2, startupPath, warningArray)
+                ElseIf (iEmail = 2) Then
+                    str2 = Nothing
+                    str1 = Nothing
+                    str = Nothing
+                    startupPath = Nothing
+                    warningArray = Nothing
+                    numArray = rv.LocalReport.Render("PDF", Nothing, str2, str1, str, startupPath, warningArray)
+                ElseIf (iEmail <> 3) Then
+                    str2 = Nothing
+                    str1 = Nothing
+                    str = Nothing
+                    startupPath = Nothing
+                    warningArray = Nothing
+                    numArray = rv.LocalReport.Render("PDF", Nothing, str2, str1, str, startupPath, warningArray)
+                Else
+                    Me.CopyToExcel(Dt, cFile)
+                End If
+                If (iEmail <> 3) Then
+                    Dim fileStream As System.IO.FileStream = New System.IO.FileStream(cFile, FileMode.Create)
+                    fileStream.Write(numArray, 0, CInt(numArray.Length))
+                    fileStream.Close()
+                    fileStream = Nothing
+                    numArray = Nothing
+                End If
+                flag = True
+            Catch exception As System.Exception
+                ProjectData.SetProjectError(exception)
+                'Me.dmethod.WriteToErrorLog(exception.Message, "ExportFile", "AutoRepGeneration", "")
+                flag = False
+                ProjectData.ClearProjectError()
+            End Try
+        Finally
+        End Try
+        Return flag
+    End Function
+
+
+
+    Private Sub GetFieldListAudit(ByRef dt As DataTable, ByRef m_Fields As Object, bDebug As Boolean, dtrep As DataTable)
+
+        'Try
+        '    Dim nCount As Int16
+
+
+        '    With dt
+        '        nCount = dt.Columns.Count
+
+        '        If dt.Columns.Contains("Total_mode") Then
+        '            nCount = nCount - 1
+        '        End If
+
+        '        If dt.Columns.Contains("org_rowno") Then
+        '            nCount = nCount - 1
+        '        End If
+
+        '        Dim mField(nCount, 11) As Object  ' 10 privoius
+        '        Dim i As Integer = 0
+        '        Dim cHeader As String = ""
+        '        Dim cName As String = ""
+        '        For Each Dc As DataColumn In .Columns
+
+        '            cHeader = Dc.ColumnName
+        '            Dc.ColumnName = Dc.ColumnName.Replace(" ", "").Replace(".", "")
+
+        '            Dim iCal As Int32 = 0
+        '            Dim igrp As Int32 = 0
+
+        '            If Dc.ColumnName.ToUpper() = "TOTAL_MODE" Then
+        '                Continue For
+        '            End If
+
+        '            If Dc.ColumnName.ToUpper() = "ORG_ROWNO" Then
+        '                Continue For
+        '            End If
+
+        '            Dim Dr As DataRow() = dtrep.Select("col_header Like '%" + cHeader + "%' ", "")
+
+
+        '            If Dr.Length > 0 Then
+        '                iCal = ConvertInt(Dr(0)("calculative_col"))
+        '                If convertbool(Dr(0)("grp_total")) Then
+        '                    igrp = 1
+        '                Else
+        '                    igrp = 0
+        '                End If
+        '            End If
+
+        '            mField.SetValue(Dc.ColumnName, i, 0) 'Column Expression
+        '            mField.SetValue(Dc.ColumnName, i, 1) 'Column Name
+
+        '            mField.SetValue(iCal, i, 2)   'subtotal
+        '            mField.SetValue(iCal, i, 7)    'calculated
+        '            mField.SetValue(iCal, i, 3)    'div factor
+        '            mField.SetValue(igrp, i, 4)    'group
+        '            mField.SetValue(1.2, i, 5) 'Width
+
+        '            mField.SetValue(cHeader, i, 8) 'Column Heading
+
+        '            If iCal > 0 Then
+        '                mField.SetValue(2, i, 9) 'Decimal Place
+        '                mField.SetValue(1, i, 6) 'Repeat Duplicates
+        '            Else
+        '                mField.SetValue(0, i, 9) 'Decimal Place
+        '                mField.SetValue(1, i, 6) 'Repeat Duplicates
+        '            End If
+
+        '            i += 1
+        '        Next
+        '        m_Fields = mField
+        '    End With
+
+        'Catch ex As Exception
+        '    If bDebug = True Then
+        '        MsgBox(ex.Message)
+        '    End If
+        'End Try
+
+
+        Try
+            Dim nCount As Int16
+
+
+            With dt
+                nCount = dt.Columns.Count
+
+                If dt.Columns.Contains("Total_mode") Then
+                    nCount = nCount - 1
+                End If
+
+                If dt.Columns.Contains("org_rowno") Then
+                    nCount = nCount - 1
+                End If
+
+
+                If dt.Columns.Contains("IMG_ID") Then
+                    nCount = nCount - 1
+                End If
+
+
+                Dim mField(nCount, 11) As Object  ' 10 privoius
+                Dim i As Integer = 0
+                Dim cHeader As String = ""
+                Dim cName As String = ""
+                For Each Dc As DataColumn In .Columns
+
+                    cHeader = Dc.ColumnName
+                    Dc.ColumnName = Dc.ColumnName.Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "")
+                    cHeader = cHeader.Replace("_", " ").Replace("XTAB", "")
+
+                    Dim iCal As Int32 = 0
+                    Dim igrp As Int32 = 0
+
+                    If Dc.ColumnName.ToUpper().Contains("TOTAL_MODE") Then
+                        Continue For
+                    End If
+
+
+                    If Dc.ColumnName.ToUpper().Contains("IMG_ID") Then
+                        Continue For
+                    End If
+
+                    If Dc.ColumnName.ToUpper().Contains("ORG_ROWNO") Then
+                        Continue For
+                    End If
+
+                    Dim Dr As DataRow() = dtrep.Select("col_header Like '%" + cHeader.Trim() + "%' ", "")
+
+                    Dim dWitdh As Int32 = 2
+                    Dim colSix As Int32 = 1.2
+
+                    Try
+                        If (Dr.Length > 0) Then
+                            dWitdh = Dr(0)("decimal_place")
+                            colSix = Dr(0)("col_width") / 12
+                        End If
+                    Catch ex As Exception
+
+                    End Try
+
+
+
+                    If Dr.Length > 0 Then
+                        iCal = ConvertINT(Dr(0)("calculative_col"))
+                        If convertbool(Dr(0)("grp_total")) Then
+                            igrp = 1
+                        Else
+                            igrp = 0
+                        End If
+                    ElseIf cHeader.ToUpper().Contains("TRANSACTION") Then
+                        iCal = 0
+                    Else
+                        iCal = 1
+                    End If
+
+                    mField.SetValue(Dc.ColumnName, i, 0) 'Column Expression
+                    mField.SetValue(Dc.ColumnName, i, 1) 'Column Name
+
+                    mField.SetValue(iCal, i, 2)   'subtotal
+                    mField.SetValue(iCal, i, 7)    'calculated
+                    mField.SetValue(iCal, i, 3)    'div factor
+                    mField.SetValue(igrp, i, 4)    'group
+                    mField.SetValue(colSix, i, 5) 'Width
+
+                    mField.SetValue(cHeader, i, 8) 'Column Heading
+
+                    If iCal > 0 Then
+                        ' mField.SetValue(2, i, 9) 'Decimal Place
+                        mField.SetValue(dWitdh, i, 9) 'Decimal Place
+                        mField.SetValue(1, i, 6) 'Repeat Duplicates
+                    Else
+                        mField.SetValue(0, i, 9) 'Decimal Place
+                        mField.SetValue(1, i, 6) 'Repeat Duplicates
+                    End If
+
+                    i += 1
+                Next
+                m_Fields = mField
+            End With
+
+        Catch ex As Exception
+            If bDebug = True Then
+                MsgBox(ex.Message)
+            End If
+        End Try
+
+    End Sub
+
+    Private Function InsertImgDataWOW(appRep As XtremeMethods.MISnCRM, Dt As DataTable) As Boolean
+
+
+        Dim cImg As Byte()
+        Dim cexpr As String = ""
+
+        If Not Dt.Columns.Contains("IMG_ID") Then
+            Return False
+        End If
+
+        Dim iIndex As Integer = 0
+
+        iIndex = Dt.Columns.IndexOf("IMG_ID")
+
+        If Dt.Columns.Contains("IMAGE") Then
+            Dt.Columns.Remove("IMAGE")
+        End If
+
+        If Dt.Columns.Contains("IMGFOUND") Then
+            Dt.Columns.Remove("IMGFOUND")
+        End If
+
+        Dt.Columns.Add("IMAGE", GetType(System.Byte())).SetOrdinal(iIndex)
+        Dt.Columns.Add("IMGFOUND", GetType(System.String))
+
+        Dim cData As String = appRep.dmethod.cDatabase + "_IMAGE..IMAGE_INFO"
+
+        Dim cPXnType As String = ""
+        Try
+            With Dt
+                For i As Integer = 0 To .Rows.Count - 1
+                    Try
+                        Dim cImgID As String = Convert.ToString(.Rows(i).Item("IMG_ID"))
+
+                        If cImgID.Trim <> "" Then  ' "cPXnType And bCrossEXcel = True Then
+                            Dim Dr As DataRow() = Dt.Select("IMG_ID= '" + cImgID + "' AND ISNULL(IMGFOUND,'') = 'T'", "")
+                            If Dr.Length > 0 Then
+                                Dt.Rows(i).Item("IMAGE") = Dr(0)("IMAGE")
+                                Dt.Rows(i).Item("IMGFOUND") = "T"
+                            Else
+                                cexpr = "Select prod_image From " + cData + " Where IMG_ID= '" + cImgID + "'"
+                                appRep.sqlCMD.CommandText = cexpr
+                                Dim b As Byte() = appRep.sqlCMD.ExecuteScalar()
+                                Dt.Rows(i).Item("IMAGE") = b
+                                Dt.Rows(i).Item("IMGFOUND") = "T"
+                            End If
+                        End If
+
+
+
+                    Catch ex As Exception
+
+                    End Try
+                Next
+
+
+            End With
+
+            Return True
+        Catch ex As Exception
+            Return False
+        Finally
+            If Dt.Columns.Contains("IMGFOUND") Then
+                Dt.Columns.Remove("IMGFOUND")
+            End If
+
+            If Dt.Columns.Contains("IMG_ID") Then
+                Dt.Columns.Remove("IMG_ID")
+            End If
+        End Try
+
+    End Function
+
+
+    Private Sub GenRepMstTemptable(appRep As XtremeMethods.MISnCRM, repid As String, iBulkImport As Int32, iShowEstimate As Int32, cFilter As String, CAddFilterid As String, colapFilter As String, cAddFilter As String)
+        Try
+
+            cExpr = "if object_id('tempdb..#wow_xpert_rep_mst','U') is not null " + vbCrLf +
+                    "DROP TABLE #wow_xpert_rep_mst"
+
+            If Not appRep.dmethod.SelectCmdTOSql(cExpr) Then
+                Return
+            End If
+
+            Dim iBulk As Int32 = 0
+            If iBulkImport = 3 Then
+                iBulk = 1
+            End If
+
+
+            cExpr = "select *," + iBulk.ToString() + " as  BulkExport,CONVERT(VARCHAR(MAX), '') as addnlFiltercriteria,CONVERT(NVARCHAR(MAX),'') xtab_cols_list, " + vbCrLf +
+                    "1 as getPmtFromApp," + iShowEstimate.ToString() + " showEstimateItems  " + vbCrLf +
+                    "into #wow_xpert_rep_mst from wow_xpert_rep_mst (nolock) where rep_id= '" + repid + "'"
+
+
+            appRep.sqlCMD.CommandText = cExpr
+            appRep.sqlCMD.ExecuteNonQuery()
+
+
+            cExpr = "Update #wow_xpert_rep_mst set addnlFiltercriteria ='" + cAddFilter + "', addnlFilterId = '" + CAddFilterid + "' , FILTER_CRITERIA = '" + cFilter + "',olap_filter_criteria = '" + colapFilter + "' where rep_id= '" + repid + "'"
+
+
+            appRep.dmethod.WriteToErrorLog(cExpr, "FILTERMST", "", "", "FILTERMST", "")
+
+
+            appRep.sqlCMD.CommandText = cExpr
+            appRep.sqlCMD.ExecuteNonQuery()
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+
+
+    Public Sub Logevent(ByVal Appobj As XtremeMethods.MISnCRM, ByVal cProcessID As String, ByVal cProcess As String, ByVal cStart As String, ByVal cEnd As String, ByVal cRmk As String, ByVal bAdd As Boolean)
+        Try
+            Dim cExpr As String = ""
+
+            If bAdd = True Then
+
+                cExpr = "INSERT Campaign_log( PROCESS_ID,Process_Name, Start_Time, End_Time, Remarks )  " + vbCrLf +
+                        "SELECT '" + cProcessID + "' AS PROCESS_ID,'" + cProcess + "' AS Process_Name, '" + cStart + "' AS Start_Time, '" + cEnd + "' As End_Time, '" + cRmk + "' AS Remarks "
+            Else
+                cExpr = "UPDATE Campaign_log SET End_Time= '" + cEnd + "' WHERE PROCESS_ID= '" + cProcessID + "' and process_name = '" + cProcess + "'"
+            End If
+
+            Appobj.dmethod.SelectCmdTOSql(cExpr, False)
+
+        Catch ex As Exception
+            Appobj.dmethod.WriteToErrorLog(ex.Message, "Logevent", "", "", "LOGEVENT", "EVENT")
+        End Try
+    End Sub
+
 
     Private Sub MRPCAT(bPrice As Boolean)
         Try
@@ -2233,8 +3088,536 @@ Public Class MDIParent1
         End Try
     End Sub
 
+    Private Sub dd()
+        Try
+            Dim Ds As New DataSet
+            Dim responseBody As String = System.IO.File.ReadAllText("C:\Users\Anil\Desktop\4.txt")
+            Ds = JsonConvert.DeserializeObject(Of DataSet)(responseBody)
+            Dim i As Int16 = Ds.Tables.Count
+            Dim rootData As wowRpt = JsonConvert.DeserializeObject(Of wowRpt)(responseBody)
+
+            Dim c As String = Convert.ToString(rootData.reportDataUpto)
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+
+    Public Sub EXPORTREPORT(cConStr As String, dtReport As DataTable, ByVal dt1 As Date, ByVal dt2 As Date, ByVal cRepid As String,
+                                          cRdlcFile As String, cFilter As String, bImgDataType As Boolean, bCrossType As Boolean, cDocType As String, cFilePath As String, ByRef cErr As String)
+
+
+        Try
+            Dim bolap As Boolean = False
+            Dim bImgcol As Boolean = False
+            Dim blncntr As Boolean = False
+            Dim Data_fields As Object
+            Dim rptTable As New XtremeMethods.generateRdlc
+            Dim cExpr As String = ""
+            Dim cFrom As String = dt1.ToString("dd-MM-yyyy")
+            Dim cTo As String = dt2.ToString("dd-MM-yyyy")
+
+
+            'Try
+            '    Dim servicePath As String = AppDomain.CurrentDomain.BaseDirectory
+            '    Dim filePath As String = Path.Combine(servicePath, "MyData.xml")
+            '    dtReport.WriteXml(filePath, XmlWriteMode.WriteSchema)
+            'Catch ex As Exception
+
+            'End Try
+
+
+            Dim cPeriod As String = "Reporting Period From : " & cFrom & " To " & cTo
+
+
+            Dim sqlcon As New SqlConnection(cConStr)
+
+            Dim sqlcom As New SqlCommand()
+
+            If sqlcon.State <> ConnectionState.Open Then
+                sqlcon.Open()
+            End If
+
+            sqlcom.Connection = sqlcon
+            sqlcom.CommandTimeout = 0
+
+            If dset.Tables.Contains("REP_MST") Then
+                dset.Tables.Remove("REP_MST")
+            End If
+
+            Dim cRepFilter = cFilter.Replace(vbCrLf, " ")
+            cRepFilter = "Filter : " & IIf(cRepFilter = "", "N.A", cRepFilter)
+
+
+            cExpr = "Select *  From wow_xpert_Rep_mst (NOLOCK) Where  rep_id = '" + cRepid + "'"
+
+            sqlcom.CommandText = cExpr
+            Dim da As New SqlDataAdapter(sqlcom)
+            da.Fill(dset, "REP_MST")
+
+
+            cExpr = "select * from olapconfig (nolock)  where activated =1"
+
+            sqlcom.CommandText = cExpr
+            da = New SqlDataAdapter(sqlcom)
+            da.Fill(dset, "tOlap")
+
+            If dset.Tables("tOlap").Rows.Count > 0 Then
+                bolap = True
+            End If
+
+
+            Dim xpertCode As String = Convert.ToString(dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE"))
+
+
+            If xpertCode = "R1" And bolap = True Then
+                bImgDataType = False
+            End If
+
+            Dim cFile As String = ""
+            cFile = cRdlcFile
+
+
+            If System.IO.File.Exists(cFile) Then
+                System.IO.File.Delete(cFile)
+            End If
+
+
+
+
+
+
+
+            For Each dc As DataColumn In dtReport.Columns
+                dc.ColumnName = dc.ColumnName.Replace("(", "").Replace(")", "").Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("/", "").Replace("\", "")
+            Next
+
+            If dtReport.Columns.Contains("IMAGE") Then
+                If Not dtReport.Columns.Contains("IMG_ID") Then
+                    dtReport.Columns.Add("IMG_ID")
+                End If
+                bImgcol = True
+            End If
+
+
+            Dim m_Fields(0, 8) As Object
+            Dim cAddress As String = ""
+            Dim cPhone As String = ""
+            Dim cTitle As String = ""
+
+            Dim cPrintby As String = ""
+            Dim cSMS As String = ""
+            Dim cReportype As String = ""
+            Dim cRepcode As String = ""
+
+            Dim COl_field As Object
+            Dim arrwidth(20) As Integer
+            Dim intDatawidth As Decimal
+            Dim cHeader As String = ""
+            Dim cRow As String = ""
+            Dim cDatacol As String = ""
+            Dim cvalue As String = ""
+            Dim bdecimal As Boolean = False
+            Dim srow(1, 1) As String 'For Static Rows
+            Dim dtView As New DataView
+            Dim cRecFiltervalue1 As String = ""
+
+            Dim iMatrix As Integer = 1
+            Dim cGroup As String = ""
+            Dim cCompany As String = ""
+            Dim DtSpan As New DataTable
+            Dim bCenterText As Boolean = False
+            Dim cAddFilterView As String = ""
+            Dim bTranCol As Boolean = False
+            Dim cTranWhere As String = ""
+            Dim bStockNa As Boolean = False
+            Dim bPeriodBase As Boolean = False
+            Dim cImgwhere As String = ""
+            Dim cPeriodwhere As String = ""
+            Dim bLandscape As Boolean = False
+            Dim iImageView As Int32 = 1
+            Dim iRowHeight As Double = 0.5
+            Dim iHeight As Double = 0.4
+
+            If dtReport.Columns.Contains("IMAGE") Then
+                bImgcol = True
+                bCenterText = True
+            Else
+                cImgwhere = " where 1=2 "
+            End If
+
+            If dtReport.Columns.Contains("TransactionType") Then
+                bTranCol = True
+            End If
+
+            If dtReport.Columns.Contains("StockNa") Then
+                bStockNa = True
+            End If
+
+            If dtReport.Columns.Contains("PERIODBASE") Then
+                bPeriodBase = True
+                cPeriodwhere = ""
+            Else
+                cPeriodwhere = " where 1=2 "
+            End If
+
+            Dim cCustomOrder As String = ""
+
+            If bTranCol = False Then
+                cTranWhere = " where 1=2 "
+            End If
+
+            Dim iMonthT As Int32 = DateDiff(DateInterval.Month, dt1, dt2) + 1
+
+
+
+            Dim pRepName As String = cFile
+
+            If IsDBNull(dset.Tables("rep_mst").Rows(0).Item("CrossTab_type")) Then
+                dset.Tables("rep_mst").Rows(0).Item("CrossTab_type") = 0
+            End If
+
+            Dim bColRepeat As Boolean = convertbool(dset.Tables("rep_mst").Rows(0).Item("col_repeat"))
+
+            Dim bshowReportHeader As Boolean = convertbool(dset.Tables("rep_mst").Rows(0).Item("showReportHeader"))
+
+            Dim gReportname As String = Convert.ToString(dset.Tables("rep_mst").Rows(0).Item("rep_name"))
+
+
+            If bPeriodBase = True Then
+                cReportype = "MATRIX"
+            ElseIf ConvertINT(dset.Tables("rep_mst").Rows(0).Item("CrossTab_type")) = 0 Then
+                cReportype = "TABLE"
+            ElseIf ConvertINT(dset.Tables("rep_mst").Rows(0).Item("CrossTab_type")) = 1 Then
+                cReportype = "MATRIX"
+            ElseIf ConvertINT(dset.Tables("rep_mst").Rows(0).Item("CrossTab_type")) = 2 Then
+                cReportype = "MATRIX"
+            End If
+
+            cRepcode = "X001"
+
+
+
+
+
+            If bshowReportHeader = True Then
+                cCompany = ""
+                cAddress = ""
+                cPhone = ""
+                cPrintby = ""
+            End If
+
+
+            Select Case cReportype
+                Case "TABLE"
+
+
+                    With rptTable
+                        .cCompany = cCompany
+                        .cAddress = cAddress
+                        .cphone = cPhone
+                        .cRepTitle = cTitle
+                        .cReportingPeriod = cPeriod
+                        .cReportName = gReportname
+                        .blnwrap = True
+                        .pImgSource = 0
+                        .cPrintedby = cPrintby
+                        .blncolor = True
+                        .cSMS = cSMS
+                        .cFilter = cRepFilter
+                        .m_Fields = m_Fields
+                        .ReportType = "TABLE"
+                        .iHeight = iHeight
+                        .iRowHeight = iRowHeight
+                        .bShowimg = bImgcol
+                        .cGroup = cGroup
+                        .bImgcol = bImgcol
+                        .bSorting = False
+                        .bTotal = True
+                        .bNewSheet = False
+                        .bTopHeader = False
+                        .bImgData = bImgDataType
+                        .iImgViewMode = iImageView
+                        .bTopHeader = DtSpan.Rows.Count > 0
+                        .DtMerge = DtSpan
+                        .bHidePageHeader = IIf(cCompany.Trim() = "", True, False)
+                        .cRepCat = "XNS"
+                        .bLandscape = True
+                        .cCrossOrder = ""
+                        .bCenterText = bCenterText
+                        .bHideZero = False
+
+                        .RdlcTable(cFile)
+
+                    End With
+
+                Case "MATRIX"
+
+                    Data_fields = New ArrayList()
+                    COl_field = New ArrayList()
+                    Dim cStockNAWhere As String = ""
+                    Dim cCrossTypeOrder As String = ""
+
+                    If bStockNa = False Then
+                        cStockNAWhere = " and replace(a.col_header,' ','') <> 'StockNa' "
+                    End If
+
+                    If dtReport.Columns.Contains("purAgeingOrder") Then
+                        cCrossTypeOrder = "PURAGEINGORDER"
+                    ElseIf dtReport.Columns.Contains("shelfAgeingOrder") Then
+                        cCrossTypeOrder = "SHELFAGEINGORDER"
+                        Dim ct As String = dtReport.Columns("shelfAgeingOrder").DataType.Name
+                    ElseIf dtReport.Columns.Contains("para2Order") Then
+                        cCrossTypeOrder = "PARA2ORDER"
+                    ElseIf dtReport.Columns.Contains("SizeOrder") Then
+                        cCrossTypeOrder = "SIZEORDER"
+                    ElseIf dtReport.Columns.Contains("MonthOrder") Then
+                        cCrossTypeOrder = "MonthOrder"
+                    End If
+
+
+                    Dim i, j As Integer
+
+                    For i = 0 To dtReport.Columns.Count - 1
+                        Data_fields.Add(UCase(Trim(dtReport.Columns(i).ColumnName)))
+                    Next i
+
+                    cExpr = "Select distinct col_header,replace(a.col_header,' ','') as col_expr,replace(a.col_header,' ','') as key_col,grp_total," + vbCrLf +
+                                "(case when b.col_mode = 2 then CAST (1 as bit) Else CAST(0 As bit) End ) As calculative_col, Dimension,Measurement_col," + vbCrLf +
+                                "col_width,Decimal_Place,'' as col_Type,Col_order " + vbCrLf +
+                                "from wow_xpert_rep_det a (NOLOCK)  " + vbCrLf +
+                                "join wow_xpert_report_cols_expressions b (NOLOCK) on a.column_id = b.column_id " + vbCrLf +
+                                "where rep_id = '" + cRepid + "' " + cStockNAWhere + vbCrLf +
+                                "UNION ALL" + vbCrLf +
+                                "Select 'Transaction type' col_header,'Transactiontype' col_expr,'Transactiontype' as key_col,CAST(0 as bit) as grp_total," + vbCrLf +
+                                "CAST(0 as bit) As calculative_col, CAST(0 as bit) as Dimension,CAST(0 as bit) as Measurement_col," + vbCrLf +
+                                "20 as col_width,0 as Decimal_Place,'' as col_Type,-1 " + cTranWhere + vbCrLf +
+                                "UNION ALL" + vbCrLf +
+                                "Select 'Image' col_header,'Image' col_expr,'Image' as key_col,CAST(0 as bit) as grp_total," + vbCrLf +
+                                "CAST(0 as bit) As calculative_col, CAST(0 as bit) as Dimension,CAST(0 as bit) as Measurement_col," + vbCrLf +
+                                "20 as col_width,0 as Decimal_Place,'' as col_Type,-2  Where 1=2" + vbCrLf +
+                                "UNION ALL" + vbCrLf +
+                                "Select 'Period Base' col_header,'Periodbase' col_expr,'Periodbase' as key_col,CAST(0 as bit) as grp_total," + vbCrLf +
+                                "CAST(0 as bit) As calculative_col, CAST(1 as bit) as Dimension,CAST(0 as bit) as Measurement_col," + vbCrLf +
+                                "10 as col_width,0 as Decimal_Place,'' as col_Type,0 " + cPeriodwhere + vbCrLf +
+                                "order by calculative_col,Col_order"
+
+
+                    sqlcom.CommandText = cExpr
+                    Dim da1 As New SqlDataAdapter(sqlcom)
+                    da1.Fill(dset, "tMcol")
+
+                    Dim iloop As Integer = 0
+
+                    For Each Dr As DataRow In dset.Tables("tMcol").Rows
+                        Dr.BeginEdit()
+                        If Convert.ToBoolean(Dr("calculative_col")) = False And iloop = 0 Then
+                            Dr("grp_total") = False
+                        End If
+                        Dr("col_expr") = Convert.ToString(Dr("col_expr")).Replace("(", "").Replace(")", "").Replace("%", "").Replace("-", "").Replace(".", "").Replace("/", "").Replace("\", "")
+                        Dr("key_col") = Convert.ToString(Dr("key_col")).Replace("(", "").Replace(")", "").Replace("%", "").Replace("-", "").Replace(".", "").Replace("/", "").Replace("\", "")
+                        Dr.EndEdit()
+                        iloop = iloop + 1
+                    Next
+
+                    Dim iLenth As Integer = 0
+                    Dim cDimension As String = ""
+                    Dim bCustom As Boolean = False
+
+
+                    With dset.Tables("tMcol")
+
+                        For j = 0 To .Rows.Count - 1
+
+                            If UCase(Trim(.Rows(j).Item("col_type"))) = "CUSTOM" Then
+                                bCustom = True
+                            Else
+                                bCustom = False
+                            End If
+
+                            If .Rows(j).Item("calculative_col") = False And .Rows(j).Item("Dimension") = False Then
+
+                                If .Rows(j).Item("grp_total") = True Then 'And Convert.ToString(.Rows(j).Item("col_expr")).ToUpper <> "IMAGE" Then
+                                    COl_field.Add("GRP$" + IIf(bCustom = False, .Rows(j).Item("col_expr"), .Rows(j).Item("key_col")))
+                                Else
+                                    COl_field.Add(IIf(bCustom = False, .Rows(j).Item("col_expr"), .Rows(j).Item("key_col")))
+                                End If
+
+                                iLenth = .Rows(j).Item("col_width")
+                                Dim iL As Integer = .Rows(j).Item("col_header").ToString.Length
+                                iLenth = Math.Abs(iLenth - iL)
+                                cRow = cRow + Trim(.Rows(j).Item("col_header")) + Space(iLenth + 11)
+
+                            End If
+
+                            'New For calculative Which are Not Selected
+                            If .Rows(j).Item("calculative_col") = True And
+                                   .Rows(j).Item("Measurement_col") = False Then
+
+                                COl_field.Add("GRPC$" + .Rows(j).Item("key_col"))
+
+                                iLenth = .Rows(j).Item("col_width")
+                                Dim iL As Integer = .Rows(j).Item("col_header").ToString.Length
+                                iLenth = Math.Abs(iLenth - iL)
+                                cRow = cRow + Trim(.Rows(j).Item("col_header")) + Space(iLenth + 11)
+
+                            End If
+                            '-------
+
+                            If .Rows(j).Item("Dimension") = True Then
+                                cHeader = IIf(bCustom = False, .Rows(j).Item("col_expr"), .Rows(j).Item("key_col"))
+                                cDimension = .Rows(j).Item("col_header")
+                                intDatawidth = (.Rows(j).Item("col_width")) * 0.1
+                            End If
+                        Next
+
+                    End With
+                    '----get static old rows
+
+                    Dim dRowst() As DataRow
+                    dRowst = dset.Tables("tMcol").Select("Measurement_col=TRUE")
+                    Dim irow As Integer = dRowst.Length
+                    Dim ir As Integer = 0
+                    If blncntr = False Then
+                        If dRowst.Length > 0 Then
+                            ReDim srow(dRowst.Length, 1)
+                            For k As Integer = 0 To dRowst.Length - 1
+                                srow(k, 0) = UCase(Trim(dRowst(k).Item("Key_col")))
+                                srow(k, 1) = dRowst(k).Item("col_header")
+                                If dRowst(k).Item("decimal_place") = 0 Then
+                                    bdecimal = False
+                                Else
+                                    bdecimal = True
+                                End If
+                            Next
+                        End If
+                    Else
+                        irow = irow * 2
+                        ReDim srow(irow, 1)
+                        For l As Integer = 0 To dRowst.Length - 1
+                            ir = ir + l
+                            srow(ir, 0) = UCase(Trim(dRowst(l).Item("Key_col")))
+                            srow(ir + 1, 0) = UCase(Trim(dRowst(l).Item("Key_col"))) + "_CNTR"
+                            srow(ir, 1) = dRowst(l).Item("col_header")
+                            srow(ir + 1, 1) = dRowst(l).Item("col_header") + " %"
+                            If dRowst(l).Item("decimal_place") = 0 Then
+                                bdecimal = False
+                            Else
+                                bdecimal = False
+                            End If
+                            ir = ir + 1
+                        Next
+                    End If
+
+                    With rptTable
+                        .pConstring = cConStr
+                        .cCompany = cCompany
+                        .cAddress = cAddress
+                        .cphone = cPhone
+                        .cRepTitle = cTitle
+                        .cReportingPeriod = cPeriod
+                        .cReportName = gReportname
+                        .cPrintedby = cPrintby
+                        .cFilter = cRepFilter
+                        .colField = UCase(cHeader)      'cell header
+                        .cDimension = UCase(cDimension)
+                        .cellValue = cvalue
+                        .cRowHeader = Trim(cRow) '      'Row header
+                        .cColWidth = (intDatawidth).ToString + "in" '"0.8in"
+                        .m_Fields = Data_fields 'm_Fields
+                        .d_Fields = COl_field 'd_Fields  'Columns list
+                        .srow = srow
+                        .blndecimal = bdecimal
+                        .blncolor = True
+                        .gRepType = "XNS"
+                        .ReportType = "MATRIX"
+                        .bRowTotal = True
+                        .cGroup = "GRPSUB_SECTION_NAME"
+                        .bShowimg = bImgcol
+                        .bImgcol = bImgcol
+                        .bImgData = bImgDataType
+                        .iImgViewMode = iImageView
+                        .bHideZero = False
+                        .bHidePageHeader = IIf(cCompany.Trim() = "", True, False)
+                        .cRepCat = "XNS"
+                        .bLandscape = True
+                        .cCrossOrder = cCrossTypeOrder
+                        .RdlcTable(cFile)
+                    End With
+
+            End Select
+
+
+            EXPORTFILETTT(pRepName, cFilePath, cDocType.Trim().ToUpper(), dtReport)
+
+
+        Catch ex As Exception
+            cErr = ex.Message
+        End Try
+    End Sub
+
+
+    Public Sub EXPORTFILETTT(cFile As String, cFilePath As String, cDocType As String, dtCopy As DataTable)
+        ' Use Using block to auto-dispose
+        Using reportViewer As New ReportViewer()
+            Dim localReport As LocalReport = reportViewer.LocalReport
+
+            ' Enable options
+            localReport.EnableExternalImages = True
+            'localReport.EnableHyperlinks = True
+            localReport.ReportPath = cFile
+
+            ' Clear old datasources
+            localReport.DataSources.Clear()
+            localReport.DataSources.Add(New ReportDataSource("DataSet1", dtCopy))
+
+            ' Render to byte array
+            Dim mimeType As String = Nothing
+            Dim encoding As String = Nothing
+            Dim fileNameExtension As String = Nothing
+            Dim streams As String() = Nothing
+            Dim warnings As Warning() = Nothing
+
+            Dim renderedBytes As Byte() = localReport.Render(
+            cDocType.Trim().ToUpper(),
+            Nothing,
+            mimeType,
+            encoding,
+            fileNameExtension,
+            streams,
+            warnings
+        )
+
+            ' Write directly to file
+            File.WriteAllBytes(cFilePath, renderedBytes)
+        End Using
+    End Sub
+
+
+
     Private Sub MDIParent1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+        'Dim dt As New DataTable
+        'dt.ReadXml("C:\Users\Anil\Desktop\MyData.xml")
+
+
+        'dt.Columns.Add("IMG_ID", GetType(System.String))
+        'With dt
+        '    For i As Integer = 0 To .Rows.Count - 1
+        '        .Rows(i).Item("IMG_ID") = .Rows(i).Item("IMAGE")
+        '    Next
+        'End With
+
+
+        'Dim cerr As String = ""
+
+        'EXPORTREPORT(appRep.dmethod.cConStr, dt, "2026-01-01", "2026-02-27", "01W0002961", "C:\Users\Anil\Desktop\01W0002961.rdlc", "", False, True, "PDF", "C:\Users\Anil\Desktop\MyData.pdf", cerr)
+
+
+        'Dim c As String = appRep.Encrypt("มรรร")
+        appRep.ApplyTheme("FRMUDRC3", Me, False)
+        ' dd()
         ' joint()
         TSSHORTCLOSE.Visible = False
         TSSEPSHORTCLOSE.Visible = False
@@ -2329,7 +3712,6 @@ Public Class MDIParent1
         appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TVIEWRPTLIST", False, True)
 
 
-
         Me.cload = True
     End Sub
 
@@ -2338,18 +3720,18 @@ Public Class MDIParent1
 
             'Hide Bulk Export and grid view  if olap is enable
             If bR1Olap = True And xrepCode.Trim().ToUpper() = "R1" Then
-                BulkExport.Visible = False
+                BulkExport.Visible = True
                 GRIDVIEW.Visible = False
+                BCPEXPORT.Visible = False
             Else
                 BulkExport.Visible = True
                 GRIDVIEW.Visible = True
+                BCPEXPORT.Visible = True
             End If
         Catch ex As Exception
 
         End Try
     End Sub
-
-
 
     Private Sub PriceCatInsert()
         Try
@@ -2595,8 +3977,6 @@ Public Class MDIParent1
             appRep.dmethod.SelectCmdTOSql(cExpr, False)
 
 
-
-
         Catch ex As Exception
         Finally
             bFirstPriceCat = True
@@ -2662,6 +4042,8 @@ Public Class MDIParent1
 
             Dim cExpr As String = ""
 
+
+
             'cExpr = "Select dept_id as [Loc id], Dept_name as [Loc Name] ,area_name as [Area], City ,State from loc_view where report_blocked=1 order by dept_id"
 
             'appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TRBLK", False, True)
@@ -2725,6 +4107,18 @@ Public Class MDIParent1
         Dim cImage As String = ""
         Dim cPmtDatewise As String = ""
 
+        str = Convert.ToString(appRep.GETCONFIG("", "XTREME", "INDIANFORMAT", True))
+
+        If str.Trim() = "1" Then
+            bIndianFormat = True
+        Else
+            bIndianFormat = False
+        End If
+
+
+        str = ""
+
+
         cPmtDatewise = Convert.ToString(appRep.GETCONFIG("", "REPORTS", "PMT_BUILD_DATEWISE", True))
 
         If cPmtDatewise.Trim() = "1" Then
@@ -2741,6 +4135,9 @@ Public Class MDIParent1
             bRepeatImg = False
         End If
 
+        'cExpr = "select mode from reporting_source (nolock)"
+
+        'Dim colab As Int32 = ConvertINT(appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, appRep.dmethod.cConStr))
 
         cExpr = "select xpert_rep_code from olapconfig where activated =1 and xpert_rep_code ='R1' "
 
@@ -2749,8 +4146,10 @@ Public Class MDIParent1
 
         If colab <> "" Then
             bR1Olap = True
+            bR1Olap_ORG = True
         Else
             bR1Olap = False
+            bR1Olap_ORG = False
         End If
 
 
@@ -2765,7 +4164,6 @@ Public Class MDIParent1
         Dim cVAlue As String = Convert.ToString(appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, appRep.dmethod.cConStr))
 
 
-
         If (cVAlue.Trim() = "1") Then
             bShowPPWITHOUTDP = True
         Else
@@ -2778,7 +4176,6 @@ Public Class MDIParent1
         Else
             Me.bOPtStock = True
         End If
-
 
 
         If (Microsoft.VisualBasic.CompilerServices.Operators.CompareString(Convert.ToString(appRep.GETCONFIG(startupPath, "XTREME", "OPT_GIT", True, "WIZCNF.INI")), "1", False) <> 0) Then
@@ -2823,7 +4220,7 @@ Public Class MDIParent1
 
 
 
-        Dim cONFIGMULTI As String = appRep.GETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", Module1.appMain.GLOCATION)
+        Dim cONFIGMULTI As String = appRep.GETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", Module1.appMain.GLOCATION)
         If (Microsoft.VisualBasic.CompilerServices.Operators.CompareString(cONFIGMULTI, "1", False) = 0) Then
             Me.iImageView = 1
         ElseIf (Microsoft.VisualBasic.CompilerServices.Operators.CompareString(cONFIGMULTI, "2", False) = 0) Then
@@ -2889,6 +4286,8 @@ Public Class MDIParent1
         '    Module1.gImagepath = cONFIG
         'End If
 
+
+
         'cImage = appRep.GETCONFIG("", "MASTERS", "ART_PICT_PATH", True)
 
 
@@ -2898,6 +4297,7 @@ Public Class MDIParent1
         'Else
         '    gImagepath = cImage
         'End If
+
 
 
 
@@ -2943,7 +4343,7 @@ Public Class MDIParent1
         'Me.txtAge2.Text = str3
         'Dim str4 As String = Strings.Trim(Convert.ToString(Me.appRep.GETCONFIG(startupPath, "XTREME", "AGE3", True, "WIZCNF.INI")))
         'Me.txtAge3.Text = str4
-
+        ' Me.  
 
 
         Dim str5 As String = ""
@@ -3044,10 +4444,14 @@ Public Class MDIParent1
             '    bShowCompanyDet = True
             'End If
 
+
+
         Catch ex As System.Exception
             appRep.ErrorShow(ex)
+
         End Try
     End Sub
+
 
     Private Sub BIND(iMode As Integer, cWhere As String)
         Try
@@ -3331,7 +4735,7 @@ Public Class MDIParent1
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "REP_DET", False, True)
 
         ElseIf tablename.ToUpper() = "REP_MST" Then
-            cExpr = "  select * from wow_xpert_rep_MST where  rep_id = '" + repId + "' "
+            cExpr = "select * from wow_xpert_rep_MST  where  rep_id = '" + repId + "' "
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "REP_MST", False, True)
 
 
@@ -3375,24 +4779,13 @@ Public Class MDIParent1
                 Return
             End If
 
-            If cXnType.ToUpper() = "Z" Then
-                tsCopyReport.Enabled = False
-            Else
-                tsCopyReport.Enabled = True
-            End If
+            tsCopyReport.Enabled = True
 
             gRepID = cRepid
             CApplyFilterid = ""
 
             Dim cReportT As String = "tReport_" + gRepID
-
-            If cCol = "LAYOUT" And cXnType = "Z" Then
-                BIND(22, cRepid)
-                If appRep.dset.Tables("TREPDETAIL").Rows.Count > 0 Then
-                    Dim F As New FrmLayout("", "", appRep.dset.Tables("TREPDETAIL"), appRep, False)
-                    F.ShowDialog()
-                End If
-            ElseIf cCol = "LAYOUT" Then
+            If cCol = "LAYOUT" Then
                 BIND(2, cRepid)
                 If appRep.dset.Tables("TREPDETAIL").Rows.Count > 0 Then
                     Dim F As New FrmLayout("", "", appRep.dset.Tables("TREPDETAIL"), appRep, True)
@@ -3500,7 +4893,7 @@ Public Class MDIParent1
 
                     TviewSelect(cRepid, 1)
                     cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
-                    tsView_Click(1)
+                    tsView_Click(6) 'EXCEL EXPORT
 
 
                 Catch ex As Exception
@@ -3511,6 +4904,32 @@ Public Class MDIParent1
                     Me.appRep.ReportCategory1 = gcRepCat
 
                 End Try
+            ElseIf cCol = "PDFEXPORT" Then
+
+                Try
+                    bRUNFROMMAIN = False
+                    bGridView = True
+                    bError = False
+                    TSLROW.Text = ""
+
+                    If appRep.dset.Tables.Contains(cReportT) Then
+                        appRep.dset.Tables.Remove(cReportT)
+                    End If
+
+                    TviewSelect(cRepid, 1)
+                    cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
+                    tsView_Click(7) 'PDF EXPORT
+
+
+                Catch ex As Exception
+                Finally
+                    Dim cDbName As String = gDatabase
+                    Dim bValid As Boolean = True
+                    OLAPCONNECTION(cDbName, False, bValid)
+                    Me.appRep.ReportCategory1 = gcRepCat
+
+                End Try
+
 
             ElseIf cCol = "BULKEXPORT" And cXnType <> "Z" Then
 
@@ -3527,9 +4946,9 @@ Public Class MDIParent1
 
                     TviewSelect(cRepid, 1)
                     cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
-                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
-                        Return
-                    End If
+                    'If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                    '    Return
+                    'End If
 
 
                     tsView_Click(3)
@@ -3543,6 +4962,42 @@ Public Class MDIParent1
                     Me.appRep.ReportCategory1 = gcRepCat
 
                 End Try
+
+
+            ElseIf cCol = "BCPEXPORT" Then
+
+                Try
+                    bRUNFROMMAIN = False
+                    bGridView = True
+                    bError = False
+                    TSLROW.Text = ""
+
+
+
+                    If appRep.dset.Tables.Contains(cReportT) Then
+                        appRep.dset.Tables.Remove(cReportT)
+                    End If
+
+                    TviewSelect(cRepid, 1)
+                    cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
+
+                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                        Return
+                    End If
+
+
+                    tsView_Click(33)
+
+
+                Catch ex As Exception
+                Finally
+                    Dim cDbName As String = gDatabase
+                    Dim bValid As Boolean = True
+                    OLAPCONNECTION(cDbName, False, bValid)
+                    Me.appRep.ReportCategory1 = gcRepCat
+
+                End Try
+
 
             ElseIf cCol = "PRINTVIEW" And cXnType <> "Z" Then
 
@@ -3603,7 +5058,7 @@ Public Class MDIParent1
                 Opentable("rep_det", gRepID)
                 Opentable("REP_DET_SMRY", gRepID)
 
-                cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
+                cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
 
                 appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
 
@@ -3627,6 +5082,7 @@ Public Class MDIParent1
                 Frm.bShowPPWITHOUTDP = bShowPPWITHOUTDP
                 Frm.ITemType = 1
                 Frm.bMaster = bMaster
+                Frm.Olap = bR1Olap_ORG
                 cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
                 Frm.ShowDialog()
 
@@ -3665,7 +5121,7 @@ Public Class MDIParent1
 
 
                 TviewSelect(cRepid, 1)
-                tsView_Click()
+                tsView_Click(2)
 
                 If appRep.dset.Tables.Contains(cReportT) Then
                     If appRep.dset.Tables(cReportT).Rows.Count > 0 Then
@@ -3683,11 +5139,9 @@ Public Class MDIParent1
 
                 Opentable("rep_mst", gRepID)
 
-                If cXnType.ToUpper() = "Z" Then
-                    DeleteRep_Old()
-                Else
-                    DeleteRep()
-                End If
+
+                DeleteRep()
+
 
                 BIND(1, "")
 
@@ -3735,38 +5189,7 @@ Public Class MDIParent1
         End Try
     End Sub
 
-    Private Sub DeleteRep_Old()
-        Try
-            If blnInActive = False And bCopy = False Then
 
-                If MsgBox("Are you Sure to Delete this Report?", MsgBoxStyle.YesNo + MsgBoxStyle.Information, "Xpert Reporting System") = MsgBoxResult.Yes Then
-
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_filter WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_filter_det WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_det WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_crm WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_sch WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM Tasks WHERE task_id='" & gRepID & "' "
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM Rep_ADV_FILTER WHERE rep_id='" & gRepID & "' "
-                    appRep.sqlCMD.ExecuteNonQuery()
-                    appRep.sqlCMD.CommandText = "DELETE FROM rep_mst WHERE rep_id='" & gRepID & "'"
-                    appRep.sqlCMD.ExecuteNonQuery()
-
-
-
-                End If
-
-            End If
-        Catch ex As Exception
-            appRep.ErrorShow(ex)
-        End Try
-    End Sub
 
     Private Sub DeleteRep()
         Try
@@ -4043,7 +5466,7 @@ Public Class MDIParent1
                         Me.appRep.OpenTable(Me.appRep.ReportCategory1, "rep_filter", Me.gRepID)
                         Me.appRep.OpenTable(Me.appRep.ReportCategory1, "rep_filter_det", Me.gRepID)
 
-                        cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
+                        cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
                         appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
 
                         cExpr = "select distinct Filter_name,Adv_filter_id from Rep_Adv_Filter where rep_id= '" + gRepID + "'  order by  Filter_name"
@@ -4410,7 +5833,7 @@ Public Class MDIParent1
             Me.appRep.OpenTable(Me.appRep.ReportCategory1, "rep_filter", Me.gRepID)
             Me.appRep.OpenTable(Me.appRep.ReportCategory1, "rep_filter_det", Me.gRepID)
 
-            cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
+            cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + gRepID + "'"
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
 
             cExpr = "select distinct Filter_name,Adv_filter_id from Rep_Adv_Filter where rep_id= '" + gRepID + "'  order by  Filter_name"
@@ -4946,6 +6369,11 @@ Public Class MDIParent1
             appRep.sqlCMD.CommandText = cExpr
             appRep.sqlCMD.ExecuteNonQuery()
 
+            'If cFilter.Length > 1 Then
+            '    cFilter = " ( " + cFilter + " ) "
+            'End If
+
+            cAddFilter = cAddFilter.Replace("'", "''")
 
             cExpr = "Update #wow_xpert_rep_mst set addnlFiltercriteria ='" + cAddFilter + "', addnlFilterId = '" + CAddFilterid + "' , FILTER_CRITERIA = '" + cFilter + "',olap_filter_criteria = '" + colapFilter + "' where rep_id= '" + repid + "'"
             appRep.dmethod.WriteToErrorLog(cExpr, "FILTERMST", "", "", "FILTERMST", "")
@@ -5118,31 +6546,89 @@ Public Class MDIParent1
         End Try
     End Function
 
+    Private Sub addDummyRow(json As String, dt As DataTable)
+        Try
+            Dim root As JObject = JObject.Parse(json)
 
-    Private Sub GetWowreport(cOrgRepNAme As String, reportid As String, cFrom As String, cTo As String, cFromCompdate As String, ctoComdate As String, pFilter As String, openfilter As String, outputfilter As String, rawdata As String, download As String, ByRef cErr As String)
+            ' Extract the array
+            Dim arr As JArray = CType(root("reportData"), JArray)
+
+
+            ' ===== Create columns with correct datatypes =====
+            For Each prop As JProperty In CType(arr(0), JObject).Properties()
+                Select Case prop.Value.Type
+                    Case JTokenType.Integer
+                        dt.Columns.Add(prop.Name, GetType(Decimal))
+
+                    Case JTokenType.Float
+                        dt.Columns.Add(prop.Name, GetType(Decimal))
+
+                    Case Else
+                        dt.Columns.Add(prop.Name, GetType(String))
+                End Select
+            Next
+
+            ' ===== Add rows =====
+            For Each obj As JObject In arr
+                Dim row As DataRow = dt.NewRow()
+
+                For Each prop As JProperty In obj.Properties()
+                    If prop.Value.Type = JTokenType.Null Then
+                        row(prop.Name) = DBNull.Value
+                    Else
+                        row(prop.Name) = prop.Value.ToObject(dt.Columns(prop.Name).DataType)
+                    End If
+                Next
+
+                dt.Rows.Add(row)
+            Next
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+
+    Private Sub GetWowreport(cOrgRepNAme As String, reportid As String, cFrom As String, cTo As String, cFromCompdate As String, ctoComdate As String, NFilterId As String, Pfilterid As String, outputfilterid As String, rawdata As String, download As String, cfileformat As String, cSaleFromdt As String, cSaleTodT As String, ByRef cErr As String)
         Try
 
             Dim fullUrl As String = ""
+            Dim cWizapp As String = "true"
+            Dim cAgeName As String = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("ageingGroupName"))
+            Dim cLogLocation = appRep.GLOCATION
+
+            If appRep.GHO_LOCATION.Trim().ToUpper() = appRep.GLOCATION.Trim().ToUpper() Then
+                cLogLocation = ""
+            End If
+
+            If download = True Then
+                cWizapp = "false"
+            End If
+
             bMsgForOlap = ""
+            cValidUptoDate = ""
+
 again:
 
 
             If cFromCompdate.Trim() = "" Then
-                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true"
+                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true&nVersionNo=4&primaryFilterId=" + Pfilterid + "&namedFilterId=" + NFilterId + "&outPutFilterId=" + outputfilterid + "&ageingSettingName=" + cAgeName + "&loggedLocationId=" + cLogLocation + "&outputFormat=" + cfileformat + "&cSalePeriodFromDt=" + cSaleFromdt + "&cSalePeriodToDt=" + cSaleTodT
             Else
-                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true"
+                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=true&bCalledFromWizapp=true&nVersionNo=4&primaryFilterId=" + Pfilterid + "&namedFilterId=" + NFilterId + "&outPutFilterId=" + outputfilterid + "&ageingSettingName=" + cAgeName + "&loggedLocationId=" + cLogLocation + "&outputFormat=" + cfileformat + "&cSalePeriodFromDt=" + cSaleFromdt + "&cSalePeriodToDt=" + cSaleTodT
             End If
 
+
+
             'TESTING URL
+            If System.IO.File.Exists(Application.StartupPath + "\testolap.txt") Then
+                If cFromCompdate.Trim() = "" Then
+                    fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true&nVersionNo=4&primaryFilterId=" + Pfilterid + "&namedFilterId=" + NFilterId + "&outPutFilterId=" + outputfilterid + "&ageingSettingName=" + cAgeName + "&loggedLocationId=" + cLogLocation + "&outputFormat=" + cfileformat + "&cSalePeriodFromDt=" + cSaleFromdt + "&cSalePeriodToDt=" + cSaleTodT
+                Else
+                    fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=true&bCalledFromWizapp=true&nVersionNo=4&primaryFilterId=" + Pfilterid + "&namedFilterId=" + NFilterId + "&outPutFilterId=" + outputfilterid + "&ageingSettingName=" + cAgeName + "&loggedLocationId=" + cLogLocation + "&outputFormat=" + cfileformat + "&cSalePeriodFromDt=" + cSaleFromdt + "&cSalePeriodToDt=" + cSaleTodT
+                End If
+            End If
 
-            'If cFromCompdate.Trim() = "" Then
-            '    fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true"
-            'Else
-            '    fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true"
-            'End If
-
-
-            Dim JsonBody As String = "{""PrimaryFilter"": """ + pFilter + """, ""OpenFilter"": """ + openfilter + """, ""OutputFilter"": """ + outputfilter + """}"
+            Dim JsonBody As String = "{}"
 
             appRep.dmethod.WriteToErrorLog(fullUrl, "OLAP", "", "", "OLAP", "")
 
@@ -5150,6 +6636,12 @@ again:
 
             appRep.dmethod.WriteToErrorLog(cGToken, "OLAP", "", "", "OLAP", "")
 
+            Dim Ds As New DataSet
+            Dim Dt As New DataTable
+            Dim DtF As New DataTable
+
+            Dim cReportT As String = "tReport_" + gRepID
+            Dt.TableName = cReportT
 
             Dim Token As String = cGToken
             Dim request As HttpWebRequest = CType(WebRequest.Create(fullUrl), HttpWebRequest)
@@ -5165,9 +6657,194 @@ again:
             End Using
 
             ' Get the response
-            Dim response As HttpWebResponse = CType(request.GetResponse(), HttpWebResponse)
+
+            Dim response As HttpWebResponse
+            Try
+                response = CType(request.GetResponse(), HttpWebResponse)
+
+            Catch ex As WebException
+                Dim s As Stream = ex.Response.GetResponseStream()
+                Dim SR As StreamReader = New StreamReader(s)
+                Dim m As String = SR.ReadToEnd()
+                Dim c As String = m
+                If c.ToUpper().Contains("SERVERNOTAVAILABLE") Then
+                    cErr = m
+                    Return
+                Else
+                    cErr = m
+                    MsgBox(cErr)
+                    Return
+                End If
+            End Try
+
+            Dim responseBody As String = ""
+            ' Check if the request was successful
+            If response.StatusCode = HttpStatusCode.OK Then
+                Using streamReader As New StreamReader(response.GetResponseStream())
+                    responseBody = streamReader.ReadToEnd()
+                End Using
+            End If
+
+            If responseBody.Length > 0 And responseBody.ToUpper().Contains("REPORTDATA") Then 'download.Trim().ToUpper() = "FALSE" Then
+
+                Try
+
+                    Ds = JsonConvert.DeserializeObject(Of DataSet)(responseBody)
+
+                    If Ds.Tables.Count > 0 Then
+                        '  Dt = Ds.Tables("reportData").Copy
+                        Dt.TableName = cReportT
+                        cValidUptoDate = Convert.ToString(Ds.Tables(1).Rows(0)(0))
+                        'Forhandling decimal 
+                        addDummyRow(responseBody, Dt)
+                    End If
+                Catch ex As Exception
+                    Dt = JsonConvert.DeserializeObject(Of DataTable)(responseBody)
+                    Dt.TableName = cReportT
+                Finally
+                    Ds = New DataSet
+                End Try
+
+
+                If appRep.dset.Tables.Contains(cReportT) Then
+                    appRep.dset.Tables.Remove(cReportT)
+                End If
+
+                appRep.dset.Tables.Add(Dt)
+
+                If Dt.Rows.Count = 50000 Then
+                    bMsgForOlap = "This report might not be complete as it fetched more than 50,000 records. You may proceed with download or filter the data further and rerun to view the report."
+                End If
+
+
+            ElseIf responseBody.Length > 0 And download.Trim().ToUpper() = "TRUE" And cfileformat <> "" Then
+                Dim url As String = ""
+                Dim fileurl As String = ""
+                Dim myDeserializedClass As Root = JsonConvert.DeserializeObject(Of Root)(responseBody)
+                url = myDeserializedClass.UrlFilePath
+                fileurl = "\" + myDeserializedClass.OutputFilePath
+                Try
+
+                    DownloadFileOlab(cOrgRepNAme, url, cfileformat)
+
+                    Dim curldel As String = "https://wizapp.in/olapservice/DeleteUrlFile?cFileUrl=" + fileurl
+                    Dim request1 As HttpWebRequest = CType(WebRequest.Create(curldel), HttpWebRequest)
+                    request1.Method = "GET"
+                    request1.ContentType = "application/json"
+                    request1.Headers.Add("Authorization", "Bearer " & Token)
+
+                    ' Get the response
+                    Dim response1 As HttpWebResponse = CType(request1.GetResponse(), HttpWebResponse)
+
+                    Dim responseBody1 As String = ""
+                    ' Check if the request was successful
+                    If response1.StatusCode = HttpStatusCode.OK Then
+                        Using streamReader As New StreamReader(response1.GetResponseStream())
+                            responseBody1 = streamReader.ReadToEnd()
+                        End Using
+                    End If
+                Catch ex As WebException
+                    Dim s As Stream = ex.Response.GetResponseStream()
+                    Dim SR As StreamReader = New StreamReader(s)
+                    Dim m As String = SR.ReadToEnd()
+                    Dim c As String = m
+                    If c.ToUpper().Contains("SERVERNOTAVAILABLE") Then
+                        cErr = m
+                        Return
+                    Else
+                        cErr = m
+                        MsgBox(cErr)
+                        Return
+                    End If
+                End Try
+
+            End If
+
+        Catch ex As Exception
+            cErr = ex.Message
+            appRep.dmethod.WriteToErrorLog(cErr, "OLAP", "", "", "OLAP", "")
+            MsgBox(ex.Message)
+        End Try
+    End Sub
+
+    Private Sub GetWowreportold(cOrgRepNAme As String, reportid As String, cFrom As String, cTo As String, cFromCompdate As String, ctoComdate As String, pFilter As String, openfilter As String, outputfilter As String, rawdata As String, download As String, ByRef cErr As String)
+        Try
+
+            Dim fullUrl As String = ""
+            Dim cWizapp As String = "true"
+
+            If download = True Then
+                cWizapp = "false"
+            End If
+
+            bMsgForOlap = ""
+            cValidUptoDate = ""
+
+again:
+
+
+            If cFromCompdate.Trim() = "" Then
+                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true&nVersionNo=2"
+            Else
+                fullUrl = "https://wizapp.in/olapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=true&bCalledFromWizapp=true&nVersionNo=2"
+            End If
+
+            'TESTING URL
+
+            If cFromCompdate.Trim() = "" Then
+                fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&bDownloadFile=" + download + "&bFetchRawData=" + rawdata + "&bCalledFromWizapp=true&nVersionNo=2"
+            Else
+                fullUrl = "https://wizapp.in/testolapservice/viewXpertReport?ReportId=" + reportid + "&FromDate=" + cFrom + "&ToDate=" + cTo + "&comparisonFromDate=" + cFromCompdate + "&comparisonToDate=" + ctoComdate + "&bDownloadFile=" + download + "&bFetchRawData=true&bCalledFromWizapp=true&nVersionNo=2"
+            End If
+
+
+            Dim JsonBody As String = "{""PrimaryFilter"": """ + pFilter + """, ""OpenFilter"": """ + openfilter + """, ""OutputFilter"": """ + outputfilter + """}"
+
+            appRep.dmethod.WriteToErrorLog(fullUrl, "OLAP", "", "", "OLAP", "")
+
+            appRep.dmethod.WriteToErrorLog(JsonBody, "OLAP", "", "", "OLAP", "")
+
+            appRep.dmethod.WriteToErrorLog(cGToken, "OLAP", "", "", "OLAP", "")
+
             Dim Ds As New DataSet
-            Dim Dt As DataTable
+            Dim Dt As New DataTable
+            Dim cReportT As String = "tReport_" + gRepID
+            Dt.TableName = cReportT
+
+            Dim Token As String = cGToken
+            Dim request As HttpWebRequest = CType(WebRequest.Create(fullUrl), HttpWebRequest)
+            request.Method = "POST"
+            request.ContentType = "application/json"
+
+            request.Headers.Add("Authorization", "Bearer " & Token)
+
+            Using streamWriter As New StreamWriter(request.GetRequestStream())
+                streamWriter.Write(JsonBody)
+                streamWriter.Flush()
+                streamWriter.Close()
+            End Using
+
+            ' Get the response
+
+            Dim response As HttpWebResponse
+            Try
+                response = CType(request.GetResponse(), HttpWebResponse)
+
+            Catch ex As WebException
+                Dim s As Stream = ex.Response.GetResponseStream()
+                Dim SR As StreamReader = New StreamReader(s)
+                Dim m As String = SR.ReadToEnd()
+                Dim c As String = m
+                If c.ToUpper().Contains("SERVERNOTAVAILABLE") Then
+                    cErr = m
+                    Return
+                Else
+                    cErr = m
+                    MsgBox(ex.Message)
+                    Return
+                End If
+            End Try
+
             Dim responseBody As String = ""
             ' Check if the request was successful
             If response.StatusCode = HttpStatusCode.OK Then
@@ -5177,11 +6854,22 @@ again:
             End If
 
             If responseBody.Length > 0 And download.Trim().ToUpper() = "FALSE" Then
-                Dt = JsonConvert.DeserializeObject(Of DataTable)(responseBody)
 
-                Dim cReportT As String = "tReport_" + gRepID
+                Try
 
-                Dt.TableName = cReportT
+                    Ds = JsonConvert.DeserializeObject(Of DataSet)(responseBody)
+                    If Ds.Tables.Count > 0 Then
+                        Dt = Ds.Tables("reportData").Copy
+                        Dt.TableName = cReportT
+                        cValidUptoDate = Convert.ToString(Ds.Tables(1).Rows(0)(0))
+                    End If
+                Catch ex As Exception
+                    Dt = JsonConvert.DeserializeObject(Of DataTable)(responseBody)
+                    Dt.TableName = cReportT
+                Finally
+                    Ds = New DataSet
+                End Try
+
 
                 If appRep.dset.Tables.Contains(cReportT) Then
                     appRep.dset.Tables.Remove(cReportT)
@@ -5190,9 +6878,10 @@ again:
                 appRep.dset.Tables.Add(Dt)
 
                 If Dt.Rows.Count = 50000 Then
-
                     bMsgForOlap = "This report might not be complete as it fetched more than 50,000 records. You may proceed with download or filter the data further and rerun to view the report."
                 End If
+
+
             ElseIf responseBody.Length > 0 And download.Trim().ToUpper() = "TRUE" Then
                 Dim url As String = ""
                 Dim fileurl As String = ""
@@ -5201,7 +6890,7 @@ again:
                 fileurl = "\" + myDeserializedClass.OutputFilePath
                 Try
 
-                    DownloadFileOlab(cOrgRepNAme, url)
+                    DownloadFileOlab(cOrgRepNAme, url, "CSV")
 
                     Dim curldel As String = "https://wizapp.in/olapservice/DeleteUrlFile?cFileUrl=" + fileurl
                     Dim request1 As HttpWebRequest = CType(WebRequest.Create(curldel), HttpWebRequest)
@@ -5221,10 +6910,9 @@ again:
                     End If
                 Catch ex As Exception
                     cErr = ex.Message
+                    MsgBox(ex.Message)
                 End Try
 
-                '   DownloadFileOlab(cOrgRepNAme, url)
-                cErr = "NA"
             End If
 
         Catch ex As Exception
@@ -5234,16 +6922,26 @@ again:
         End Try
     End Sub
 
-    Sub DownloadFileOlab(repname As String, fileurl As String)
+    Sub DownloadFileOlab(repname As String, fileurl As String, cFileFormat As String)
 
         Dim url As String = fileurl
         Dim savePath As String = ""
 
         Dim sd As New SaveFileDialog
-        sd.Filter = "CSV File|*.CSV"
+        If cFileFormat = "CSV" Then
+            sd.Filter = "CSV File|*.CSV"
+            sd.DefaultExt = "csv"
+        ElseIf cFileFormat = "EXCEL" Then
+            sd.DefaultExt = "Excel"
+            sd.Filter = "Excel File|*.xls"
+        ElseIf cFileFormat = "PDF" Then
+            sd.Filter = "Pdf File|*.pdf"
+            sd.DefaultExt = "Pdf"
+        End If
+
 
         sd.FileName = repname
-        sd.DefaultExt = "csv"
+
         sd.AddExtension = True
 
         If (sd.ShowDialog(Me) = System.Windows.Forms.DialogResult.Cancel) Then
@@ -5256,22 +6954,39 @@ again:
             Try
                 ' Download the file
                 client.DownloadFile(url, savePath)
-                MsgBox("File downloaded successfully to: " & savePath)
+                ' MsgBox("File downloaded successfully to: " & savePath)
+
             Catch ex As Exception
                 MsgBox(ex.Message)
+                Return
             End Try
         End Using
+
+
+        If System.IO.File.Exists(savePath) Then
+            If MsgBox("File downloaded successfully to: " & savePath + vbCrLf + vbCrLf + "Do you Want to Open Exported File.", MsgBoxStyle.YesNo + MsgBoxStyle.Information, "WizApp3S-Xtreme Reporting System") = MsgBoxResult.Yes Then
+                System.Diagnostics.Process.Start(savePath)
+            End If
+        End If
     End Sub
 
 
     Private Sub tsView_Click(Optional iViewMode As Integer = 0)
 
+        Dim bQuery As Boolean = False
         Dim frmRptPeriodG As DateTime
+        Dim primaryFilterId As String = ""
         Dim cWowOlapFilter As String = ""
+        Dim cWowOlapNameFilter As String = ""
         Dim bCross As Boolean = False
         Dim cCampFromperiod As String = ""
         Dim cCampToperiod As String = ""
+        Dim cSalePeriodFrom As String = ""
+        Dim cSalePeriodTo As String = ""
+
+        Dim bAgeCat As Boolean = False
         bMsgForOlap = ""
+        cValidUptoDate = ""
         bError = False
         Dim cAddFilterDet As String = ""
         intMonthNumber = 0
@@ -5297,6 +7012,10 @@ again:
         Dim cAddFilter As String = ""
         TSSHORTCLOSE.Visible = False
         TSSEPSHORTCLOSE.Visible = False
+
+        'bR1Olap_ORG = True
+
+        bR1Olap = bR1Olap_ORG
 
         Dim cReportT As String = "tReport_" + gRepID
         Dim cReportT1 As String = "tReport_" + gRepID + "1"
@@ -5336,9 +7055,20 @@ again:
             Dim cOrgRepNAme As String = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("rep_name"))
             Dim bColReapt As Boolean = convertbool(appRep.dset.Tables("rep_mst").Rows(0).Item("col_repeat"))
 
+            If ConvertINT(appRep.dset.Tables("rep_mst").Rows(0).Item("crossTabusingQuery")) = 1 Then
+                bQuery = True
+            End If
+
             Dim ipaymodeView As Int32 = ConvertINT(appRep.dset.Tables("rep_mst").Rows(0)("showRetailsalePaymentsViewMode"))
 
             Dim icross As Int32 = ConvertINT(appRep.dset.Tables("rep_mst").Rows(0)("crosstab_type"))
+            Dim bShowSolditemData As Boolean = convertbool(appRep.dset.Tables("rep_mst").Rows(0).Item("show_data_for_solditems_only"))
+            Dim cSplColumnID As String = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("spl_column_id"))
+            Dim bShowSalePeriod As Boolean = False
+
+            If bShowSolditemData And cSplColumnID <> "" Then
+                bShowSalePeriod = True
+            End If
 
 
             If bR1Olap And bFirstToken = False And cXpertRepCode.Trim().ToUpper() = "R1" Then
@@ -5350,7 +7080,12 @@ again:
 
                     Dim cUserName As String = "super"
 
-                    cExpr = "SELECT passwd from users (nolock) where user_code = '0000000'"
+                    cExpr = "SELECT username from users (nolock) where user_code = '" + appRep.GUSER_CODE + "'"
+
+                    cUserName = Convert.ToString(appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, appRep.dmethod.cConStr))
+
+
+                    cExpr = "SELECT passwd from users (nolock) where user_code = '" + appRep.GUSER_CODE + "'"
                     Dim cPassWd As String = Convert.ToString(appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, appRep.dmethod.cConStr))
                     cPassWd = appRep.Encrypt(cPassWd)
 
@@ -5385,6 +7120,12 @@ again:
                 bCross = True
             End If
 
+            'If bR1Olap And cXpertRepCode.Trim().ToUpper() = "R1" Then
+            '    Dim Dr() As DataRow = appRep.dset.Tables("rep_det").Select("column_id in ('ageing_1','ageing_2','ageing_3')", "")
+            '    If Dr.Length > 0 Then
+            '        bAgeCat = True
+            '    End If
+            'End If
 
             Me.cFilter = ""
             Me.cFilter1 = ""
@@ -5409,6 +7150,7 @@ again:
             FrmRptPeriod.boldReports = False
             FrmRptPeriod.bFilter = blnEditFILTER
             FrmRptPeriod.addnlFilterId = addnlFilterId
+            FrmRptPeriod.bShowSalePeriod = bShowSalePeriod
 
             If cXpertRepCode.Trim().ToUpper() = "R1" Then
                 cTranRepCode = "X001"
@@ -5422,6 +7164,9 @@ again:
                 cTranRepCode = "TR04"
             ElseIf cXpertRepCode.Trim().ToUpper() = "R6" Then
                 cTranRepCode = "TR05"
+                bCross = False
+            ElseIf cXpertRepCode.Trim().ToUpper() = "R7" Then
+                cTranRepCode = "TR06"
                 bCross = False
             Else
                 cTranRepCode = "X001"
@@ -5457,34 +7202,51 @@ again:
                     cOpenFilterStr = Convert.ToString(My.Forms.FrmRptPeriod.cOpenFilter)
                     Me.cFilter1 = cOpenFilterStr
                     Me.cFilter = Convert.ToString(My.Forms.FrmRptPeriod.cOpenFilterDisplay)
+
+                    If cOpenFilterStr.Trim() <> "" Then
+                        cExpr = "select top 1 filter_rep_id from wow_xpert_rep_mst (nolock) where  rep_id= '" + gRepID + "' "
+                        primaryFilterId = Convert.ToString(Me.appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, Me.appRep.dmethod.cConStr)).Trim()
+                    End If
+
+
                     cOpenFilterStrDispaly = Convert.ToString(My.Forms.FrmRptPeriod.cOpenFilterDisplay)
                     cWowOlapFilter = Convert.ToString(My.Forms.FrmRptPeriod.cOlapOpenFilter)
                     cWowOlapFilter = cWowOlapFilter.Replace(vbCrLf, " ")
-
-                    bFirstStockView = My.Forms.FrmRptPeriod.bFirstStkView
-
-                    If gRepID.Trim().ToUpper() <> oldRepid.Trim().ToUpper() Then
-                        bFirstStockView = False
+                    If cWowOlapFilter <> "" Then
+                        cOpenFilterStr = " ( " + cOpenFilterStr + " ) "
+                        cWowOlapFilter = " ( " + cWowOlapFilter + " ) "
                     End If
 
-                    If (bEditCalled = True) Then
-                        bFirstStockView = False
-                    End If
+                    cExpr = "Update wow_xpert_rep_mst Set FILTER_CRITERIA= '" & cOpenFilterStr.Replace("'", "''") & "',olap_filter_criteria= '" + cWowOlapFilter.Replace("'", "''") + "'  where rep_id= '" + gRepID + "'"
+                        appRep.sqlCMD.CommandText = cExpr
+                        appRep.sqlCMD.ExecuteNonQuery()
 
-                    If cOpenFilterStr.ToUpper().Contains("PIM.BILL_DT ") And cXpertRepCode.Trim() = "R5" Then
-                        cExpr = "select top 1 rep_id from wow_xpert_rep_det (nolock) where column_id in ('C1322','C1323','C1324','C1325') and rep_id= '" + gRepID + "' "
 
-                        Dim cCampId As String = Convert.ToString(Me.appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, Me.appRep.dmethod.cConStr)).Trim()
+                        bFirstStockView = My.Forms.FrmRptPeriod.bFirstStkView
 
-                        If cCampId = "" Then
-                            Interaction.MsgBox("Plz Select  Purchase Bill Date or Purchase Bill No or Purchase Mrr No Column For This  Report.", MsgBoxStyle.Information, Nothing)
-                            Return
+                        If gRepID.Trim().ToUpper() <> oldRepid.Trim().ToUpper() Then
+                            bFirstStockView = False
                         End If
+
+                        If (bEditCalled = True) Then
+                            bFirstStockView = False
+                        End If
+
+                        If cOpenFilterStr.ToUpper().Contains("PIM.BILL_DT ") And cXpertRepCode.Trim() = "R5" Then
+                            cExpr = "select top 1 rep_id from wow_xpert_rep_det (nolock) where column_id in ('C1322','C1323','C1324','C1325') and rep_id= '" + gRepID + "' "
+
+                            Dim cCampId As String = Convert.ToString(Me.appRep.dmethod.SelectCmdTOSql_Scalar(cExpr, Me.appRep.dmethod.cConStr)).Trim()
+
+                            If cCampId = "" Then
+                                Interaction.MsgBox("Plz Select  Purchase Bill Date or Purchase Bill No or Purchase Mrr No Column For This  Report.", MsgBoxStyle.Information, Nothing)
+                                Return
+                            End If
+                        End If
+
                     End If
 
                 End If
-
-            End If
+OLTP:
 
 
             Dim str41 As String = ""
@@ -5519,6 +7281,18 @@ again:
             End If
 
 
+            If bShowSolditemData = True Then
+                If (DateTime.Compare(FrmRptPeriod.dtFromS._value, FrmRptPeriod.dtptoS._value) > 0) Then
+                    Me.Cursor = Cursors.[Default]
+                    Interaction.MsgBox("Invalid Reporting Period." + vbCrLf + "To Date Can't be Less Then From Date", MsgBoxStyle.Information, Nothing)
+                    Return
+                Else
+                    cSalePeriodFrom = FrmRptPeriod.dtFromS._value.ToString("yyyy-MM-dd")
+                    cSalePeriodTo = FrmRptPeriod.dtptoS._value.ToString("yyyy-MM-dd")
+                End If
+            End If
+
+
             If My.Forms.FrmRptPeriod.chkComP.Checked Then
 
                 If (DateTime.Compare(My.Forms.FrmRptPeriod.dtFromC._value, My.Forms.FrmRptPeriod.dtptoC._value) > 0) Then
@@ -5548,14 +7322,17 @@ again:
                 End If
 
 
+
+
                 Dim cexpr As String = ""
+
 
                 cexpr = "select top 1 rep_id from wow_xpert_rep_det where Measurement_col =1 and rep_id= '" + gRepID + "' "
 
                 Dim cCampId As String = Convert.ToString(Me.appRep.dmethod.SelectCmdTOSql_Scalar(cexpr, Me.appRep.dmethod.cConStr)).Trim()
 
                 If cCampId = "" Then
-                    Interaction.MsgBox("Plz Select Measurment Column For Comparision Reporting.", MsgBoxStyle.Information, Nothing)
+                    Interaction.MsgBox("Plz Select Measurment/Calculative Column For Comparision Reporting.", MsgBoxStyle.Information, Nothing)
                     Return
                 End If
 
@@ -5590,7 +7367,6 @@ again:
             Else
 
                 cExpr = "Update wow_xpert_rep_mst Set compare_period_from_dt = '' , compare_period_to_dt = '' where rep_id= '" + gRepID + "'"
-
                 appRep.sqlCMD.CommandText = cExpr
                 appRep.sqlCMD.ExecuteNonQuery()
                 pComparePeriod = ""
@@ -5645,27 +7421,40 @@ again:
 
             If cXpertRepCode.Trim().ToUpper() = "R1" Or cXpertRepCode.Trim().ToUpper() = "R2" Or
                 cXpertRepCode.Trim().ToUpper() = "R3" Or cXpertRepCode.Trim().ToUpper() = "R4" Or
-                cXpertRepCode.Trim().ToUpper() = "R5" Or cXpertRepCode.Trim().ToUpper() = "R6" Then
+                cXpertRepCode.Trim().ToUpper() = "R5" Or cXpertRepCode.Trim().ToUpper() = "R6" Or
+                cXpertRepCode.Trim().ToUpper() = "R7" Then
 
                 Dim cAFilter As String = ""
                 Dim cAddonFilter As String = ""
+                If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                    GetApplyFilter(cAFilter, gRepID, cXpertRepCode, True)
+                    cWowOlapNameFilter = cAFilter
+                Else
 
-                GetApplyFilter(cAFilter, gRepID, cXpertRepCode)
+                    GetApplyFilter(cAFilter, gRepID, cXpertRepCode, False)
 
-                If cOpenFilterStr.Trim() <> "" Then
-                    cAFilter = cAFilter + IIf(cAFilter = "", "", " And ") + cOpenFilterStr
+                    If cAFilter.Length > 1 Then
+                        cAFilter = " ( " + cAFilter + " ) "
+                    End If
+
+                    If cOpenFilterStr.Trim() <> "" Then
+                        cAFilter = cAFilter + IIf(cAFilter = "", "", " And ") + cOpenFilterStr
+                    End If
                 End If
-
 
                 Dim cColErFlag As String = ""
                 Dim cASupplier As String = ""
+                Dim cOlapLocFilter As String = ""
                 Dim cALocid As String = ""
                 Dim LocInactive = ""
 
                 'LOC AND SUPPLIER FILTER
 
                 If (cXpertRepCode.Trim().ToUpper() <> "R4") Then
-                    GETSUPPFILTER(cXpertRepCode, gRepID, cAFilter, cASupplier, cALocid)
+                    GETSUPPFILTER(cXpertRepCode, gRepID, cAFilter, cASupplier, cALocid, cOlapLocFilter)
+
+                    cWowOlapFilter = cWowOlapFilter + IIf(cWowOlapFilter = "", "", " AND ") + cOlapLocFilter + vbCrLf
+
                 End If
 
                 'As Per Sir User can Select inactive filter  stock Mismatch issue
@@ -5723,10 +7512,10 @@ again:
                 End If
 
 
-                cAFilter = cAFilter.Replace("TRUE", "1")
-                cAFilter = cAFilter.Replace("FALSE", "0")
+                '    cAFilter = cAFilter.Replace("TRUE", "1")
+                'cAFilter = cAFilter.Replace("FALSE", "0")
+
                 cAFilter = cAFilter.Replace("`", "'")
-                '  cAFilter = cAFilter.Replace("'0'", "0").Replace("'1'", "1")
 
                 appRep.dmethod.WriteToErrorLog("STEP 0", "PMTBUILD", "", "", "PMTBUILD", "")
 
@@ -5741,10 +7530,28 @@ again:
                 bGridView = False
 
 
-
                 If iViewMode = 1 Or iViewMode = 5 Or bCross = True Then
-                    iMode = 1
+
+                    If cXpertRepCode = "R1" And bR1Olap = True Then
+                        iMode = 2
+                    Else
+                        iMode = 1
+                    End If
+                ElseIf iViewMode = 6 Then
+                    iMode = 2
+                ElseIf iViewMode = 7 Then
+                    iMode = 2
                 ElseIf iViewMode = 3 Then
+                    iMode = 1 ' prevous 2  ,3 Bulk 
+                ElseIf iViewMode = 33 Then
+                    iMode = 3  'Bulk 
+                End If
+
+                If cXpertRepCode = "R6" And (iViewMode = 1 Or iViewMode = 3) Then
+                    iMode = 2
+                End If
+
+                If iViewMode = 33 And bCross = True Then
                     iMode = 3
                 End If
 
@@ -5777,50 +7584,67 @@ again:
                         GenRepMstTemptable(gRepID, iMode, iErFlag, cAFilter, CAddFilterid, "", cAddFilterDet)
 
                         If (cXpertRepCode.Trim().ToUpper() = "R1" Or cXpertRepCode.Trim().ToUpper() = "R6") And bFirstStockView = False Then
-                                CreatePmt(Strings.Format(My.Forms.FrmRptPeriod.dtpfrom._value, "yyyy-MM-dd"), Strings.Format(My.Forms.FrmRptPeriod.dtpto._value, "yyyy-MM-dd"), gRepID, bFalse)
-                                If bFalse = True Then
-                                    Return
-                                Else
-                                    bFirstStockView = True
-                                End If
+                            CreatePmt(Strings.Format(My.Forms.FrmRptPeriod.dtpfrom._value, "yyyy-MM-dd"), Strings.Format(My.Forms.FrmRptPeriod.dtpto._value, "yyyy-MM-dd"), gRepID, bFalse)
+                            If bFalse = True Then
+                                Return
+                            Else
+                                bFirstStockView = True
                             End If
-
-                            cExpr = "EXEC  " + gOladDb + ".DBO.SPwow_GENXPERT_REPDATA  @nMode= " + iMode.ToString() + ",@cRepId= '" + gRepID + "' ,@dFromDt ='" + Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd") + "',@dToDt = '" + Strings.Format(Me.dtTo.Value, "yyyy-MM-dd") + "',@bGetPmtOnTheFly=1,@bShowEstimateItems=" + iErFlag.ToString()
-
                         End If
+
+
+                        cExpr = "EXEC  " + gOladDb + ".DBO.SPwow_GENXPERT_REPDATA  @nMode= " + iMode.ToString() + ",@cRepId= '" + gRepID + "' ,@dFromDt ='" + Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd") + "',@dToDt = '" + Strings.Format(Me.dtTo.Value, "yyyy-MM-dd") + "',@bGetPmtOnTheFly=1,@bShowEstimateItems=" + iErFlag.ToString()
+
+                    End If
 
                     appRep.dmethod.WriteToErrorLog("STEP 9 " + cExpr, "PMTBUILD", "", "", "PMTBUILD", "")
 
-
-                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" And iMode = 2 Then
+                    If bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
                         Dim cerr As String = ""
                         Dim cOlapFilterNew As String = ""
                         cWowOlapFilter = cWowOlapFilter.Replace("`", "'")
                         ReplaceOlapFilter(cWowOlapFilter, cOlapFilterNew)
-                        GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, cOlapFilterNew, "", cAddFilterDet, "true", "false", cerr)
-                        If (cerr <> "") Then
-                            bShowPAge = False
-                            Return
+
+                        Dim cWowOlapNameFilterNew As String = ""
+                        cWowOlapNameFilter = cWowOlapNameFilter.Replace("`", "'")
+                        ReplaceOlapFilter(cWowOlapNameFilter, cWowOlapNameFilterNew)
+
+                        If iViewMode = 6 Or iViewMode = 7 Or iViewMode = 3 Then
+                            If iViewMode = 3 Then
+                                GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, CApplyFilterid, primaryFilterId, CAddFilterid, "true", "true", "CSV", cSalePeriodFrom, cSalePeriodTo, cerr)
+                                If cerr <> "" Then
+                                    MsgBox(cerr)
+                                End If
+
+                                Return
+                            ElseIf iViewMode = 6 Then
+                                GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, CApplyFilterid, primaryFilterId, CAddFilterid, "true", "true", "EXCEL", cSalePeriodFrom, cSalePeriodTo, cerr)
+                                If cerr <> "" Then
+                                    MsgBox(cerr)
+                                End If
+
+                                Return
+                            ElseIf iViewMode = 7 Then
+                                GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, CApplyFilterid, primaryFilterId, CAddFilterid, "true", "true", "PDF", cSalePeriodFrom, cSalePeriodTo, cerr)
+                                If cerr <> "" Then
+                                    MsgBox(cerr)
+                                End If
+
+                                Return
+                            End If
+                        Else
+                            GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, CApplyFilterid, primaryFilterId, CAddFilterid, "true", "false", "", cSalePeriodFrom, cSalePeriodTo, cerr)
                         End If
 
-                    ElseIf bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" And iMode = 1 And iViewMode = 5 Then
-                        Dim cerr As String = ""
-                        Dim cOlapFilterNew As String = ""
-                        cWowOlapFilter = cWowOlapFilter.Replace("`", "'")
-                        ReplaceOlapFilter(cWowOlapFilter, cOlapFilterNew)
-                        GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, cOlapFilterNew, "", cAddFilterDet, "false", "false", cerr)
                         If (cerr <> "") Then
                             bShowPAge = False
-                            Return
+                            bR1Olap = False
+                            If cerr.ToUpper().Contains("SERVERNOTAVAILABLE") Then
+                                GoTo OLTP
+                            Else
+                                Return
+                            End If
                         End If
-
-                    ElseIf bR1Olap = True And cXpertRepCode.Trim().ToUpper() = "R1" And iMode = 1 Then
-                        Dim cerr As String = ""
-                        Dim cOlapFilterNew As String = ""
-                        cWowOlapFilter = cWowOlapFilter.Replace("`", "'")
-                        ReplaceOlapFilter(cWowOlapFilter, cOlapFilterNew)
-                        GetWowreport(cOrgRepNAme, gRepID, Strings.Format(Me.dtFrom.Value, "yyyy-MM-dd"), Strings.Format(Me.dtTo.Value, "yyyy-MM-dd"), cCampFromperiod, cCampToperiod, cOlapFilterNew, "", cAddFilterDet, "false", "true", cerr)
-                        Return
 
 
                     Else
@@ -5856,26 +7680,30 @@ again:
                     appRep.ChangeNull(DtS)
                 End If
 
-                If iMode = 2 And bEossCross = False Then
-                    For Each dc As DataColumn In appRep.dset.Tables(cReportT).Columns
-                        'MsgBox(dc.DataType.Name)
-                        dc.ColumnName = dc.ColumnName.Replace("(", "").Replace(")", "").Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("/", "").Replace("\", "")
-                    Next
+
+                If iViewMode = 3 And cXpertRepCode.Trim() <> "R6" Then
+                Else
+                    If iMode = 2 And bEossCross = False And bAgeCat = False And bCross = False Then
+                        For Each dc As DataColumn In appRep.dset.Tables(cReportT).Columns
+                            dc.ColumnName = dc.ColumnName.Replace("(", "").Replace(")", "").Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("/", "").Replace("\", "")
+                        Next
+                    End If
                 End If
 
                 If cXpertRepCode = "R6" Then
-                    GetEossSaleStock(gRepID, cReportT, Format(dtTo.Value, "yyyy-MM-dd"), bEossCbs)
+                    GetEossSaleStock(gRepID, cReportT, Format(dtTo.Value, "yyyy-MM-dd"), bEossCbs, cAddFilterDet)
                 End If
 
                 If cXpertRepCode = "R1" And bR1Olap = True Then
+                    InsertImGIDFOROLAP(cReportT, bQuery)
                 Else
-                    InsertImgData_New_Method(cReportT)
+                    InsertImgData_New_Method(cReportT, bQuery)
                 End If
 
             End If
 
 
-                If appRep.dset.Tables(cReportT).Rows.Count <= 0 Then
+            If appRep.dset.Tables(cReportT).Rows.Count <= 0 Then
                 Me.Cursor = Cursors.[Default]
                 Me.Refresh()
                 Interaction.MsgBox("Record Not Available For This Report, Plz Try With Another Filter Or Date...", MsgBoxStyle.Information, "WizApp3S-Xtreme Reporting System")
@@ -5923,12 +7751,10 @@ again:
                 Next
             End If
 
-            If iViewMode = 1 Or iViewMode = 3 Then
+            If iViewMode = 33 Or iViewMode = 3 Then
                 Try
                     Dim sd As New SaveFileDialog
                     sd.Filter = "CSV File|*.CSV"
-                    ' sd.Filter = "Excel File|*.xls|Excel File|*.xlsx|CSV File|*.CSV"
-                    '  sd.Filter = "CSV File|*.CSV|Excel File|*.xls|Excel File|*.xlsx"
                     sd.FileName = cOrgRepNAme
                     sd.DefaultExt = "csv"
                     sd.AddExtension = True
@@ -5952,7 +7778,7 @@ again:
 
                     If cfile.ToUpper().Contains(".CSV") Then
 
-                        If iViewMode = 3 Then
+                        If iViewMode = 33 Then
                             Dim cCmd As String = Convert.ToString(appRep.dset.Tables(cReportT).Rows(0)("bcpcmd"))
                             Dim cTable As String = Convert.ToString(appRep.dset.Tables(cReportT).Rows(0)("temptablename"))
                             Dim cServer As String = appRep.dmethod.cServer
@@ -5976,6 +7802,7 @@ again:
 
                             cBcpCmd = "bcp """ + cCmd + """ queryout """ + cfile + """ -c -t, -S " + cServer + " -d " + cdatabase + " -U " + uid + " -P " + cpwd
 
+                            appRep.dmethod.WriteToErrorLog(cBcpCmd, "BULKEXPORT", "", "", "BULKEXPORT", "")
 
                             ' Create a new process
                             Dim process As New Process() '
@@ -6032,8 +7859,6 @@ again:
 
                         GC.Collect()
 
-                        'appRep.CopyToExcel(appRep.dset.Tables(cReportT), cfile)
-                        'Return
 
                         getcntrRaw(cReportT, gRepID)
 
@@ -6047,6 +7872,16 @@ again:
                         Catch ex As Exception
                             dtviewR.RowFilter = ""
                         End Try
+
+
+                        'Module1.ExportDataTable(dtviewR.ToTable(), cfile)
+
+                        'If MsgBox("Report Exported Successfully." + vbCrLf + "Do you Want to Open Exported File.", MsgBoxStyle.YesNo + MsgBoxStyle.Information, "WizApp3S-Xtreme Reporting System") = MsgBoxResult.Yes Then
+                        '    System.Diagnostics.Process.Start(cfile)
+                        'End If
+
+                        'Return
+
 
                         ' Add Report Title and Header
                         sb.Append(cOrgRepNAme)
@@ -6075,7 +7910,58 @@ again:
 
                         For Each dr As DataRow In dtviewR.ToTable().Rows
                             For Each dc As DataColumn In appRep.dset.Tables(cReportT).Columns
-                                sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
+
+                                Dim Drc As DataRow() = appRep.dset.Tables("Rep_Det").Select("col_header Like '%" + dc.ColumnName + "%' ", "")
+                                Dim DrcM As DataRow() = appRep.dset.Tables("Rep_Det").Select("Measurement_col=true", "")
+                                Dim DrcD As DataRow() = appRep.dset.Tables("Rep_Det").Select("dimension=true", "")
+                                Dim dWitdh As Int32 = 0
+                                Dim bCal As Boolean = False
+                                If dc.DataType.Name.ToUpper.Contains("STRING") Then
+                                ElseIf dc.DataType.Name.ToUpper.Contains("DATE") Then
+                                Else
+                                    bCal = True
+                                End If
+
+                                ' Chr(48) for 0
+
+                                If (Drc.Length > 0) Then
+                                    If Drc(0)("calculative_col") Then
+                                        dWitdh = Drc(0)("decimal_place")
+                                        Dim d As Double = ConvertDouble(dr(dc.ColumnName))
+                                        If dWitdh = 1 Then
+                                            sb.Append((WriteCSV(d.ToString("##.0"), dc.ColumnName) + ","))
+                                        ElseIf dWitdh = 2 Then
+                                            sb.Append((WriteCSV(d.ToString("##.00"), dc.ColumnName) + ","))
+                                        ElseIf dWitdh = 0 Then
+                                            sb.Append((WriteCSV(d.ToString("##"), dc.ColumnName) + ","))
+                                        ElseIf dWitdh = 3 Then
+                                            sb.Append((WriteCSV(d.ToString("##.000"), dc.ColumnName) + ","))
+                                        Else
+                                            sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
+                                        End If
+                                    Else
+                                        sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
+                                    End If
+                                ElseIf DrcM.Length > 0 And DrcD.Length > 0 And bCal = True Then
+                                    dWitdh = DrcM(0)("decimal_place")
+                                    Dim d As Double = ConvertDouble(dr(dc.ColumnName))
+                                    If dWitdh = 1 Then
+                                        sb.Append((WriteCSV(d.ToString("##.0"), dc.ColumnName) + ","))
+                                    ElseIf dWitdh = 2 Then
+                                        sb.Append((WriteCSV(d.ToString("##.00"), dc.ColumnName) + ","))
+                                    ElseIf dWitdh = 0 Then
+                                        sb.Append((WriteCSV(d.ToString("##"), dc.ColumnName) + ","))
+                                    ElseIf dWitdh = 3 Then
+                                        sb.Append((WriteCSV(d.ToString("##.000"), dc.ColumnName) + ","))
+                                    Else
+                                        sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
+                                    End If
+                                Else
+                                    sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
+
+                                End If
+
+                                'sb.Append((WriteCSV(Convert.ToString(dr(dc.ColumnName)), dc.ColumnName) + ","))
                             Next
                             sb.Remove((sb.Length - 1), 1)
                             sb.AppendLine()
@@ -6119,11 +8005,32 @@ again:
                 Finally
                     Me.Cursor = Cursors.Default
                 End Try
-            ElseIf iViewMode = 2 Then
+            ElseIf iViewMode = 2 Or iViewMode <= 0 Then
                 If cXpertRepCode.Trim() = "R4" Or bCross = True Or bEossCross = True Then
-                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt)
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "", bCross, cXpertRepCode)
+                ElseIf bR1Olap = True And bAgeCat = True Then
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "", False, cXpertRepCode)
                 Else
-                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID)
+                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID, "")
+                End If
+
+
+            ElseIf iViewMode = 6 Then
+                If cXpertRepCode.Trim() = "R4" Or bCross = True Or bEossCross = True Then
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "EXCEL", bCross, cXpertRepCode)
+                ElseIf bR1Olap = True And bAgeCat = True Then
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "EXCEL", bCross, cXpertRepCode)
+                Else
+                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID, "EXCEL")
+                End If
+
+            ElseIf iViewMode = 7 Then
+                If cXpertRepCode.Trim() = "R4" Or bCross = True Or bEossCross = True Then
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "PDF", bCross, cXpertRepCode)
+                ElseIf bR1Olap = True And bAgeCat = True Then
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "PDF", bCross, cXpertRepCode)
+                Else
+                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID, "PDF")
                 End If
 
             ElseIf iViewMode = 5 Then
@@ -6132,9 +8039,9 @@ again:
                 bShowPAge = True
             Else
                 If cXpertRepCode.Trim() = "R4" Or bCross = True Or bEossCross = True Then
-                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt)
+                    printRDlcAudit(appRep.dset.Tables(cReportT), cAddFilterDet, bColReapt, "", bCross, cXpertRepCode)
                 Else
-                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID)
+                    printRDlc(cReportT, Me.dtFrom.Value, Me.dtTo.Value, gRepID, "")
                 End If
             End If
 
@@ -6149,19 +8056,19 @@ again:
                     DTEXPORT = appRep.dset.Tables(cReportT)
                 End If
             End If
+
             Me.Cursor = Cursors.[Default]
             PLNERRSHOW(False)
             bEditCalled = False
             bFistReport = True
             GC.Collect()
+
         End Try
     End Sub
 
     Private Sub ReplaceOlapFilter(cFilter As String, ByRef olapfilter As String)
         Try
             olapfilter = cFilter
-
-
 
             olapfilter = olapfilter.Replace("sku_names.attr", "art_names.attr")
             olapfilter = olapfilter.Replace("oem_supplier_city.city", "oemsupplier_city.city")
@@ -6182,7 +8089,6 @@ again:
 
         End Try
     End Sub
-
 
 
     Private Sub GetListofReport(ByVal dt1 As Date, ByVal dt2 As Date, cAddFilterView As String)
@@ -6226,20 +8132,12 @@ again:
     End Sub
 
 
-    Private Function printRDlcAudit(ByVal Dt As DataTable, cAddFilterDet As String, bReapt As Boolean) As Boolean
+    Private Function printRDlcAudit(ByVal Dt As DataTable, cAddFilterDet As String, bReapt As Boolean, ByVal cExportType As String, bCross As Boolean, cXpertRepCode As String) As Boolean
 
         Try
 
-            Dim DtSpan As New DataTable
-            dtviewR = New DataView
-            dtviewR.Table = Dt
-            dtviewR.RowFilter = ""
-            Dim iRepeat As Int32 = 0
-            Dim bPeriodbase As Boolean = False
+            Dim bDonotReapt As Boolean = bRepeatImg
 
-            If bReapt = True Then
-                iRepeat = 1
-            End If
 
             Dim xpertCode As String = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE"))
 
@@ -6253,12 +8151,70 @@ again:
                 appRep.dset.Tables.Remove("Rep_Det")
             End If
 
+
             cExpr = "select a.*,(case when b.col_mode=2 then cast(1 as int) else cast(0 as int) end) as calculative_col,'' as CAL_COLUMN_GRP,'' as COL_VALUE_TYPE," + vbCrLf +
                     "cast(0 as bit) as Required from wow_xpert_rep_det  a " + vbCrLf +
                     "join wow_xpert_report_cols_expressions b on a.column_id= b.column_id " + vbCrLf +
                     "where  rep_id = '" + gRepID + "' order by col_order "
 
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "Rep_Det", False, True)
+
+
+            Dim cname As String = Dt.TableName
+            If bR1Olap_ORG = True And bCross = True And cXpertRepCode.Trim().ToUpper() = "R1" Then
+                Dim cMasterCol As String = ""
+                Dim cMasterColINCAL As String = ""
+                Dim cCrossCol As String = ""
+                Dim cMeasureCol As String = ""
+                Dim bsort As Boolean = True
+
+                For Each dr As DataRow In appRep.dset.Tables("Rep_Det").Rows
+                    If ConvertINT(dr("calculative_col")) = 0 And convertbool(dr("dimension")) = False And convertbool(dr("Measurement_col")) = False And Convert.ToString(dr("column_id")).Trim() <> "C0042" Then
+                        cMasterCol = cMasterCol + IIf(cMasterCol = "", "", ",") + Convert.ToString(dr("col_header")).Trim()
+                    ElseIf ConvertINT(dr("calculative_col")) = 1 And convertbool(dr("dimension")) = False And convertbool(dr("Measurement_col")) = False Then
+                        cMasterColINCAL = cMasterColINCAL + IIf(cMasterColINCAL = "", "", ",") + Convert.ToString(dr("col_header")).Trim()
+                    ElseIf ConvertINT(dr("calculative_col")) = 0 And convertbool(dr("dimension")) = True Then
+                        cCrossCol = Convert.ToString(dr("col_header")).Trim()
+                    ElseIf ConvertINT(dr("calculative_col")) = 1 And convertbool(dr("Measurement_col")) = True Then
+                        cMeasureCol = Convert.ToString(dr("col_header")).Trim()
+                    End If
+                Next
+
+                For Each dr As DataRow In appRep.dset.Tables("Rep_Det").Rows
+                    If Convert.ToString(dr("column_id")) = "C0011" And ConvertINT(dr("calculative_col")) = 0 And convertbool(dr("dimension")) = True Then
+                        bsort = False
+                    ElseIf Convert.ToString(dr("column_id")) = "C0053" And ConvertINT(dr("calculative_col")) = 0 And convertbool(dr("dimension")) = True Then
+                        bsort = False
+                    End If
+                Next
+
+
+                If cMasterCol.Length > 0 And cCrossCol.Length > 0 And cMeasureCol.Length > 0 Then
+                    Dim rows() As String = cMasterCol.Split(",")
+                    Dim obsFlds() As String = cMasterColINCAL.Split(",")
+
+                    If cMasterColINCAL.Length > 0 Then
+                        Dt = Module1.PivotDataMulti(Dt, rows, obsFlds, cCrossCol, cMeasureCol, bsort)
+                    Else
+                        Dt = Module1.PivotData(Dt, rows, cCrossCol, cMeasureCol, bsort)
+                    End If
+
+                    Dt.TableName = cname
+                End If
+            End If
+
+
+            Dim DtSpan As New DataTable
+            dtviewR = New DataView
+            dtviewR.Table = Dt
+            dtviewR.RowFilter = ""
+            Dim iRepeat As Int32 = 0
+            Dim bPeriodbase As Boolean = False
+            Dim AgeCat As Boolean = False
+
+            If bReapt = True Then
+                iRepeat = 1
+            End If
 
 
 
@@ -6280,11 +8236,14 @@ again:
             dtCopy = dtviewR.ToTable()
 
 
-            If (dtCopy.Columns.Contains("IMG_ID")) Then
-                dtCopy.Columns.Remove("IMG_ID")
+            'If (dtCopy.Columns.Contains("IMG_ID")) Then
+            '    dtCopy.Columns.Remove("IMG_ID")
+            'End If
+
+
+            If (dtCopy.Columns.Contains("total_str")) Then
+                dtCopy.Columns.Remove("total_str")
             End If
-
-
 
             If cXpertRepCode = "R3" Then
                 If (dtCopy.Columns.Contains("TRANSACTION TYPE")) Then
@@ -6294,7 +8253,7 @@ again:
 
 
             If (dtCopy.Columns.Contains("total_mode")) Then
-                Dim dr() As DataRow = dtCopy.Select("total_mode=1", "")
+                Dim dr() As DataRow = dtCopy.Select("total_mode in (1,2)", "")
                 If dr.Length > 0 Then
                     For Each d As DataRow In dr
                         d.Delete()
@@ -6318,11 +8277,52 @@ again:
             'Next
 
 
+            Dim dd As New DataTable
+            dd = dtCopy
+            If bDonotReapt Then
+                If dtCopy.Columns.Contains("IMAGE") And dtCopy.Columns.Contains("IMG_ID") Then
+                    Dim seen As New HashSet(Of String)
+
+                    For Each row As DataRow In dtCopy.Rows
+                        If Not row.IsNull("IMG_ID") Then
+                            Dim val As String = row("IMG_ID").ToString()
+
+                            If seen.Contains(val) Then
+                                row("image") = DBNull.Value
+                            Else
+                                seen.Add(val)
+                            End If
+                        End If
+                    Next
+
+                ElseIf dtCopy.Columns.Contains("IMAGE") And bR1Olap = True Then
+                    Dim seen As New HashSet(Of String)
+                    For Each row As DataRow In dtCopy.Rows
+                        If Not row.IsNull("IMAGE") Then
+                            Dim val As String = row("IMAGE").ToString()
+                            If seen.Contains(val) Then
+                                row("image") = DBNull.Value
+                            Else
+                                seen.Add(val)
+                            End If
+                        End If
+                    Next
+
+                End If
+            End If
+
+
             For Each dc As DataColumn In dtCopy.Columns
                 If dc.ColumnName.ToUpper() = "TOTAL_MODE" Then
                 ElseIf dc.ColumnName.ToUpper() = "ORG_ROWNO" Then
                 ElseIf dc.ColumnName.ToUpper() = "IMG_ID" Then
                 ElseIf dc.ColumnName.ToUpper() = "IMAGE" Then
+                    bShowimg = True
+                    bImgcol = True
+                ElseIf dc.ColumnName.ToUpper().Contains("AGE") _
+                     And dc.ColumnName.ToUpper().Contains("CATEGORY") Then
+                    AgeCat = True
+                    dc.ColumnName = "XTAB" + dc.ColumnName
                 Else
                     dc.ColumnName = "XTAB" + dc.ColumnName
                 End If
@@ -6331,11 +8331,10 @@ again:
 
             dtCopy.AcceptChanges()
 
-
             Dim cPeriod As String = "Reporting Period From : " & Format(dtFrom.Value, "dd-MM-yyyy") & " to " & Format(dtTo.Value, "dd-MM-yyyy")
 
-            If pComparePeriod <> "" Then
-                '  cPeriod = pComparePeriod
+            If pComparePeriod <> "" Then 'And bR1Olap_ORG = True Then
+                cPeriod = pComparePeriod
                 bPeriodbase = True
             End If
 
@@ -6344,15 +8343,18 @@ again:
 
             Call GetFieldListAudit("", dtCopy, m_Fields, iRepeat)
 
+            'temp
 
-            If bPeriodbase = True Then
+            If bPeriodbase = True Then 'And bR1Olap_ORG = False Then
                 CREATESPANPERIOD(dtCopy, DtSpan)
+            ElseIf AgeCat And bR1Olap_ORG = True Then
+                CREATESPANAGE(dtCopy, DtSpan)
             End If
 
             Dim cMsgolab As String = ""
 
-            If bMsgForOlap.Trim() <> "" Then
-                cMsgolab = "Note: " + bMsgForOlap
+            If cValidUptoDate.Trim() <> "" Then
+                cMsgolab = "Report Upto: " + cValidUptoDate + vbCrLf + bMsgForOlap
             End If
 
             With rptTable
@@ -6374,19 +8376,47 @@ again:
                 .bRowTotal = True
                 .bShowimg = bShowimg
                 .bImgcol = bImgcol
-
+                .bSorting = True
                 .bImgData = bdataImage
                 .iImgViewMode = iImageView
                 .iHeight = iHeight
+                .iRowHeight = iRowHeight
                 .bHideZero = blnZerovalue
                 .bTopHeader = DtSpan.Rows.Count > 0
                 .DtMerge = DtSpan
+                .bIndianFormat = bIndianFormat
                 .RdlcTable(cFile)
+
             End With
 
             cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE"))
 
-            ShowReport(gRepID, cFile, dtCopy)
+
+            If cExportType.Trim() = "PDF" Then
+                Dim sd As New SaveFileDialog
+                sd.Filter = "PDF File|*.Pdf"
+                sd.FileName = gReportname
+                sd.DefaultExt = "PDF"
+                sd.AddExtension = True
+                If (sd.ShowDialog(Me) = System.Windows.Forms.DialogResult.Cancel) Then
+                    Return False
+                End If
+                Dim cFilename As String = sd.FileName
+                EXPORTFILE(cFile, cFilename, "PDF", dtCopy)
+            ElseIf cExportType.Trim() = "EXCEL" Then
+                Dim sd As New SaveFileDialog
+                sd.Filter = "Excel File|*.xls"
+                sd.FileName = gReportname
+                sd.DefaultExt = "EXCEL"
+                sd.AddExtension = True
+                If (sd.ShowDialog(Me) = System.Windows.Forms.DialogResult.Cancel) Then
+                    Return False
+                End If
+                Dim cFilename As String = sd.FileName
+                EXPORTFILE(cFile, cFilename, "EXCEL", dtCopy)
+            Else
+                ShowReport(gRepID, cFile, dtCopy)
+            End If
 
         Catch ex As Exception
             appRep.ErrorShow(ex)
@@ -6576,8 +8606,9 @@ again:
                 For Each Dc As DataColumn In .Columns
 
 
+
                     cHeader = Dc.ColumnName
-                    Dc.ColumnName = Dc.ColumnName.Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("\", "").Replace("/", "").Replace("(", "").Replace(")", "").Replace("<", "").Replace(">", "").Replace("=", "").Replace("*", "")
+                    Dc.ColumnName = Dc.ColumnName.Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("\", "").Replace("/", "").Replace("(", "").Replace(")", "").Replace("<", "").Replace(">", "").Replace("=", "").Replace("*", "").Replace("&", "").Replace("#", "_").Replace("!", "__")
                     cHeader = cHeader.Replace("_", " ").Replace("XTAB", "").Replace("xtab", "")
 
 
@@ -6607,6 +8638,8 @@ again:
                         cHeader = "Item Code"
                     End If
 
+
+
                     Dim iCal As Int32 = 0
                     Dim igrp As Int32 = 0
 
@@ -6624,13 +8657,12 @@ again:
                     End If
 
 
-                    Dim cH As String = cHeader.Replace("PERIOD2 ", "")
-                    cH = cH.Replace("PERIOD1 ", "")
+                    Dim cH As String = cHeader.Replace("PERIOD1", "").Replace("PERIOD1 ", "")
+                    cH = cH.Replace("PERIOD2", "").Replace("PERIOD2 ", "")
 
                     Dim Dr As DataRow() = appRep.dset.Tables("Rep_Det").Select("col_header = '" + cH.Trim() + "' and isnull(dimension,0)=0", "")
                     Dim DrX As DataRow() = appRep.dset.Tables("Rep_Det").Select("isnull(dimension,0)=1", "")
-
-                    ' MsgBox(cH & Dr.Length.ToString())
+                    Dim DrM As DataRow() = appRep.dset.Tables("Rep_Det").Select("isnull(Measurement_col,0)=1", "")
 
 
                     Dim dWitdh As Int32 = 2
@@ -6654,6 +8686,27 @@ again:
                                 colSix = 1
                             End If
                         End If
+
+
+                        If (DrM.Length > 0) Then
+
+                            dWitdh = DrM(0)("decimal_place")
+                            Dim cXV As String = Convert.ToString(DrM(0)("col_header"))
+                            If cHeader.Contains(cXV) Then
+                                ' cHeader = cHeader.Replace(Convert.ToString(DrM(0)("col_header")) + " 1", "")
+
+                            End If
+
+                            If DrM.Length > 1 Then
+                                dWitdh = DrM(1)("decimal_place")
+                                Dim cXV1 As String = Convert.ToString(DrM(1)("col_header"))
+                                If cHeader.Contains(cXV1) Then
+                                    ' cHeader = cHeader.Replace(Convert.ToString(DrM(0)("col_header")) + " 1", "")
+
+                                End If
+                            End If
+
+                        End If
                     Catch ex As Exception
 
                     End Try
@@ -6667,6 +8720,7 @@ again:
                         Else
                             igrp = 0
                         End If
+
                     ElseIf cHeader.ToUpper().Contains("TRANSACTION") Then
                         iCal = 0
                     ElseIf cHeader.ToUpper().Contains("VARIANCE") Then
@@ -6677,9 +8731,21 @@ again:
 
                     ' MsgBox(cH & iCal.ToString())
 
-                    cHeader = cHeader.ToUpper().Replace("PERIOD2 ", "")
-                    cHeader = cHeader.ToUpper.Replace("PERIOD1 ", "")
-                    cHeader = cHeader.ToUpper.Replace("VARIANCE ", "")
+                    ' If bR1Olap_ORG = False  Then
+                    cHeader = cHeader.ToUpper().Replace("PERIOD2 ", "").Replace("PERIOD2", "")
+                    cHeader = cHeader.ToUpper.Replace("PERIOD1 ", "").Replace("PERIOD1", "")
+                    cHeader = cHeader.ToUpper.Replace("VARIANCE ", "").Replace("VARIANCE", "")
+                    ' End If
+
+                    If cHeader.ToUpper().Contains("AGE") And cHeader.ToUpper().Contains("CATEGORY") Then
+                        cHeader = cHeader.ToUpper().Replace("SALE", "")
+                        cHeader = cHeader.ToUpper().Replace("AGEING", "")
+                        cHeader = cHeader.ToUpper().Replace("CATEGORY", "")
+                        cHeader = cHeader.ToUpper().Replace("SHELF", "")
+                        cHeader = cHeader.ToUpper().Replace("STOCK", "")
+                        cHeader = cHeader.Trim()
+                    End If
+
                     cHeader = appRep.ToProperCase(cHeader)
 
 
@@ -6858,9 +8924,207 @@ again:
         End Try
     End Function
 
+    Public Function WriteCSV130625(ByVal input As String, cColHeader As String) As String
+        Try
+
+
+            If (input Is Nothing) Then
+                Return String.Empty
+            End If
+
+
+
+
+            input = input.Replace(vbCr, "").Replace(vbLf, "")
+            input = input.Replace(",", " ")
+            input = input.Replace("""", "")
+
+            input = input
+
+            If input.Length <= 0 Then
+                input = " "
+            End If
+
+            'If cColHeader.ToUpper().Contains("ITEM") Then
+            '    If input.Trim().Length > 15 Then
+            '        Try
+            '            Dim c As Double = Convert.ToDouble(input)
+            '            input = input + Convert.ToChar(Keys.Tab)
+            '          
+            '        Catch ex As Exception
+
+            '        End Try
+            '    End If
+            'End If
+
+
+            Dim Dr As DataRow() = appRep.dset.Tables("Rep_Det").Select("col_header Like '%" + cColHeader + "%' ", "")
+
+            Dim dWitdh As Int32 = 0
+            Dim bCal As Boolean = False
+            ' Chr(48) for 0
+
+            If (Dr.Length > 0) Then
+                If Dr(0)("calculative_col") Then
+                    dWitdh = Dr(0)("decimal_place")
+                    bCal = True
+                Else
+
+                    If IsNumeric(input) And input.Substring(0, 1) = "0" Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = " " + input
+                    ElseIf cColHeader.ToUpper().Contains("ITEM") And Char.IsDigit(input(0)) Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = "'" + input
+                    ElseIf cColHeader.ToUpper().Contains("LOCATION ID") And Char.IsDigit(input(0)) Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = "'" + input
+                    ElseIf cColHeader.ToUpper().Contains("STYLE") Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                    Else
+                        input = input
+                    End If
+                End If
+            End If
+
+            Dim containsQuote As Boolean = False
+            Dim containsComma As Boolean = False
+            Dim len As Integer = input.Length
+            Dim i As Integer = 0
+            Do While ((i < len) _
+                        AndAlso ((containsComma = False) _
+                        OrElse (containsQuote = False)))
+                Dim ch As Char = input(i)
+                If (ch = Microsoft.VisualBasic.ChrW(34)) Then
+                    containsQuote = True
+                ElseIf (ch = Microsoft.VisualBasic.ChrW(44)) Then
+                    containsComma = True
+                End If
+
+                i = (i + 1)
+            Loop
+
+            If (containsQuote AndAlso containsComma) Then
+                input = input.Replace(",", "")
+                input = input.Replace("'", "")
+            End If
+
+            Return input
+
+        Catch ex As Exception
+            appRep.ErrorShow(ex)
+
+        End Try
+
+    End Function
 
 
     Public Function WriteCSV(ByVal input As String, cColHeader As String) As String
+        Try
+
+
+            If (input Is Nothing) Then
+                Return String.Empty
+            End If
+
+
+            input = input.Replace(vbCr, "").Replace(vbLf, "")
+            input = input.Replace(",", " ")
+            input = input.Replace("""", "")
+
+            input = input
+
+            If input.Length <= 0 Then
+                input = " "
+            End If
+
+
+            Dim Dr As DataRow() = appRep.dset.Tables("Rep_Det").Select("col_header Like '%" + cColHeader + "%' ", "")
+
+            Dim dWitdh As Int32 = 0
+            Dim bCal As Boolean = False
+            ' Chr(48) for 0
+            '  ="1-14"   
+
+            If (Dr.Length > 0) Then
+                If Dr(0)("calculative_col") Then
+                    dWitdh = Dr(0)("decimal_place")
+                    bCal = True
+                Else
+
+                    If IsNumeric(input) And input.Substring(0, 1) = "0" Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = " " + input
+
+                    ElseIf bCal = False And input.Substring(0, 1) = "0" And IsNumeric(input) = True Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = " " + input
+                    ElseIf cColHeader.ToUpper().Contains("ITEM") And Char.IsDigit(input(0)) Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                        'input = "'" + input
+
+                    ElseIf cColHeader.ToUpper().Contains("ITEM") And Char.IsDigit(input(0)) And input.Length > 12 Then
+                        input = "'" + input
+                    ElseIf cColHeader.ToUpper().Contains("LOCATION ID") And Char.IsDigit(input(0)) Then
+                        'input = Convert.ToChar(Keys.Tab) + input
+                        input = "'" + input
+                    ElseIf cColHeader.ToUpper().Contains("STYLE") Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                    ElseIf cColHeader.ToUpper().Contains("DATE____") Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                    Else
+                        input = input
+                    End If
+                End If
+            Else
+                If IsNumeric(input) And input.Substring(0, 1) = "0" Then
+                    'input = Convert.ToChar(Keys.Tab) + input
+                    input = " " + input
+
+                ElseIf bCal = False And input.Substring(0, 1) = "0" And IsNumeric(input) = True Then
+                    input = Convert.ToChar(Keys.Tab) + input
+                    'input = " " + input
+
+                ElseIf IsNumeric(input) And input.Length > 12 Then
+                    ' input = "'" + input
+                    input = Convert.ToChar(Keys.Tab) + input
+                Else
+                    input = input
+                End If
+            End If
+
+            Dim containsQuote As Boolean = False
+            Dim containsComma As Boolean = False
+            Dim len As Integer = input.Length
+            Dim i As Integer = 0
+            Do While ((i < len) _
+                        AndAlso ((containsComma = False) _
+                        OrElse (containsQuote = False)))
+                Dim ch As Char = input(i)
+                If (ch = Microsoft.VisualBasic.ChrW(34)) Then
+                    containsQuote = True
+                ElseIf (ch = Microsoft.VisualBasic.ChrW(44)) Then
+                    containsComma = True
+                End If
+
+                i = (i + 1)
+            Loop
+
+            If (containsQuote AndAlso containsComma) Then
+                input = input.Replace(",", "")
+                input = input.Replace("'", "")
+            End If
+
+            Return input
+
+        Catch ex As Exception
+            appRep.ErrorShow(ex)
+
+        End Try
+
+    End Function
+
+    Public Function WriteCSVold(ByVal input As String, cColHeader As String) As String
         Try
 
 
@@ -6903,27 +9167,26 @@ again:
                 Else
 
                     If IsNumeric(input) And input.Substring(0, 1) = "0" Then
-                        ' input = Convert.ToChar(Keys.Tab) + input
-                        input = $"""{input.ToString()}"""
+                        input = Convert.ToChar(Keys.Tab) + input
                     ElseIf cColHeader.ToUpper().Contains("ITEM") And Char.IsDigit(input(0)) Then
                         '  input = Convert.ToChar(Keys.Tab) + input
                         input = $"""{input.ToString()}"""
-                    ElseIf cColHeader.ToUpper().Contains("ITEM__") Then
-                        ' input = Convert.ToChar(Keys.Tab) + input
-                        input = $"""{input.ToString()}"""
+
                     ElseIf cColHeader.ToUpper().Contains("LOCATION ID") And Char.IsDigit(input(0)) Then
                         ' input = Convert.ToChar(Keys.Tab) + input
                         input = $"""{input.ToString()}"""
                     ElseIf IsNumeric(input) Then
                         input = input
+                    ElseIf Char.IsDigit(input(0)) And input.Contains("-") Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                    ElseIf Char.IsDigit(input(0)) And input.Contains("/") Then
+                        input = Convert.ToChar(Keys.Tab) + input
+                    ElseIf Char.IsDigit(input(0)) And input.Contains("\") Then
+                        input = Convert.ToChar(Keys.Tab) + input
                     ElseIf input.Contains("-") Then
-                        input = input
+                        input = Convert.ToChar(Keys.Tab) + input
                     Else
-                        If Char.IsDigit(input(0)) And input.Contains("-") Then
-                            input = Convert.ToChar(32) + input
-                        Else
-                            input = input
-                        End If
+                        input = input
                     End If
                 End If
             End If
@@ -6957,8 +9220,6 @@ again:
         End Try
 
     End Function
-
-
 
     Dim gcRepCat As String = "XNS"
     Dim DTEXPORT As New DataTable
@@ -7225,17 +9486,24 @@ again:
                     iCol = iCol + 1
                 ElseIf dc.ColumnName.ToUpper().Contains("VARIANCE") Then
 
+                ElseIf dc.ColumnName.ToUpper().Contains("TOTAL_MODE") Then
+
+                ElseIf dc.ColumnName.ToUpper().Contains("ORG_ROWNO") Then
+
                 Else
                     iInvcol = iInvcol + 1
                 End If
             Next
 
 
+
             dtSpan.Rows.Add()
-            dtSpan.Rows(0).Item("COL_SPAN") = iInvcol - 2 'drM.Length
+            dtSpan.Rows(0).Item("COL_SPAN") = iInvcol  'iInvcol - 2 'drM.Length
             dtSpan.Rows(0).Item("COL_VALUE") = "" 'Inventory Details
 
             iCol = iCol / 2
+
+
 
             dtSpan.Rows.Add()
             dtSpan.Rows(1).Item("COL_SPAN") = iCol
@@ -7255,6 +9523,110 @@ again:
 
         Catch ex As Exception
 
+        End Try
+    End Sub
+
+    Private Sub CREATESPANAGE(ByVal Dt As DataTable, ByRef dtSpan As DataTable)
+        Try
+
+            ' Return
+
+            dtSpan.TableName = "TSPAN"
+            dtSpan.Columns.Add("COL_SPAN")
+            dtSpan.Columns.Add("COL_VALUE")
+
+            Dim invCol As Int32 = Dt.Columns.Count - 8
+            Dim iCol As Int32 = 0
+            Dim iInvcol As Int32 = 0
+            Dim iColSale As Int32 = 0
+            Dim iColShelf As Int32 = 0
+            Dim icolCalculative As Int32 = 0
+            Dim iStokNa As Int32 = 0
+            For Each dc As DataColumn In Dt.Columns
+                If dc.ColumnName.ToUpper().Contains("STOCKAGEINGCATEGORY") Then
+                    iCol = iCol + 1
+                ElseIf dc.ColumnName.ToUpper().Contains("SALEAGEINGCATEGORY") Then
+                    iColSale = iColSale + 1
+                ElseIf dc.ColumnName.ToUpper().Contains("SHELFAGEINGCATEGORY") Then
+                    iColShelf = iColShelf + 1
+                ElseIf dc.ColumnName.ToUpper().Contains("TOTAL_MODE") Then
+
+                ElseIf dc.ColumnName.ToUpper().Contains("ORG_ROWNO") Then
+
+                ElseIf dc.ColumnName.ToUpper().Contains("STOCKNA") Then
+                    iStokNa = 1
+                Else
+                    iInvcol = iInvcol + 1
+                End If
+            Next
+
+
+            Dim iOrder As Int32 = 0
+            Dim iCOrder As Int32 = 0
+            Dim dr() As DataRow = appRep.dset.Tables("Rep_Det").Select("Calculative_col=0 and column_id not in ('ageing_1','ageing_2','ageing_3')", "col_order")
+
+            If dr.Length > 0 Then
+                iInvcol = dr.Length
+                iOrder = ConvertINT(dr(dr.Length - 1)("col_order"))
+            End If
+
+
+            Dim drStn() As DataRow = appRep.dset.Tables("Rep_Det").Select("Calculative_col=0 and column_id  in ('C0042')", "col_order")
+
+            If drStn.Length > 0 And iStokNa = 0 Then
+                iInvcol = iInvcol - 1
+            End If
+
+            Dim drC() As DataRow = appRep.dset.Tables("Rep_Det").Select("Calculative_col=1 and column_id not in ('ageing_1','ageing_2','ageing_3')", "col_order")
+
+            If drC.Length > 0 Then
+                icolCalculative = drC.Length
+                iCOrder = ConvertINT(drC(drC.Length - 1)("col_order"))
+            End If
+
+
+
+            dtSpan.Rows.Add()
+            dtSpan.Rows(0).Item("COL_SPAN") = iInvcol  'drM.Length
+            dtSpan.Rows(0).Item("COL_VALUE") = "Master" 'Inventory Details
+
+
+
+            Dim drA() As DataRow = appRep.dset.Tables("Rep_Det").Select("column_id  in ('ageing_1','ageing_2','ageing_3')", "col_order")
+
+            If drA.Length > 0 Then
+                For Each D As DataRow In drA
+                    If Convert.ToString(D("column_id")).ToUpper() = "AGEING_1" Then
+                        If iCol > 0 Then
+                            dtSpan.Rows.Add()
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_SPAN") = iCol
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_VALUE") = "Stock ageing Category"
+                        End If
+                    ElseIf Convert.ToString(D("column_id")).ToUpper() = "AGEING_2" Then
+                        If iColSale > 0 Then
+                            dtSpan.Rows.Add()
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_SPAN") = iColSale
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_VALUE") = "Sale ageing Category"
+                        End If
+                    ElseIf Convert.ToString(D("column_id")).ToUpper() = "AGEING_3" Then
+                        If iColShelf > 0 Then
+                            dtSpan.Rows.Add()
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_SPAN") = iColShelf
+                            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_VALUE") = "Shelf ageing Category"
+                        End If
+
+                    End If
+                Next
+            End If
+
+
+            dtSpan.Rows.Add()
+            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_SPAN") = icolCalculative
+            dtSpan.Rows(dtSpan.Rows.Count - 1).Item("COL_VALUE") = "Calculative"
+
+
+        Catch ex As Exception
+            dtSpan.Rows.Clear()
         End Try
     End Sub
 
@@ -7352,7 +9724,7 @@ again:
                     "join wow_xpert_report_cols_expressions b (NOLOCK) on a.column_id = b.column_id  " + vbCrLf +
                     "where   rep_id = '" + cepid + "' " + cStockNAWhere + vbCrLf +
                     "UNION ALL " + vbCrLf +
-                    "Select 15 as col_width ,0 as decimal_place,CAST(0 as bit) as dimension ,CAST(0 as bit) as Measurement_col," + vbCrLf +
+                    "Select 18 as col_width ,0 as decimal_place,CAST(0 as bit) as dimension ,CAST(0 as bit) as Measurement_col," + vbCrLf +
                     "CAST(1 as bit) as grp_total,'Transaction Type', CAST(0 as bit)  as Show_total,'' as CAL_FN,0 as SHOW_CUM,CAST(0 as bit) as Calculative_col," + vbCrLf +
                     "-1 as Col_order ,cast(0 as bit) as contr_per,'' as col_Type,'Transactiontype' as col_expr ,'Transactiontype' as key_col ," + vbCrLf +
                     "cast(" & iColRepeat & " as bit) as col_repeat " + cTranWhere + vbCrLf +
@@ -7472,11 +9844,16 @@ again:
 
                     mField.SetValue(row("col_width") / 12, i, 5) 'Width
 
-                    If row("col_repeat") = True Then
+                    If row("Calculative_col") Then
                         mField.SetValue(1, i, 6) 'Repeat Duplicates
                     Else
-                        mField.SetValue(0, i, 6)
+                        If row("col_repeat") = True Then
+                            mField.SetValue(1, i, 6) 'Repeat Duplicates
+                        Else
+                            mField.SetValue(0, i, 6)
+                        End If
                     End If
+
 
                     Dim cCol As String = Convert.ToString(row("key_col"))
                     Dim cheader As String = Convert.ToString(row("col_header"))
@@ -7701,7 +10078,9 @@ again:
 
 
     Private Function printRDlc(cReportT As String, ByVal dt1 As Date, ByVal dt2 As Date, ByVal cRepid As String,
-                                Optional ByVal s_no As String = "1") As Boolean
+                               ByVal cExportType As String, Optional ByVal s_no As String = "1") As Boolean
+
+
 
         Try
 
@@ -7760,6 +10139,7 @@ again:
             Dim cPeriodwhere As String = ""
 
             Try
+
 
                 If appRep.dset.Tables(cReportT).Columns.Contains("para2_name") Then
                     If Not appRep.dset.Tables(cReportT).Columns.Contains("Para2_order") Then
@@ -7964,7 +10344,6 @@ again:
                 End If
 
 
-
                 If appRep.dset.Tables(cReportT).Columns.Contains("IMAGE") Then
                     bImgcol = True
                     bCenterText = True
@@ -8107,8 +10486,10 @@ again:
 
                         Dim cMsgolab As String = ""
 
-                        If bMsgForOlap.Trim() <> "" Then
-                            cMsgolab = "Note: " + bMsgForOlap
+
+
+                        If cValidUptoDate.Trim() <> "" Then
+                            cMsgolab = "Report Upto: " + cValidUptoDate + vbCrLf + bMsgForOlap
                         End If
 
 
@@ -8134,7 +10515,7 @@ again:
                             .bShowimg = bShowimg
                             .cGroup = cGroup
                             .bImgcol = bImgcol
-                            .bSorting = blnSorting
+                            .bSorting = True
                             .bTotal = True
                             .bNewSheet = bNewSheet
                             .bTopHeader = False
@@ -8147,6 +10528,7 @@ again:
                             .bLandscape = bLandscape
                             .cCrossOrder = ""
                             .bCenterText = bCenterText
+                            .bIndianFormat = bIndianFormat
                             ' .cMrpDPlace = "MRP0"
                             If appRep.ReportCategory1 = "GST" Then
                                 .bHideZero = False
@@ -8161,32 +10543,20 @@ again:
 
                         Dim cMsgolab As String = ""
 
-                        If bMsgForOlap.Trim() <> "" Then
-                            cMsgolab = "Note: " + bMsgForOlap
+
+                        If cValidUptoDate.Trim() <> "" Then
+                            cMsgolab = "Report Upto: " + cValidUptoDate + vbCrLf + bMsgForOlap
                         End If
 
                         Data_fields = New ArrayList()
                         COl_field = New ArrayList()
                         Dim cStockNAWhere As String = ""
                         Dim cCrossTypeOrder As String = ""
+                        Dim cparaSorton = ""
 
                         If bStockNa = False Then
                             cStockNAWhere = " and replace(a.col_header,' ','') <> 'StockNa' "
                         End If
-
-                        If appRep.dset.Tables(cReportT).Columns.Contains("purAgeingOrder") Then
-                            cCrossTypeOrder = "PURAGEINGORDER"
-                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("shelfAgeingOrder") Then
-                            cCrossTypeOrder = "SHELFAGEINGORDER"
-                            Dim ct As String = appRep.dset.Tables(cReportT).Columns("shelfAgeingOrder").DataType.Name
-                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("para2Order") Then
-                            cCrossTypeOrder = "PARA2ORDER"
-                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("SizeOrder") Then
-                            cCrossTypeOrder = "SIZEORDER"
-                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("MonthOrder") Then
-                            cCrossTypeOrder = "MonthOrder"
-                        End If
-
 
                         Dim i, j As Integer
 
@@ -8199,7 +10569,7 @@ again:
                                 "col_width,Decimal_Place,'' as col_Type,Col_order " + vbCrLf +
                                 "from wow_xpert_rep_det a (NOLOCK)  " + vbCrLf +
                                 "join wow_xpert_report_cols_expressions b (NOLOCK) on a.column_id = b.column_id " + vbCrLf +
-                                "where rep_id = '" + cRepid + "' " + cStockNAWhere + vbCrLf +
+                                "where a.col_width>1 and rep_id = '" + cRepid + "' " + cStockNAWhere + vbCrLf +
                                 "UNION ALL" + vbCrLf +
                                 "Select 'Transaction type' col_header,'Transactiontype' col_expr,'Transactiontype' as key_col,CAST(0 as bit) as grp_total," + vbCrLf +
                                 "CAST(0 as bit) As calculative_col, CAST(0 as bit) as Dimension,CAST(0 as bit) as Measurement_col," + vbCrLf +
@@ -8218,6 +10588,33 @@ again:
                         If appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "tMcol", False) = False Then
                             Return False
                         End If
+
+                        Dim dc As DataRow() = appRep.dset.Tables("tMcol").Select("Dimension=1 or Dimension=true", "")
+
+                        If dc.Length > 0 Then
+                            Dim cCrossColumn As String = Convert.ToString(dc(0)("key_col")).ToUpper()
+                            cCrossTypeOrder = cCrossColumn + "_ORDER"
+                        End If
+
+                        If Not appRep.dset.Tables(cReportT).Columns.Contains(cCrossTypeOrder) Then
+                            cCrossTypeOrder = ""
+                        End If
+
+                        If appRep.dset.Tables(cReportT).Columns.Contains("SizeAlias") And appRep.dset.Tables(cReportT).Columns.Contains("SizeAlias_Order") Then
+                            cparaSorton = "SIZEALIAS_ORDER"
+
+                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("SizeName") And appRep.dset.Tables(cReportT).Columns.Contains("SizeName_Order") Then
+                            cparaSorton = "SIZENAME_ORDER"
+
+                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("SizeName") And appRep.dset.Tables(cReportT).Columns.Contains("SizeOrder") Then
+                            cparaSorton = "SIZEORDER"
+                            cCrossTypeOrder = "SIZEORDER"
+
+                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("BILLMONTH") And appRep.dset.Tables(cReportT).Columns.Contains("BILLMONTHNO") Then
+                            cparaSorton = "BILLMONTHNO"
+                            cCrossTypeOrder = "BILLMONTHNO"
+                        End If
+
                         Dim iloop As Integer = 0
 
                         For Each Dr As DataRow In appRep.dset.Tables("tMcol").Rows
@@ -8324,6 +10721,7 @@ again:
                             Next
                         End If
 
+
                         With rptTable
                             .pConstring = appRep.dmethod.cConStr
                             .cCompany = cCompany
@@ -8356,6 +10754,9 @@ again:
                             .cRepCat = appRep.ReportCategory1
                             .bLandscape = True
                             .cCrossOrder = cCrossTypeOrder
+                            .cParaSorton = cparaSorton
+                            .bSorting = True
+                            .bIndianFormat = bIndianFormat
                             .RdlcTable(cFile)
                         End With
 
@@ -8368,8 +10769,29 @@ again:
                     dtView.Sort = cTopNExpr
                     DtR = TOPBOTTOM(dtView.ToTable, nTopN)
                     ShowReport(cRepid, cFile, DtR)
+                ElseIf cExportType.Trim() = "EXCEL" Then
+                    Dim sd As New SaveFileDialog
+                    sd.Filter = "Excel File|*.xls"
+                    sd.FileName = gReportname
+                    sd.DefaultExt = "Excel"
+                    sd.AddExtension = True
+                    If (sd.ShowDialog(Me) = System.Windows.Forms.DialogResult.Cancel) Then
+                        Return False
+                    End If
+                    Dim cFilename As String = sd.FileName
+                    EXPORTFILE(cFile, cFilename, "EXCEL", dtView.ToTable)
+                ElseIf cExportType.Trim() = "PDF" Then
+                    Dim sd As New SaveFileDialog
+                    sd.Filter = "PDF File|*.Pdf"
+                    sd.FileName = gReportname
+                    sd.DefaultExt = "PDF"
+                    sd.AddExtension = True
+                    If (sd.ShowDialog(Me) = System.Windows.Forms.DialogResult.Cancel) Then
+                        Return False
+                    End If
+                    Dim cFilename As String = sd.FileName
+                    EXPORTFILE(cFile, cFilename, "PDF", dtView.ToTable)
                 Else
-
                     ShowReport(cRepid, cFile, dtView.ToTable)
                 End If
 
@@ -8388,6 +10810,50 @@ again:
     End Function
 
 
+    Public Sub EXPORTFILE(cFile As String, cFilePath As String, cDocType As String, dtCopy As DataTable)
+        Try
+            ' Use Using block to auto-dispose
+            Using reportViewer As New ReportViewer()
+                Dim localReport As LocalReport = reportViewer.LocalReport
+
+                ' Enable options
+                localReport.EnableExternalImages = True
+                'localReport.EnableHyperlinks = True
+                localReport.ReportPath = cFile
+
+                ' Clear old datasources
+                localReport.DataSources.Clear()
+                localReport.DataSources.Add(New ReportDataSource("DataSet1", dtCopy))
+
+                ' Render to byte array
+                Dim mimeType As String = Nothing
+                Dim encoding As String = Nothing
+                Dim fileNameExtension As String = Nothing
+                Dim streams As String() = Nothing
+                Dim warnings As Warning() = Nothing
+
+                Dim renderedBytes As Byte() = localReport.Render(
+                cDocType.Trim().ToUpper(),
+                Nothing,
+                mimeType,
+                encoding,
+                fileNameExtension,
+                streams,
+                warnings
+            )
+
+                File.WriteAllBytes(cFilePath, renderedBytes)
+            End Using
+
+
+            If MsgBox("Report Exported Successfully." + vbCrLf + "Do you Want to Open Exported File.", MsgBoxStyle.YesNo + MsgBoxStyle.Information, "WizApp3S-Xtreme Reporting System") = MsgBoxResult.Yes Then
+                System.Diagnostics.Process.Start(cFilePath)
+            End If
+        Catch ex As Exception
+            appRep.ErrorShow(ex)
+        End Try
+
+    End Sub
 
     Private Function TOPBOTTOM(ByVal dt As DataTable, ByVal iTopN As Integer) As DataTable
         Try
@@ -8450,7 +10916,7 @@ again:
     End Sub
 
 
-    Private Sub GETSUPPFILTER(ByVal cRepCode As String, ByVal cRepID As String, ByRef cFilter_Ref As String, ByRef cSuppName As String, ByRef cLocCol As String)
+    Private Sub GETSUPPFILTER(ByVal cRepCode As String, ByVal cRepID As String, ByRef cFilter_Ref As String, ByRef cSuppName As String, ByRef cLocCol As String, ByRef copenlocFilter As String)
         Try
 
             Dim cAcName As String = ""
@@ -8470,6 +10936,7 @@ again:
 
             If cAcName <> "" Then
                 cFilter_Ref = cFilter_Ref + IIf(cFilter_Ref = "", "", " AND ") + " sku_names.ac_name IN ('" + cAcName + "' )"
+                copenlocFilter = copenlocFilter + IIf(copenlocFilter = "", "", " AND ") + " upper(trim(sku_names.ac_name)) IN ('" + cAcName + "' )"
 
             End If
 
@@ -8478,24 +10945,29 @@ again:
 
                 Dim str2 As String = "'" + Convert.ToString(appRep.GLOCATION) + "'"
                 cFilter_Ref = cFilter_Ref + IIf(cFilter_Ref <> "", " AND ", "") + " sourcelocation.dept_id  IN (" + str2 + ")"
+                copenlocFilter = copenlocFilter + IIf(copenlocFilter <> "", " AND ", "") + " upper(trim(sourcelocation.dept_id))  IN (" + str2 + ")"
             Else
 
                 cExpr = "select dept_id from LocRepUser a (NOLOCK) " + vbCrLf +
-                    "join users c (NOLOCK) on A.user_code= c.user_code  " +
-                    "where isnull(c.viewreportsLocationMode,1)=2   AND C.USER_CODE= '" + appRep.GUSER_CODE + "'"
+                        "join users c (NOLOCK) on A.user_code= c.user_code  " +
+                        "where isnull(c.viewreportsLocationMode,1)=2   AND C.USER_CODE= '" + appRep.GUSER_CODE + "'"
 
                 Me.appRep.dmethod.SelectCmdTOSql(Me.appRep.dset, cExpr, "TLUR", False, True)
 
                 If (Me.appRep.dset.Tables("TLUR").Rows.Count > 0) Then
                     Dim str2 As String = Me.appRep.DataToStr(Me.appRep.dset.Tables("TLUR"), "DEPT_ID", "", False)
                     cFilter_Ref = cFilter_Ref + IIf(cFilter_Ref <> "", " AND ", "") + " sourcelocation.dept_id  IN (" + str2 + ")"
+                    copenlocFilter = copenlocFilter + IIf(copenlocFilter <> "", " AND ", "") + " upper(trim(sourcelocation.dept_id))  IN (" + str2 + ")"
                 End If
 
             End If
 
 
             If cRepCode.ToUpper = "R1" Then
-                cFilter_Ref = cFilter_Ref + IIf(cFilter_Ref = "", "", " AND ") + " sourcebin.bin_id  NOT IN ('999') " + vbCrLf
+                If Not cFilter_Ref.ToUpper().Contains("SOURCEBIN.") Then
+                    cFilter_Ref = cFilter_Ref + IIf(cFilter_Ref = "", "", " AND ") + " sourcebin.bin_id  NOT IN ('999','777','888') " + vbCrLf
+                    copenlocFilter = copenlocFilter + IIf(copenlocFilter = "", "", " AND ") + " upper(trim(sourcebin.bin_id))  NOT IN ('999','777','888') " + vbCrLf
+                End If
             End If
 
 
@@ -8645,7 +11117,7 @@ again:
 
 
 
-    Private Sub GetApplyFilter(ByRef cRFilter As String, ByVal cRepID As String, ByVal cXpertCode As String)
+    Private Sub GetApplyFilter(ByRef cRFilter As String, ByVal cRepID As String, ByVal cXpertCode As String, bOlap As Boolean)
         Try
 
 
@@ -8655,8 +11127,12 @@ again:
                     If Dr.Length > 0 Then
 
                         If Convert.ToString(Dr(0).Item("Filter_Apply")) <> "" Then
-                            cRFilter = Convert.ToString(Dr(0).Item("Filter_Apply"))
 
+                            If bOlap = True Then
+                                cRFilter = Convert.ToString(Dr(0).Item("olapNamedfiltercriteria"))
+                            Else
+                                cRFilter = Convert.ToString(Dr(0).Item("Filter_Apply"))
+                            End If
 
                             cFilter = Convert.ToString(Dr(0).Item("Filter_display"))
                             cRFilter = cRFilter.Replace("[", "").Replace("]", "")
@@ -8835,6 +11311,7 @@ again:
         Frm.bShowPPWITHOUTDP = bShowPPWITHOUTDP
         Frm.ITemType = 1
         Frm.bMaster = bMaster
+        Frm.Olap = bR1Olap_ORG
         Frm.ShowDialog()
 
     End Sub
@@ -8857,7 +11334,7 @@ again:
             Me.appRep.OpenTable("XNS", "rep_filter_det", "")
 
 
-            cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where 1=2"
+            cExpr = "  select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where 1=2"
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
 
             cExpr = "  select * from rep_det_xntypes where  1=2"
@@ -8875,6 +11352,7 @@ again:
             Frm.bShowPPWITHOUTDP = bShowPPWITHOUTDP
             Frm.ITemType = 1
             Frm.bMaster = bMaster
+            Frm.Olap = bR1Olap_ORG
             Frm.ShowDialog()
 
             If Frm.bReturnTrue = True Then
@@ -9125,7 +11603,7 @@ again:
             cgrpU = Convert.ToString(appRep.sqlCMD.ExecuteScalar)
             FrmSetsch.Crepid = gRepID
             FrmSetsch.cRepCode = gRepcode
-            FrmSetsch.Creptype = Trim(appRep.ReportCategory1)
+            FrmSetsch.Creptype = "XNS"
             FrmSetsch.gReportname = gReportname
             FrmSetsch.gRepGroup = cgrpU
             FrmSetsch.ShowDialog()
@@ -9152,9 +11630,12 @@ again:
                 CAddFilterid = "XX"
             End If
 
-            appRep.GetXpertReportDataWow(appRep, cXpertRepCode, gRepID, gReportname, Application.StartupPath, True, 0)
 
+            Dim x As New xpertMail
+            x.StartupPath = Application.StartupPath
+            x.GetXpertReportDataWow(appRep, cXpertRepCode, gRepID, gReportname, Application.StartupPath, True, 0, bR1Olap_ORG, cGToken)
 
+            ' x.GENXTREMEREPORT_WOW(appRep, appRep.GLOCATION, Application.StartupPath, True)
 
 
         Catch ex As Exception
@@ -9182,7 +11663,7 @@ again:
                         Opentable("rep_det", gRepID)
                         Opentable("REP_DET_SMRY", gRepID)
 
-                        cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + cId + "'"
+                        cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + cId + "'"
 
                         appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
 
@@ -9197,6 +11678,7 @@ again:
                         Frm.bShowPPWITHOUTDP = bShowPPWITHOUTDP
                         Frm.ITemType = 1
                         Frm.bMaster = bMaster
+                        Frm.Olap = bR1Olap_ORG
                         cXpertRepCode = Convert.ToString(appRep.dset.Tables("rep_mst").Rows(0).Item("XPERT_REP_CODE")).Trim().ToUpper()
                         Frm.ShowDialog()
 
@@ -9284,10 +11766,9 @@ again:
             Opentable("rep_det", cRepID)
             Opentable("REP_DET_SMRY", cRepID)
 
-            cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + cRepID + "'"
+            cExpr = "select a.*,b.filter_name,b.Filter_Apply,b.Filter_display,b.olapNamedfiltercriteria from WOW_Xpert_Rep_Mst_Linked_Filter a join Xpert_filter_Mst b on a.filter_id= b.filter_id  where a.rep_id = '" + cRepID + "'"
 
             appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TREPNAMEFILTER", False, True)
-
 
 
             Dim cTable As String = "#tblEditCols"
@@ -10060,6 +12541,7 @@ again:
             Dim cReportT As String = "tReport_" + gRepID
             Dim dtView As New DataView
             Dim cRecFiltervalue1 As String = ""
+            Dim bolap As Boolean = False
 
             If Not appRep.dset.Tables.Contains(cReportT) Then
                 MsgBox("Report Not Available For Thumbnail View,Plz Click on View Report...", MsgBoxStyle.Information, "wizApp3S Xtreme Reporting")
@@ -10128,7 +12610,7 @@ again:
             '    dtView.RowFilter = ""
             'End Try
 
-            Call Showthumb(dtView.ToTable, gImgSource, rh1, rh2, rh3, rh4, rh5, rh6, rh7, rh8, rh9)
+            Call Showthumb(dtView.ToTable, gImgSource, rh1, rh2, rh3, rh4, rh5, rh6, rh7, rh8, rh9, bolap)
 
             Dim cDt As String = ""
 
@@ -10144,8 +12626,13 @@ again:
             frm.BringToFront()
             frm.Tag = Trim(appRep.ReportCategory1) + "TH"
 
+            If bolap = True Then
+                pRepName = Application.StartupPath & "\Reports\XTREME\ThumbnailOlap.rdlc"
+            Else
+                pRepName = Application.StartupPath & "\Reports\XTREME\Thumbnail.rdlc"
+            End If
 
-            pRepName = Application.StartupPath & "\Reports\XTREME\Thumbnail.rdlc"
+
 
             Me.Cursor = Cursors.Default
 
@@ -10173,7 +12660,7 @@ again:
     End Sub
 
 
-    Private Sub Showthumb(ByVal dt As DataTable, ByVal iImage As Integer, ByRef rh1 As String, ByRef rh2 As String, ByRef rh3 As String, ByRef rh4 As String, ByRef rh5 As String, ByRef rh6 As String, ByRef rh7 As String, ByRef rh8 As String, ByRef rh9 As String)
+    Private Sub Showthumb(ByVal dt As DataTable, ByVal iImage As Integer, ByRef rh1 As String, ByRef rh2 As String, ByRef rh3 As String, ByRef rh4 As String, ByRef rh5 As String, ByRef rh6 As String, ByRef rh7 As String, ByRef rh8 As String, ByRef rh9 As String, ByRef bolap As Boolean)
 
         Try
             Dim cexpr As String = "Select '' as colname1,'' as pict1,'' as R11,'' as R21,'' as R31, '' as R41,'' as R51,'' AS R61,'' AS R71,'' AS R81,'' AS R91," + vbCrLf +
@@ -10193,22 +12680,43 @@ again:
             Dim cColName As String = ""
             Dim nInd As Integer = 0
             Dim iRow As Integer = 0
+            Dim bOlapImg As Boolean = False
+            Try
+                If (dt.Columns.Contains("IMAGE")) Then
+                    Dim Dr As DataRow() = dt.Select("Image Like '%http%'", "")
+                    If Dr.Length > 0 Then
+                        bOlapImg = True
+                        bolap = True
+                    End If
+                End If
+            Catch ex As Exception
 
-            appRep.dset.Tables("tThumb").Columns.Remove("pict1")
-            appRep.dset.Tables("tThumb").Columns.Add("pict1", GetType(System.Byte()))
+            End Try
 
-            appRep.dset.Tables("tThumb").Columns.Remove("pict2")
-            appRep.dset.Tables("tThumb").Columns.Add("pict2", GetType(System.Byte()))
 
-            appRep.dset.Tables("tThumb").Columns.Remove("pict3")
-            appRep.dset.Tables("tThumb").Columns.Add("pict3", GetType(System.Byte()))
+            For Each dc As DataColumn In dt.Columns
+                dc.ColumnName = dc.ColumnName.Replace("(", "").Replace(")", "").Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("/", "").Replace("\", "")
+            Next
 
-            appRep.dset.Tables("tThumb").Columns.Remove("pict4")
-            appRep.dset.Tables("tThumb").Columns.Add("pict4", GetType(System.Byte()))
 
-            appRep.dset.Tables("tThumb").Columns.Remove("pict5")
-            appRep.dset.Tables("tThumb").Columns.Add("pict5", GetType(System.Byte()))
 
+            If (bOlapImg = False) Then
+                appRep.dset.Tables("tThumb").Columns.Remove("pict1")
+                appRep.dset.Tables("tThumb").Columns.Add("pict1", GetType(System.Byte()))
+
+                appRep.dset.Tables("tThumb").Columns.Remove("pict2")
+                appRep.dset.Tables("tThumb").Columns.Add("pict2", GetType(System.Byte()))
+
+                appRep.dset.Tables("tThumb").Columns.Remove("pict3")
+                appRep.dset.Tables("tThumb").Columns.Add("pict3", GetType(System.Byte()))
+
+                appRep.dset.Tables("tThumb").Columns.Remove("pict4")
+                appRep.dset.Tables("tThumb").Columns.Add("pict4", GetType(System.Byte()))
+
+                appRep.dset.Tables("tThumb").Columns.Remove("pict5")
+                appRep.dset.Tables("tThumb").Columns.Add("pict5", GetType(System.Byte()))
+
+            End If
 
             Dim cPath As String = gImagepath
 
@@ -10574,7 +13082,7 @@ again:
 
         Dim Frm As New FrmThumb(Me)
 
-        Frm.dtCol = appRep.dset.Tables("Rep_Det")
+        Frm.dtCol = appRep.dset.Tables("Rep_Det_SMRY")
         Frm.ShowDialog()
 
         If cColList <> "" And blnthumb = True Then
@@ -11183,7 +13691,7 @@ BottomVal:
 
 
 
-    Private Sub GetEossSaleStock(cRepid As String, cReportT As String, cToDt As String, bEossCbs As Boolean)
+    Private Sub GetEossSaleStock(cRepid As String, cReportT As String, cToDt As String, bEossCbs As Boolean, cAddFilter As String)
         Try
 
             If appRep.dset.Tables(cReportT).Rows.Count <= 0 Then
@@ -11230,16 +13738,16 @@ BottomVal:
             Dim bP As Boolean = False
             Dim bCbs As Boolean = False
             Dim bCrossQuery As Boolean = False
-            Dim bProductCode As Boolean = False
+            Dim bProductCode As Boolean = True
 
-            If appRep.dset.Tables(cReportT).Columns.Contains("item Code") Then
-                bProductCode = True
-                appRep.dset.Tables(cReportT).Columns("item Code").ColumnName = "ItemCode"
-            End If
+            'If appRep.dset.Tables(cReportT).Columns.Contains("item Code") Then
+            '    bProductCode = True
+            '    appRep.dset.Tables(cReportT).Columns("item Code").ColumnName = "ItemCode"
+            'End If
 
-            If appRep.dset.Tables(cReportT).Columns.Contains("itemCode") Then
-                bProductCode = True
-            End If
+            'If appRep.dset.Tables(cReportT).Columns.Contains("itemCode") Then
+            '    bProductCode = True
+            'End If
 
 
             If appRep.dset.Tables(cReportT).Columns.Contains("StockNa") Then
@@ -11286,7 +13794,15 @@ BottomVal:
                             row("EossCategory") = "Fresh"
                         End If
                     Else
-                        row("EossCategory") = "Fresh"
+                        If Convert.ToString(row("EossCategory")).Trim() = "" Then
+                            row("EossCategory") = "Fresh"
+                        End If
+                    End If
+
+                    If appRep.dset.Tables(cReportT).Columns.Contains("EossDiscount") Then
+                        If ConvertDouble(row("EossDiscount")) > 0 Then
+                            row("EossCategory") = "Discounted"
+                        End If
                     End If
                 Next
             End If
@@ -11332,6 +13848,11 @@ BottomVal:
                     "And '" + cToDt + "' between b.applicableFromDt  and b.applicableToDt  " + vbCrLf +
                     "group by a.schemeRowId,a.schemeMode,a.schemeName,buyFilterMode,buyFilterCriteria,getFilterCriteria ," + vbCrLf +
                     "buyFilterCriteria_exclusion "
+
+
+
+            appRep.dmethod.WriteToErrorLog("STEP 1", "" + cExpr + "", "", "", "EOSSSALE", "")
+
 
 
             If appRep.dset.Tables.Contains("TEOSSLIST") Then
@@ -11609,6 +14130,9 @@ BottomVal:
                     'ITEMCODE buyFilterMode=2
                     Dim schrowid As String = Convert.ToString((dr("schemeRowId")))
 
+                    appRep.dmethod.WriteToErrorLog("STEP 2 SCHEMEROWID ", "" + schrowid + "", "", "", "EOSSSALE", "")
+
+
                     cExpr = "select product_code,discountpercentage,discountamount,netPrice as discountnetPrice" + vbCrLf +
                             "from WOW_SCHEMESETUP_SLSBC_FLAT a (nolock) " + vbCrLf +
                             "join wow_SchemeSetup_Title_Det b (nolock) on a.schemeRowId = b.schemeRowId " + vbCrLf +
@@ -11617,6 +14141,12 @@ BottomVal:
                     If appRep.dset.Tables.Contains("TPARAF") Then
                         appRep.dset.Tables.Remove("TPARAF")
                     End If
+
+
+                    appRep.dmethod.WriteToErrorLog("STEP 3  ", "" + cExpr + "", "", "", "EOSSSALE", "")
+
+
+
 
                     appRep.dmethod.SelectCmdTOSql(appRep.dset, cExpr, "TPARAF", False, False)
 
@@ -11628,7 +14158,15 @@ BottomVal:
 
                     For Each drF As DataRow In appRep.dset.Tables("TPARAF").Rows
 
-                        cAppFilter = "itemCode = '" + Convert.ToString(drF("Product_code")) + "'"
+                        If appRep.dset.Tables(cReportT).Columns.Contains("itemCode") Then
+                            cAppFilter = "itemCode = '" + Convert.ToString(drF("Product_code")) + "'"
+                        ElseIf appRep.dset.Tables(cReportT).Columns.Contains("itemCodewobatch") Then
+                            cAppFilter = "itemCodewobatch = '" + Convert.ToString(drF("Product_code")) + "'"
+                        Else
+                            Continue For
+                        End If
+
+                        appRep.dmethod.WriteToErrorLog("STEP 4 ", "" + cAppFilter + "", "", "", "EOSSSALE", "")
 
                         Dim dFData As DataRow()
                         Try
@@ -11639,6 +14177,10 @@ BottomVal:
                             appRep.ErrorShow(ex)
                         End Try
 
+                        appRep.dmethod.WriteToErrorLog("STEP 4.5  ", "" + dFData.Length.ToString() + "", "", "", "EOSSSALE", "")
+
+
+
                         If dFData.Length > 0 Then
 
                             For Each D As DataRow In dFData
@@ -11646,6 +14188,9 @@ BottomVal:
                                 D("SHIFTED") = "T"
 
                                 Dim cc As String = Convert.ToString(dr("schemeName"))
+
+                                appRep.dmethod.WriteToErrorLog("STEP 5 ", "" + cc + "", "", "", "EOSSSALE", "")
+
 
                                 If appRep.dset.Tables(cReportT).Columns.Contains("EossSchemeName") Then
                                     D("EossSchemeName") = Convert.ToString(dr("schemeName"))
@@ -11698,6 +14243,10 @@ BottomVal:
                                 If appRep.dset.Tables(cReportT).Columns.Contains("EossCategory") Then
                                     D("EossCategory") = "Discounted"
                                 End If
+
+
+                                appRep.dmethod.WriteToErrorLog("STEP 6", "", "", "", "EOSSSALE", "")
+
 
                                 Dim clonedRow As DataRow = DtNew.NewRow()
                                 clonedRow.ItemArray = D.ItemArray
@@ -11861,6 +14410,13 @@ BottomVal:
                                 D("EossCategory") = "Fresh"
                             End If
                         End If
+
+                        If appRep.dset.Tables(cReportT).Columns.Contains("EossDiscount") Then
+                            If ConvertDouble(D("EossDiscount")) > 0 Then
+                                D("EossCategory") = "Discounted"
+                            End If
+                        End If
+
                     End If
 
 
@@ -11913,7 +14469,7 @@ BottomVal:
             End If
 
 
-
+            cMaster = cMaster.Replace("/", "")
             cMasterCol = cMaster.Split(",")
             cCalCol = cCal.Split(",")
 
@@ -11931,38 +14487,17 @@ BottomVal:
                 DtNew.Columns.Remove("PRODUCT_CODE")
             End If
 
+            cAddFilter = cAddFilter.Replace("(", "").Replace(")", "").Replace(" ", "").Replace(".", "").Replace("%", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("/", "").Replace("\", "")
 
+            If cAddFilter <> "" Then
+                Dim DtV As New DataView
+                DtV.Table = DtNew
+                DtV.RowFilter = cAddFilter
+                Dt = w.DataTableSmry(DtV.ToTable(), cMasterCol, cCalCol)
+            Else
+                Dt = w.DataTableSmry(DtNew, cMasterCol, cCalCol)
+            End If
 
-
-            'Dim cOrgT As String = "TEOSSTEMP"
-
-            'Dim cXpr As String = CreateSyncTableprg(DtNew, cOrgT)
-
-
-
-            'If SaveBulkData_olap(appMain, cOrgT, DtNew) = False Then
-            '    MsgBox("Error Creation Temp Table")
-            '    Return
-            'End If
-
-            'If cFilter1.ToUpper().Contains("EOSS_CATEGORY") Then
-
-            '    Dim Dtv As New DataView
-
-            '    Dtv.Table = DtNew
-
-            '    If cFilter1.ToUpper().Contains("DISCOUNTED") And cFilter1.ToUpper().Contains("FRESH") Then
-            '        Dtv.RowFilter = "EossCategory in ('Discounted','Fresh')"
-            '    ElseIf cFilter1.ToUpper().Contains("DISCOUNTED") Then
-            '        Dtv.RowFilter = "EossCategory in ('Discounted')"
-            '    ElseIf cFilter1.ToUpper().Contains("FRESH") Then
-            '        Dtv.RowFilter = "EossCategory in ('Fresh')"
-            '    End If
-
-            '    Dt = w.DataTableSmry(Dtv.ToTable(), cMasterCol, cCalCol)
-            'Else
-            Dt = w.DataTableSmry(DtNew, cMasterCol, cCalCol)
-            'End If
 
             If appRep.dset.Tables.Contains(cReportT) Then
                 appRep.dset.Tables.Remove(cReportT)
@@ -12071,6 +14606,15 @@ BottomVal:
     Private Sub dgvReport_CellEnter(sender As Object, e As DataGridViewCellEventArgs) Handles dgvReport.CellEnter
         Try
             If Convert.ToString(dgvReport.Columns(e.ColumnIndex).Tag).ToUpper() = "PENDINGORDERQTY" Then
+                Dim cCol As String = Convert.ToString(dgvReport.Columns(e.ColumnIndex).Tag)
+
+                Dim dQty = ConvertDouble(dgvReport(cCol, e.RowIndex).Value)
+                If dQty > 0 Then
+                    dgvReport.Columns(e.ColumnIndex).ReadOnly = False
+                Else
+                    dgvReport.Columns(e.ColumnIndex).ReadOnly = True
+                End If
+            ElseIf Convert.ToString(dgvReport.Columns(e.ColumnIndex).Tag).ToUpper() = "ORDERQTY" Then
                 Dim cCol As String = Convert.ToString(dgvReport.Columns(e.ColumnIndex).Tag)
 
                 Dim dQty = ConvertDouble(dgvReport(cCol, e.RowIndex).Value)
@@ -12275,10 +14819,59 @@ BottomVal:
         Return cStrColType
     End Function
 
+    Private Sub ToolStrip1_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles ToolStrip1.ItemClicked
+
+    End Sub
+
+    Private Function InsertImGIDFOROLAP(cReportT As String, bQuery As Boolean) As Boolean
+        Try
+            If brunExport = True Then
+                Return True
+            End If
+
+            If Not appRep.dset.Tables(cReportT).Columns.Contains("IMAGE") Then
+                Return False
+            End If
+
+            Dim bDonotReapt As Boolean = bRepeatImg
+
+            If bQuery = True Then
+                bDonotReapt = False
+            End If
+
+            Dim cPXnType As String = ""
+
+            If Not appRep.dset.Tables(cReportT).Columns.Contains("IMG_ID") Then
+                appRep.dset.Tables(cReportT).Columns.Add("IMG_ID", GetType(System.String))
+                If bDonotReapt = False Then
+                    With appRep.dset.Tables(cReportT)
+                        For i As Integer = 0 To .Rows.Count - 1
+                            .Rows(i).Item("IMG_ID") = .Rows(i).Item("IMAGE")
+                        Next
+                    End With
+                Else
+                    With appRep.dset.Tables(cReportT)
+                        For i As Integer = 0 To .Rows.Count - 1
+                            Dim cImgID As String = Convert.ToString(.Rows(i).Item("IMAGE"))
+                            If cImgID.Trim <> "" And cPXnType <> cImgID Then
+                                .Rows(i).Item("IMG_ID") = .Rows(i).Item("IMAGE")
+                                .Rows(i).Item("IMAGE") = .Rows(i).Item("IMAGE")
+                            Else
+                                .Rows(i).Item("IMG_ID") = ""
+                                .Rows(i).Item("IMAGE") = ""
+                            End If
+                            cPXnType = cImgID
+                        Next
+                    End With
+                End If
+            End If
+        Catch ex As Exception
+
+        End Try
+    End Function
 
 
-
-    Private Function InsertImgData_New_Method(cReportT As String) As Boolean
+    Private Function InsertImgData_New_Method(cReportT As String, bQuery As Boolean) As Boolean
 
 
         'Return InsertImgData_New_Method_File()
@@ -12309,6 +14902,11 @@ BottomVal:
 
         Dim iIndex As Integer = 0
         Dim bDonotReapt As Boolean = bRepeatImg
+
+
+        If bQuery = True Then
+            bDonotReapt = False
+        End If
 
         iIndex = appRep.dset.Tables(cReportT).Columns.IndexOf("IMAGE")
 
@@ -12343,7 +14941,7 @@ BottomVal:
                             If cImgID.Trim <> "" And iTMode < 1 And cPXnType <> cImgID Then
                                 Dim Dr As DataRow() = appRep.dset.Tables(cReportT).Select("IMG_ID= '" + cImgID + "' AND ISNULL(IMGFOUND,'') = 'T'", "")
                                 If Dr.Length > 0 Then
-                                    appRep.dset.Tables(cReportT).Rows(i).Item("IMAGE") = Dr(0)("IMAGE")
+                                    'appRep.dset.Tables(cReportT).Rows(i).Item("IMAGE") = Dr(0)("IMAGE")
                                     appRep.dset.Tables(cReportT).Rows(i).Item("IMGFOUND") = "T"
                                 Else
                                     cexpr = "Select prod_image From " + cData + " Where IMG_ID = '" + cImgID + "'"
@@ -12372,7 +14970,7 @@ BottomVal:
                         cPXnType = cImgID
 
                     Catch ex As Exception
-                        appRep.ErrorShow(ex)
+                        ' appRep.ErrorShow(ex)
                     End Try
                 Next
 
@@ -12441,6 +15039,10 @@ BottomVal:
     End Sub
 
     Private Sub tsTestBox_MouseUp(sender As Object, e As MouseEventArgs) Handles tsTestBox.MouseUp
+
+    End Sub
+
+    Private Sub DgvRepList_GotFocus(sender As Object, e As EventArgs) Handles DgvRepList.GotFocus
 
     End Sub
 
@@ -12523,7 +15125,10 @@ End Class
 
 
 
+Public Class wowRpt
 
+    Public Property reportDataUpto As String
+End Class
 
 
 

@@ -1,0 +1,7 @@
+﻿ SELECT dept_id,PRODUCT_CODE,(CASE  WHEN shelf_ageing_days <=10 THEN '_1' 
+                      WHEN shelf_ageing_days BETWEEN 11 AND 20 THEN '_2'  
+                      WHEN shelf_ageing_days BETWEEN 21 AND 30 THEN '_3'  ELSE '_4' END)  as SELFAGEING_ORDER, 
+                      (CASE  WHEN shelf_ageing_days <=10 THEN '<=10' 
+                      WHEN shelf_ageing_days BETWEEN 11 AND 20 THEN '11-20'  
+                      WHEN shelf_ageing_days BETWEEN 21 AND 30 THEN '21-30'  ELSE '>30' END)  as AGEING_3 
+into #SELF_SKU_AGEING153 from  PMT01106 (NOLOCK)

@@ -1,0 +1,11 @@
+﻿ SELECT dept_id,PRODUCT_CODE,(CASE  WHEN purchase_ageing_days <=10 THEN '_1' 
+                      WHEN purchase_ageing_days BETWEEN 11 AND 50 THEN '_2'  
+                      WHEN purchase_ageing_days BETWEEN 51 AND 75 THEN '_3' 
+                      WHEN purchase_ageing_days BETWEEN 76 AND 100 THEN '_4' 
+                      ELSE '_5' END)  as AGEING_ORDER, 
+                      (CASE  WHEN purchase_ageing_days <=10 THEN '<=10' 
+                      WHEN purchase_ageing_days BETWEEN 11 AND 50 THEN '11-50'  
+                      WHEN purchase_ageing_days BETWEEN 51 AND 75 THEN '51-75' 
+                      WHEN purchase_ageing_days BETWEEN 76 AND 100 THEN '76-100' 
+ELSE '>100' END)  as AGEING_1 
+into SKU_AGEING145 from  PMT01106 (NOLOCK)

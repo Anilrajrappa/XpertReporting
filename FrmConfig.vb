@@ -96,7 +96,7 @@ Public Class FrmConfig
 
 
 
-            Dim cImgView As String = appMain.GETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", appMain.GLOCATION)
+            Dim cImgView As String = appMain.GETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", appMain.GLOCATION)
 
 
             If cImgView = "1" Then
@@ -134,6 +134,17 @@ Public Class FrmConfig
                 chkIMGL.Checked = True
             Else
                 chkIMGL.Checked = False
+            End If
+
+            cSource = ""
+
+            cSource = Convert.ToString(AppConfig.GETCONFIG("", "XTREME", "INDIANFORMAT", True))
+
+
+            If cSource = "1" Then
+                chkFormat.Checked = True
+            Else
+                chkFormat.Checked = False
             End If
 
 
@@ -446,13 +457,13 @@ Public Class FrmConfig
 
             'Source
             If OPTFP.Checked = True Then
-                appMain.SETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", "1", appMain.GLOCATION)
+                appMain.SETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", "1", appMain.GLOCATION)
             ElseIf OPTAUTO.Checked = True Then
-                appMain.SETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", "2", appMain.GLOCATION)
+                appMain.SETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", "2", appMain.GLOCATION)
             ElseIf OPTFIT.Checked = True Then
-                appMain.SETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", "3", appMain.GLOCATION)
+                appMain.SETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", "3", appMain.GLOCATION)
             Else
-                appMain.SETCONFIG_MULTI("", "IMAGE", "SIZE_MODE", "4", appMain.GLOCATION)
+                appMain.SETCONFIG_MULTI("", "IMAGE", "IMAGE_SIZE_MODE", "4", appMain.GLOCATION)
             End If
 
 
@@ -506,6 +517,14 @@ Public Class FrmConfig
             Else
                 appMain.SETCONFIG(cPathLocal, "XTREME", "IMAGE_LANDSCAPE", "0", True)
             End If
+
+
+            If chkFormat.Checked = True Then
+                appMain.SETCONFIG(cPathLocal, "XTREME", "INDIANFORMAT", "1", True)
+            Else
+                appMain.SETCONFIG(cPathLocal, "XTREME", "INDIANFORMAT", "0", True)
+            End If
+
 
 
 
